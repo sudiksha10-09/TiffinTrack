@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Login to TiffinTrack - Access your tiffin service dashboard">
+    <title>Login - TiffinTrack</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Ftiffintrac6995back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.12"></script>
+  <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2"></script>
+  </head>
+<body class="bg-background min-h-screen flex flex-col">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-surface border-b border-border sticky top-0 z-navigation shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="login.html" class="flex items-center space-x-2">
+                        <svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="48" height="48" rx="12" fill="#E67E22"/>
+                            <path d="M24 12C18.48 12 14 16.48 14 22C14 27.52 18.48 32 24 32C29.52 32 34 27.52 34 22C34 16.48 29.52 12 24 12ZM24 28C20.69 28 18 25.31 18 22C18 18.69 20.69 16 24 16C27.31 16 30 18.69 30 22C30 25.31 27.31 28 24 28Z" fill="white"/>
+                            <path d="M24 36C18.48 36 14 34.21 14 32V36H34V32C34 34.21 29.52 36 24 36Z" fill="white"/>
+                        </svg>
+                        <span class="text-xl font-heading font-bold text-primary">TiffinTrack</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="login.html" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Login
+                    </a>
+                    <a href="register.html" class="btn btn-outline">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Register
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden touch-target text-text-primary hover:text-primary transition-colors" aria-label="Toggle mobile menu">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-surface">
+            <div class="px-4 py-4 space-y-3">
+                <a href="login.html" class="btn btn-primary w-full">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Login
+                </a>
+                <a href="register.html" class="btn btn-outline w-full">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Register
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center px-4 py-8 sm:py-12">
+        <div class="w-full max-w-6xl">
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+                
+                <!-- Left Side - Branding & Image -->
+                <div class="hidden md:block">
+                    <div class="relative">
+                        <!-- Background Decoration -->
+                        <div class="absolute -top-4 -left-4 w-72 h-72 bg-primary-100 rounded-full opacity-20 blur-3xl"></div>
+                        <div class="absolute -bottom-4 -right-4 w-64 h-64 bg-secondary-100 rounded-full opacity-20 blur-3xl"></div>
+                        
+                        <!-- Main Image -->
+                        <div class="relative z-10">
+                            <img 
+                                src="https://img.rocket.new/generatedImages/rocket_gen_img_15aac71f3-1766503960888.png" 
+                                alt="Delicious home-cooked tiffin meals arranged in traditional containers with fresh vegetables and aromatic spices"
+                                class="rounded-2xl shadow-xl w-full h-auto object-cover"
+                                loading="lazy"
+                                onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop'; this.onerror=null;"
+                            >
+                        </div>
+
+                        <!-- Feature Cards -->
+                        <div class="mt-8 space-y-4">
+                            <div class="flex items-center space-x-4 bg-surface p-4 rounded-xl shadow-md border border-border">
+                                <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-utensils text-primary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-text-primary">Fresh Daily Meals</h3>
+                                    <p class="text-sm text-text-secondary">Prepared with love & care</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-4 bg-surface p-4 rounded-xl shadow-md border border-border">
+                                <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-truck text-secondary text-xl"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-semibold text-text-primary">Timely Delivery</h3>
+                                    <p class="text-sm text-text-secondary">Right to your doorstep</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side - Login Form -->
+                <div class="w-full">
+                    <div class="card">
+                        <!-- Header -->
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl sm:text-4xl font-heading font-bold text-text-primary mb-2">Welcome Back!</h1>
+                            <p class="text-text-secondary">Sign in to access your tiffin service dashboard</p>
+                        </div>
+
+                        <!-- Flash Message Area -->
+                        <div id="flash-message" class="hidden mb-6 p-4 rounded-lg border" role="alert">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle mt-0.5 mr-3"></i>
+                                <div class="flex-1">
+                                    <p id="flash-text" class="text-sm font-medium"></p>
+                                </div>
+                                <button onclick="closeFlashMessage()" class="ml-3 touch-target" aria-label="Close message">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Login Form -->
+                        <form id="login-form" class="space-y-6" novalidate>
+                            <!-- Email Field -->
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-text-primary mb-2">
+                                    Email Address
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <i class="fas fa-envelope text-text-tertiary"></i>
+                                    </div>
+                                    <input 
+                                        type="email" 
+                                        id="email" 
+                                        name="email"
+                                        class="input pl-12" 
+                                        placeholder="you@example.com"
+                                        required
+                                        aria-required="true"
+                                        aria-describedby="email-error"
+                                    >
+                                </div>
+                                <p id="email-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    Please enter a valid email address
+                                </p>
+                            </div>
+
+                            <!-- Password Field -->
+                            <div>
+                                <label for="password" class="block text-sm font-medium text-text-primary mb-2">
+                                    Password
+                                </label>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                        <i class="fas fa-lock text-text-tertiary"></i>
+                                    </div>
+                                    <input 
+                                        type="password" 
+                                        id="password" 
+                                        name="password"
+                                        class="input pl-12 pr-12" 
+                                        placeholder="Enter your password"
+                                        required
+                                        aria-required="true"
+                                        aria-describedby="password-error"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        id="toggle-password"
+                                        class="absolute inset-y-0 right-0 pr-4 flex items-center touch-target text-text-tertiary hover:text-text-primary transition-colors"
+                                        aria-label="Toggle password visibility"
+                                    >
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <p id="password-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    Password is required
+                                </p>
+                            </div>
+
+                            <!-- Remember Me & Forgot Password -->
+                            <div class="flex items-center justify-between">
+                                <label class="flex items-center cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        id="remember-me"
+                                        class="w-5 h-5 text-primary border-border rounded focus:ring-2 focus:ring-primary-200 cursor-pointer"
+                                    >
+                                    <span class="ml-2 text-sm text-text-secondary">Remember me</span>
+                                </label>
+                                <a href="javascript:void(0)" class="text-sm text-primary hover:text-primary-700 font-medium transition-colors">
+                                    Forgot Password?
+                                </a>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button 
+                                type="submit" 
+                                class="btn btn-primary w-full text-lg"
+                            >
+                                <i class="fas fa-sign-in-alt mr-2"></i>
+                                Sign In
+                            </button>
+
+                            <!-- Divider -->
+                            <div class="relative my-6">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-border"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-4 bg-surface text-text-tertiary">New to TiffinTrack?</span>
+                                </div>
+                            </div>
+
+                            <!-- Register Link -->
+                            <div class="text-center">
+                                <a href="register.html" class="btn btn-outline w-full">
+                                    <i class="fas fa-user-plus mr-2"></i>
+                                    Create New Account
+                                </a>
+                            </div>
+                        </form>
+
+                        <!-- Demo Credentials Info -->
+                        <div class="mt-8 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle text-primary mt-0.5 mr-3"></i>
+                                <div class="text-sm">
+                                    <p class="font-semibold text-text-primary mb-2">Demo Credentials:</p>
+                                    <div class="space-y-1 text-text-secondary">
+                                        <p><strong>Admin:</strong> admin@tiffintrack.com / admin123</p>
+                                        <p><strong>Customer:</strong> customer@example.com / customer123</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Badge -->
+                    <div class="mt-6 flex items-center justify-center space-x-4 text-text-tertiary text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            <span>Secure Login</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-lock mr-2"></i>
+                            <span>SSL Protected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface border-t border-border mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-sm text-text-secondary text-center sm:text-left">
+                    © 2025 TiffinTrack. All Rights Reserved.
+                </p>
+                <div class="flex items-center space-x-6">
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Privacy Policy
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Terms of Service
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        // Password Toggle
+        const togglePassword = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            const icon = togglePassword.querySelector('i');
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+
+        // Flash Message Functions
+        function showFlashMessage(message, type = 'info') {
+            const flashMessage = document.getElementById('flash-message');
+            const flashText = document.getElementById('flash-text');
+            
+            flashMessage.classList.remove('hidden', 'bg-success-50', 'border-success-200', 'text-success-800', 
+                                         'bg-error-50', 'border-error-200', 'text-error-800',
+                                         'bg-warning-50', 'border-warning-200', 'text-warning-800');
+            
+            if (type === 'success') {
+                flashMessage.classList.add('bg-success-50', 'border-success-200', 'text-success-800');
+            } else if (type === 'error') {
+                flashMessage.classList.add('bg-error-50', 'border-error-200', 'text-error-800');
+            } else if (type === 'warning') {
+                flashMessage.classList.add('bg-warning-50', 'border-warning-200', 'text-warning-800');
+            }
+            
+            flashText.textContent = message;
+        }
+
+        function closeFlashMessage() {
+            document.getElementById('flash-message').classList.add('hidden');
+        }
+
+        // Form Validation
+        const loginForm = document.getElementById('login-form');
+        const emailInput = document.getElementById('email');
+        const emailError = document.getElementById('email-error');
+        const passwordError = document.getElementById('password-error');
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function showError(input, errorElement) {
+            input.classList.add('border-error');
+            errorElement.classList.remove('hidden');
+        }
+
+        function hideError(input, errorElement) {
+            input.classList.remove('border-error');
+            errorElement.classList.add('hidden');
+        }
+
+        emailInput.addEventListener('blur', () => {
+            if (!validateEmail(emailInput.value)) {
+                showError(emailInput, emailError);
+            } else {
+                hideError(emailInput, emailError);
+            }
+        });
+
+        emailInput.addEventListener('input', () => {
+            if (validateEmail(emailInput.value)) {
+                hideError(emailInput, emailError);
+            }
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            if (passwordInput.value.trim() === '') {
+                showError(passwordInput, passwordError);
+            } else {
+                hideError(passwordInput, passwordError);
+            }
+        });
+
+        passwordInput.addEventListener('input', () => {
+            if (passwordInput.value.trim() !== '') {
+                hideError(passwordInput, passwordError);
+            }
+        });
+
+        // Form Submission
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            let isValid = true;
+
+            // Validate email
+            if (!validateEmail(emailInput.value)) {
+                showError(emailInput, emailError);
+                isValid = false;
+            }
+
+            // Validate password
+            if (passwordInput.value.trim() === '') {
+                showError(passwordInput, passwordError);
+                isValid = false;
+            }
+
+            if (!isValid) {
+                showFlashMessage('Please correct the errors in the form', 'error');
+                return;
+            }
+
+            // Mock authentication logic
+            const email = emailInput.value.toLowerCase();
+            const password = passwordInput.value;
+
+            // Demo credentials check
+            if (email === 'admin@tiffintrack.com' && password === 'admin123') {
+                showFlashMessage('Login successful! Redirecting to admin dashboard...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'admin_dashboard.html';
+                }, 1500);
+            } else if (email === 'customer@example.com' && password === 'customer123') {
+                showFlashMessage('Login successful! Redirecting to customer dashboard...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'customer_dashboard.html';
+                }, 1500);
+            } else {
+                showFlashMessage('Invalid email or password. Please try again.', 'error');
+            }
+        });
+
+        // Auto-hide flash messages after 5 seconds
+        setInterval(() => {
+            const flashMessage = document.getElementById('flash-message');
+            if (!flashMessage.classList.contains('hidden')) {
+                setTimeout(closeFlashMessage, 5000);
+            }
+        }, 100);
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>

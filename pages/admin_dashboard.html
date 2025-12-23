@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin Dashboard - TiffinTrack Service Management">
+    <title>Admin Dashboard - TiffinTrack</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Ftiffintrac6995back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.12"></script>
+  <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2"></script>
+  </head>
+<body class="bg-background min-h-screen flex flex-col">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-surface border-b border-border sticky top-0 z-navigation shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="admin_dashboard.html" class="flex items-center space-x-2">
+                        <svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="48" height="48" rx="12" fill="#E67E22"/>
+                            <path d="M24 12C18.48 12 14 16.48 14 22C14 27.52 18.48 32 24 32C29.52 32 34 27.52 34 22C34 16.48 29.52 12 24 12ZM24 28C20.69 28 18 25.31 18 22C18 18.69 20.69 16 24 16C27.31 16 30 18.69 30 22C30 25.31 27.31 28 24 28Z" fill="white"/>
+                            <path d="M24 36C18.48 36 14 34.21 14 32V36H34V32C34 34.21 29.52 36 24 36Z" fill="white"/>
+                        </svg>
+                        <span class="text-xl font-heading font-bold text-primary">TiffinTrack</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="admin_dashboard.html" class="text-primary font-medium border-b-2 border-primary pb-1">
+                        <i class="fas fa-chart-line mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="customer_management.html" class="text-text-secondary hover:text-primary transition-colors">
+                        <i class="fas fa-users mr-2"></i>
+                        Customers
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors">
+                        <i class="fas fa-utensils mr-2"></i>
+                        Menu
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors">
+                        <i class="fas fa-file-alt mr-2"></i>
+                        Reports
+                    </a>
+                    
+                    <!-- Admin Profile Dropdown -->
+                    <div class="relative">
+                        <button id="admin-menu-btn" class="flex items-center space-x-2 text-text-primary hover:text-primary transition-colors touch-target" aria-label="Admin menu">
+                            <img 
+                                src="https://img.rocket.new/generatedImages/rocket_gen_img_117dbac63-1763295212937.png" 
+                                alt="Administrator profile picture showing professional business attire"
+                                class="w-10 h-10 rounded-full object-cover border-2 border-primary"
+                                loading="lazy"
+                                onerror="this.src='https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=100&auto=format&fit=crop'; this.onerror=null;"
+                            >
+                            <span class="font-medium">Admin</span>
+                            <i class="fas fa-chevron-down text-sm"></i>
+                        </button>
+                        <div id="admin-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-surface rounded-lg border border-border shadow-lg">
+                            <a href="javascript:void(0)" class="block px-4 py-3 text-text-primary hover:bg-primary-50 transition-colors">
+                                <i class="fas fa-user-circle mr-2"></i>
+                                Profile
+                            </a>
+                            <a href="javascript:void(0)" class="block px-4 py-3 text-text-primary hover:bg-primary-50 transition-colors">
+                                <i class="fas fa-cog mr-2"></i>
+                                Settings
+                            </a>
+                            <hr class="border-border">
+                            <a href="login.html" class="block px-4 py-3 text-error hover:bg-error-50 transition-colors">
+                                <i class="fas fa-sign-out-alt mr-2"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden touch-target text-text-primary hover:text-primary transition-colors" aria-label="Toggle mobile menu">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-surface">
+            <div class="px-4 py-4 space-y-3">
+                <a href="admin_dashboard.html" class="flex items-center px-4 py-3 text-primary bg-primary-50 rounded-lg font-medium">
+                    <i class="fas fa-chart-line mr-3 w-5"></i>
+                    Dashboard
+                </a>
+                <a href="customer_management.html" class="flex items-center px-4 py-3 text-text-secondary hover:bg-primary-50 hover:text-primary rounded-lg transition-colors">
+                    <i class="fas fa-users mr-3 w-5"></i>
+                    Customers
+                </a>
+                <a href="javascript:void(0)" class="flex items-center px-4 py-3 text-text-secondary hover:bg-primary-50 hover:text-primary rounded-lg transition-colors">
+                    <i class="fas fa-utensils mr-3 w-5"></i>
+                    Menu
+                </a>
+                <a href="javascript:void(0)" class="flex items-center px-4 py-3 text-text-secondary hover:bg-primary-50 hover:text-primary rounded-lg transition-colors">
+                    <i class="fas fa-file-alt mr-3 w-5"></i>
+                    Reports
+                </a>
+                <hr class="border-border">
+                <a href="javascript:void(0)" class="flex items-center px-4 py-3 text-text-secondary hover:bg-primary-50 hover:text-primary rounded-lg transition-colors">
+                    <i class="fas fa-user-circle mr-3 w-5"></i>
+                    Profile
+                </a>
+                <a href="javascript:void(0)" class="flex items-center px-4 py-3 text-text-secondary hover:bg-primary-50 hover:text-primary rounded-lg transition-colors">
+                    <i class="fas fa-cog mr-3 w-5"></i>
+                    Settings
+                </a>
+                <a href="login.html" class="flex items-center px-4 py-3 text-error hover:bg-error-50 rounded-lg transition-colors">
+                    <i class="fas fa-sign-out-alt mr-3 w-5"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Page Header -->
+            <div class="mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-heading font-bold text-text-primary mb-2">Admin Dashboard</h1>
+                        <p class="text-text-secondary">Welcome back! Here's your service overview for today.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <button class="btn btn-outline">
+                            <i class="fas fa-file-download mr-2"></i>
+                            Generate Report
+                        </button>
+                        <button class="btn btn-primary" onclick="showAddCustomerModal()">
+                            <i class="fas fa-user-plus mr-2"></i>
+                            Add Customer
+                        </button>
+                    </div>
+                </div>
+                <div class="mt-4 text-sm text-text-tertiary">
+                    <i class="fas fa-calendar-day mr-2"></i>
+                    Last updated: December 23, 2025 at 3:28 PM
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <!-- Total Customers Card -->
+                <div class="card">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-text-secondary text-sm font-medium mb-2">Total Customers</p>
+                            <h3 class="text-3xl font-heading font-bold text-text-primary mb-1">248</h3>
+                            <div class="flex items-center text-success text-sm">
+                                <i class="fas fa-arrow-up mr-1"></i>
+                                <span class="font-medium">12.5%</span>
+                                <span class="text-text-tertiary ml-1">vs last month</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-users text-primary text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Meals to Cook Card -->
+                <div class="card">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-text-secondary text-sm font-medium mb-2">Meals to Cook Today</p>
+                            <h3 class="text-3xl font-heading font-bold text-text-primary mb-1">186</h3>
+                            <div class="flex items-center text-warning text-sm">
+                                <i class="fas fa-clock mr-1"></i>
+                                <span class="font-medium">3 hours</span>
+                                <span class="text-text-tertiary ml-1">until delivery</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-utensils text-secondary text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Orders Card -->
+                <div class="card">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-text-secondary text-sm font-medium mb-2">Pending Orders</p>
+                            <h3 class="text-3xl font-heading font-bold text-text-primary mb-1">23</h3>
+                            <div class="flex items-center text-error text-sm">
+                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                <span class="font-medium">5 urgent</span>
+                                <span class="text-text-tertiary ml-1">need attention</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-clipboard-list text-accent text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Revenue Card -->
+                <div class="card">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <p class="text-text-secondary text-sm font-medium mb-2">Monthly Revenue</p>
+                            <h3 class="text-3xl font-heading font-bold text-text-primary mb-1">$18,420</h3>
+                            <div class="flex items-center text-success text-sm">
+                                <i class="fas fa-arrow-up mr-1"></i>
+                                <span class="font-medium">8.2%</span>
+                                <span class="text-text-tertiary ml-1">vs last month</span>
+                            </div>
+                        </div>
+                        <div class="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-dollar-sign text-success text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Content Grid -->
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <!-- Customer Management Section -->
+                <div class="lg:col-span-2">
+                    <div class="card">
+                        <!-- Section Header -->
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+                            <div>
+                                <h2 class="text-2xl font-heading font-bold text-text-primary mb-1">Customer Management</h2>
+                                <p class="text-text-secondary text-sm">Active subscriptions and recent activity</p>
+                            </div>
+                            <a href="customer_management.html" class="btn btn-outline">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                View All
+                            </a>
+                        </div>
+
+                        <!-- Search and Filter -->
+                        <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <i class="fas fa-search text-text-tertiary"></i>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    id="customer-search"
+                                    class="input pl-12" 
+                                    placeholder="Search customers..."
+                                    aria-label="Search customers"
+                                >
+                            </div>
+                            <button class="btn btn-outline sm:w-auto">
+                                <i class="fas fa-filter mr-2"></i>
+                                Filter
+                            </button>
+                        </div>
+
+                        <!-- Desktop Table View -->
+                        <div class="hidden md:block table-container">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Status</th>
+                                        <th>Delivery Address</th>
+                                        <th>Dietary Preference</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customer-table-body">
+                                    <!-- Customer Row 1 -->
+                                    <tr>
+                                        <td>
+                                            <div class="flex items-center space-x-3">
+                                                <img 
+                                                    src="https://img.rocket.new/generatedImages/rocket_gen_img_1b842baea-1763301386721.png" 
+                                                    alt="Profile picture of Sarah Johnson, active customer"
+                                                    class="w-10 h-10 rounded-full object-cover"
+                                                    loading="lazy"
+                                                    onerror="this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop'; this.onerror=null;"
+                                                >
+                                                <div>
+                                                    <p class="font-medium text-text-primary">Sarah Johnson</p>
+                                                    <p class="text-sm text-text-tertiary">sarah.j@email.com</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Active
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <p class="text-text-primary">123 Oak Street</p>
+                                            <p class="text-sm text-text-tertiary">Downtown, NY 10001</p>
+                                        </td>
+                                        <td>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-md bg-success-50 text-success-800 text-xs">
+                                                <i class="fas fa-leaf mr-1"></i>
+                                                Vegetarian
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="flex items-center space-x-2">
+                                                <button class="touch-target text-primary hover:text-primary-700 transition-colors" aria-label="View customer details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="touch-target text-secondary hover:text-secondary-700 transition-colors" aria-label="Edit customer">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Customer Row 2 -->
+                                    <tr>
+                                        <td>
+                                            <div class="flex items-center space-x-3">
+                                                <img 
+                                                    src="https://img.rocket.new/generatedImages/rocket_gen_img_1dc64ab65-1763293842844.png" 
+                                                    alt="Profile picture of Michael Chen, active customer"
+                                                    class="w-10 h-10 rounded-full object-cover"
+                                                    loading="lazy"
+                                                    onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop'; this.onerror=null;"
+                                                >
+                                                <div>
+                                                    <p class="font-medium text-text-primary">Michael Chen</p>
+                                                    <p class="text-sm text-text-tertiary">m.chen@email.com</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Active
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <p class="text-text-primary">456 Maple Avenue</p>
+                                            <p class="text-sm text-text-tertiary">Midtown, NY 10022</p>
+                                        </td>
+                                        <td>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-md bg-primary-50 text-primary-800 text-xs">
+                                                <i class="fas fa-drumstick-bite mr-1"></i>
+                                                Non-Veg
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="flex items-center space-x-2">
+                                                <button class="touch-target text-primary hover:text-primary-700 transition-colors" aria-label="View customer details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="touch-target text-secondary hover:text-secondary-700 transition-colors" aria-label="Edit customer">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Customer Row 3 -->
+                                    <tr>
+                                        <td>
+                                            <div class="flex items-center space-x-3">
+                                                <img 
+                                                    src="https://img.rocket.new/generatedImages/rocket_gen_img_1ee2bcef3-1763301295581.png" 
+                                                    alt="Profile picture of Emily Rodriguez, paused subscription"
+                                                    class="w-10 h-10 rounded-full object-cover"
+                                                    loading="lazy"
+                                                    onerror="this.src='https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;"
+                                                >
+                                                <div>
+                                                    <p class="font-medium text-text-primary">Emily Rodriguez</p>
+                                                    <p class="text-sm text-text-tertiary">emily.r@email.com</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-warning">
+                                                <i class="fas fa-pause-circle mr-1"></i>
+                                                Paused
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <p class="text-text-primary">789 Pine Road</p>
+                                            <p class="text-sm text-text-tertiary">Uptown, NY 10033</p>
+                                        </td>
+                                        <td>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-md bg-success-50 text-success-800 text-xs">
+                                                <i class="fas fa-leaf mr-1"></i>
+                                                Vegan
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="flex items-center space-x-2">
+                                                <button class="touch-target text-primary hover:text-primary-700 transition-colors" aria-label="View customer details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="touch-target text-secondary hover:text-secondary-700 transition-colors" aria-label="Edit customer">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Customer Row 4 -->
+                                    <tr>
+                                        <td>
+                                            <div class="flex items-center space-x-3">
+                                                <img 
+                                                    src="https://img.rocket.new/generatedImages/rocket_gen_img_1350ab5dd-1763295345389.png" 
+                                                    alt="Profile picture of David Kumar, active customer"
+                                                    class="w-10 h-10 rounded-full object-cover"
+                                                    loading="lazy"
+                                                    onerror="this.src='https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop'; this.onerror=null;"
+                                                >
+                                                <div>
+                                                    <p class="font-medium text-text-primary">David Kumar</p>
+                                                    <p class="text-sm text-text-tertiary">d.kumar@email.com</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Active
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <p class="text-text-primary">321 Elm Boulevard</p>
+                                            <p class="text-sm text-text-tertiary">Brooklyn, NY 11201</p>
+                                        </td>
+                                        <td>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-md bg-success-50 text-success-800 text-xs">
+                                                <i class="fas fa-leaf mr-1"></i>
+                                                Vegetarian
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="flex items-center space-x-2">
+                                                <button class="touch-target text-primary hover:text-primary-700 transition-colors" aria-label="View customer details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="touch-target text-secondary hover:text-secondary-700 transition-colors" aria-label="Edit customer">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Customer Row 5 -->
+                                    <tr>
+                                        <td>
+                                            <div class="flex items-center space-x-3">
+                                                <img 
+                                                    src="https://img.rocket.new/generatedImages/rocket_gen_img_17599e3b8-1763301193735.png" 
+                                                    alt="Profile picture of Lisa Thompson, active customer"
+                                                    class="w-10 h-10 rounded-full object-cover"
+                                                    loading="lazy"
+                                                    onerror="this.src='https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop'; this.onerror=null;"
+                                                >
+                                                <div>
+                                                    <p class="font-medium text-text-primary">Lisa Thompson</p>
+                                                    <p class="text-sm text-text-tertiary">lisa.t@email.com</p>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Active
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <p class="text-text-primary">654 Cedar Lane</p>
+                                            <p class="text-sm text-text-tertiary">Queens, NY 11354</p>
+                                        </td>
+                                        <td>
+                                            <span class="inline-flex items-center px-2 py-1 rounded-md bg-primary-50 text-primary-800 text-xs">
+                                                <i class="fas fa-drumstick-bite mr-1"></i>
+                                                Non-Veg
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="flex items-center space-x-2">
+                                                <button class="touch-target text-primary hover:text-primary-700 transition-colors" aria-label="View customer details">
+                                                    <i class="fas fa-eye"></i>
+                                                </button>
+                                                <button class="touch-target text-secondary hover:text-secondary-700 transition-colors" aria-label="Edit customer">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Card View -->
+                        <div class="md:hidden space-y-4" id="customer-cards">
+                            <!-- Customer Card 1 -->
+                            <div class="border border-border rounded-lg p-4 bg-surface">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <img 
+                                            src="https://img.rocket.new/generatedImages/rocket_gen_img_1b842baea-1763301386721.png" 
+                                            alt="Profile picture of Sarah Johnson, active customer"
+                                            class="w-12 h-12 rounded-full object-cover"
+                                            loading="lazy"
+                                            onerror="this.src='https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop'; this.onerror=null;"
+                                        >
+                                        <div>
+                                            <p class="font-medium text-text-primary">Sarah Johnson</p>
+                                            <p class="text-sm text-text-tertiary">sarah.j@email.com</p>
+                                        </div>
+                                    </div>
+                                    <span class="badge badge-success">Active</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-map-marker-alt text-text-tertiary mr-2 mt-1"></i>
+                                        <div>
+                                            <p class="text-text-primary">123 Oak Street</p>
+                                            <p class="text-text-tertiary">Downtown, NY 10001</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-leaf text-success mr-2"></i>
+                                        <span class="text-text-primary">Vegetarian</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3 mt-4 pt-4 border-t border-border">
+                                    <button class="btn btn-outline flex-1">
+                                        <i class="fas fa-eye mr-2"></i>
+                                        View
+                                    </button>
+                                    <button class="btn btn-primary flex-1">
+                                        <i class="fas fa-edit mr-2"></i>
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Customer Card 2 -->
+                            <div class="border border-border rounded-lg p-4 bg-surface">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <img 
+                                            src="https://img.rocket.new/generatedImages/rocket_gen_img_1dc64ab65-1763293842844.png" 
+                                            alt="Profile picture of Michael Chen, active customer"
+                                            class="w-12 h-12 rounded-full object-cover"
+                                            loading="lazy"
+                                            onerror="this.src='https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop'; this.onerror=null;"
+                                        >
+                                        <div>
+                                            <p class="font-medium text-text-primary">Michael Chen</p>
+                                            <p class="text-sm text-text-tertiary">m.chen@email.com</p>
+                                        </div>
+                                    </div>
+                                    <span class="badge badge-success">Active</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-map-marker-alt text-text-tertiary mr-2 mt-1"></i>
+                                        <div>
+                                            <p class="text-text-primary">456 Maple Avenue</p>
+                                            <p class="text-text-tertiary">Midtown, NY 10022</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-drumstick-bite text-primary mr-2"></i>
+                                        <span class="text-text-primary">Non-Veg</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3 mt-4 pt-4 border-t border-border">
+                                    <button class="btn btn-outline flex-1">
+                                        <i class="fas fa-eye mr-2"></i>
+                                        View
+                                    </button>
+                                    <button class="btn btn-primary flex-1">
+                                        <i class="fas fa-edit mr-2"></i>
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Customer Card 3 -->
+                            <div class="border border-border rounded-lg p-4 bg-surface">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div class="flex items-center space-x-3">
+                                        <img 
+                                            src="https://img.rocket.new/generatedImages/rocket_gen_img_1ee2bcef3-1763301295581.png" 
+                                            alt="Profile picture of Emily Rodriguez, paused subscription"
+                                            class="w-12 h-12 rounded-full object-cover"
+                                            loading="lazy"
+                                            onerror="this.src='https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=100'; this.onerror=null;"
+                                        >
+                                        <div>
+                                            <p class="font-medium text-text-primary">Emily Rodriguez</p>
+                                            <p class="text-sm text-text-tertiary">emily.r@email.com</p>
+                                        </div>
+                                    </div>
+                                    <span class="badge badge-warning">Paused</span>
+                                </div>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-map-marker-alt text-text-tertiary mr-2 mt-1"></i>
+                                        <div>
+                                            <p class="text-text-primary">789 Pine Road</p>
+                                            <p class="text-text-tertiary">Uptown, NY 10033</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-leaf text-success mr-2"></i>
+                                        <span class="text-text-primary">Vegan</span>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3 mt-4 pt-4 border-t border-border">
+                                    <button class="btn btn-outline flex-1">
+                                        <i class="fas fa-eye mr-2"></i>
+                                        View
+                                    </button>
+                                    <button class="btn btn-primary flex-1">
+                                        <i class="fas fa-edit mr-2"></i>
+                                        Edit
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Today's Meal Preparation Panel -->
+                <div class="lg:col-span-1">
+                    <div class="card">
+                        <div class="mb-6">
+                            <h2 class="text-2xl font-heading font-bold text-text-primary mb-1">Today's Preparation</h2>
+                            <p class="text-text-secondary text-sm">Meal summary for December 23, 2025</p>
+                        </div>
+
+                        <!-- Meal Image -->
+                        <div class="mb-6 overflow-hidden rounded-lg">
+                            <img 
+                                src="https://images.unsplash.com/photo-1585468527567-6a6caa16a599" 
+                                alt="Traditional Indian thali meal with rice, dal, vegetables, roti and accompaniments arranged in steel containers"
+                                class="w-full h-48 object-cover"
+                                loading="lazy"
+                                onerror="this.src='https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=800&auto=format&fit=crop'; this.onerror=null;"
+                            >
+                        </div>
+
+                        <!-- Menu Details -->
+                        <div class="space-y-4 mb-6">
+                            <div>
+                                <h3 class="font-semibold text-text-primary mb-2">Today's Menu</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex items-start">
+                                        <i class="fas fa-circle text-primary text-xs mr-2 mt-1"></i>
+                                        <span class="text-text-secondary">Vegetable Biryani with Raita</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <i class="fas fa-circle text-primary text-xs mr-2 mt-1"></i>
+                                        <span class="text-text-secondary">Dal Tadka & Jeera Rice</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <i class="fas fa-circle text-primary text-xs mr-2 mt-1"></i>
+                                        <span class="text-text-secondary">Mixed Vegetable Curry</span>
+                                    </div>
+                                    <div class="flex items-start">
+                                        <i class="fas fa-circle text-primary text-xs mr-2 mt-1"></i>
+                                        <span class="text-text-secondary">Chapati (4 pieces)</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-border">
+
+                            <!-- Ingredient Requirements -->
+                            <div>
+                                <h3 class="font-semibold text-text-primary mb-2">Key Ingredients</h3>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Basmati Rice</span>
+                                        <span class="font-medium text-text-primary">15 kg</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Mixed Vegetables</span>
+                                        <span class="font-medium text-text-primary">12 kg</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Lentils (Dal)</span>
+                                        <span class="font-medium text-text-primary">8 kg</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-text-secondary">Wheat Flour</span>
+                                        <span class="font-medium text-text-primary">10 kg</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="border-border">
+
+                            <!-- Delivery Schedule -->
+                            <div>
+                                <h3 class="font-semibold text-text-primary mb-3">Delivery Schedule</h3>
+                                <div class="space-y-3">
+                                    <div class="flex items-center justify-between p-3 bg-primary-50 rounded-lg">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-clock text-white"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-text-primary text-sm">Lunch Batch</p>
+                                                <p class="text-xs text-text-tertiary">12:00 PM - 1:00 PM</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-primary font-bold">124</span>
+                                    </div>
+                                    <div class="flex items-center justify-between p-3 bg-secondary-50 rounded-lg">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-10 h-10 bg-secondary rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-moon text-white"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-text-primary text-sm">Dinner Batch</p>
+                                                <p class="text-xs text-text-tertiary">7:00 PM - 8:00 PM</p>
+                                            </div>
+                                        </div>
+                                        <span class="text-secondary font-bold">62</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            <button class="btn btn-primary w-full">
+                                <i class="fas fa-utensils mr-2"></i>
+                                Manage Menu
+                            </button>
+                            <button class="btn btn-outline w-full">
+                                <i class="fas fa-truck mr-2"></i>
+                                View Deliveries
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface border-t border-border mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-sm text-text-secondary text-center sm:text-left">
+                    © 2025 TiffinTrack. All Rights Reserved.
+                </p>
+                <div class="flex items-center space-x-6">
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Privacy Policy
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Terms of Service
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Add Customer Modal -->
+    <div id="add-customer-modal" class="hidden modal-overlay" onclick="closeModalOnOutsideClick(event)">
+        <div class="modal-content p-8 max-w-2xl">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-2xl font-heading font-bold text-text-primary">Add New Customer</h2>
+                <button onclick="closeAddCustomerModal()" class="touch-target text-text-tertiary hover:text-text-primary transition-colors" aria-label="Close modal">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <form id="add-customer-form" class="space-y-6">
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="customer-name" class="block text-sm font-medium text-text-primary mb-2">
+                            Full Name
+                        </label>
+                        <input 
+                            type="text" 
+                            id="customer-name" 
+                            class="input" 
+                            placeholder="Enter customer name"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label for="customer-email" class="block text-sm font-medium text-text-primary mb-2">
+                            Email Address
+                        </label>
+                        <input 
+                            type="email" 
+                            id="customer-email" 
+                            class="input" 
+                            placeholder="customer@email.com"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-6">
+                    <div>
+                        <label for="customer-phone" class="block text-sm font-medium text-text-primary mb-2">
+                            Phone Number
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="customer-phone" 
+                            class="input" 
+                            placeholder="+1 (555) 000-0000"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label for="customer-dietary" class="block text-sm font-medium text-text-primary mb-2">
+                            Dietary Preference
+                        </label>
+                        <select id="customer-dietary" class="input" required>
+                            <option value="">Select preference</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                            <option value="non-veg">Non-Vegetarian</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="customer-address" class="block text-sm font-medium text-text-primary mb-2">
+                        Delivery Address
+                    </label>
+                    <textarea 
+                        id="customer-address" 
+                        class="input min-h-[100px] py-3" 
+                        placeholder="Enter complete delivery address"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                    <button type="button" onclick="closeAddCustomerModal()" class="btn btn-outline flex-1">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary flex-1">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Add Customer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        // Admin Dropdown Toggle
+        const adminMenuBtn = document.getElementById('admin-menu-btn');
+        const adminDropdown = document.getElementById('admin-dropdown');
+
+        adminMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            adminDropdown.classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!adminMenuBtn.contains(e.target) && !adminDropdown.contains(e.target)) {
+                adminDropdown.classList.add('hidden');
+            }
+        });
+
+        // Customer Search Functionality
+        const customerSearch = document.getElementById('customer-search');
+        
+        customerSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const tableRows = document.querySelectorAll('#customer-table-body tr');
+            const mobileCards = document.querySelectorAll('#customer-cards > div');
+
+            // Filter desktop table
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+
+            // Filter mobile cards
+            mobileCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(searchTerm) ? '' : 'none';
+            });
+        });
+
+        // Modal Functions
+        function showAddCustomerModal() {
+            document.getElementById('add-customer-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddCustomerModal() {
+            document.getElementById('add-customer-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            document.getElementById('add-customer-form').reset();
+        }
+
+        function closeModalOnOutsideClick(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeAddCustomerModal();
+            }
+        }
+
+        // Add Customer Form Submission
+        document.getElementById('add-customer-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Get form values
+            const name = document.getElementById('customer-name').value;
+            const email = document.getElementById('customer-email').value;
+            const phone = document.getElementById('customer-phone').value;
+            const dietary = document.getElementById('customer-dietary').value;
+            const address = document.getElementById('customer-address').value;
+
+            // Show success message (in real app, this would send to backend)
+            alert(`Customer "${name}" added successfully!\n\nEmail: ${email}\nPhone: ${phone}\nDietary: ${dietary}\nAddress: ${address}`);
+            
+            closeAddCustomerModal();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAddCustomerModal();
+            }
+        });
+
+        // Prevent body scroll when modal is open
+        const modal = document.getElementById('add-customer-modal');
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'class') {
+                    if (modal.classList.contains('hidden')) {
+                        document.body.style.overflow = 'auto';
+                    } else {
+                        document.body.style.overflow = 'hidden';
+                    }
+                }
+            });
+        });
+
+        observer.observe(modal, { attributes: true });
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>

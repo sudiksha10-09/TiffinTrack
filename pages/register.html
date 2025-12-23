@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Register for TiffinTrack - Create your account to start enjoying fresh, home-cooked meals delivered daily">
+    <title>Register - TiffinTrack</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Ftiffintrac6995back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.12"></script>
+  <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2"></script>
+  </head>
+<body class="bg-background min-h-screen flex flex-col">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-surface border-b border-border sticky top-0 z-navigation shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="login.html" class="flex items-center space-x-2">
+                        <svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="48" height="48" rx="12" fill="#E67E22"/>
+                            <path d="M24 12C18.48 12 14 16.48 14 22C14 27.52 18.48 32 24 32C29.52 32 34 27.52 34 22C34 16.48 29.52 12 24 12ZM24 28C20.69 28 18 25.31 18 22C18 18.69 20.69 16 24 16C27.31 16 30 18.69 30 22C30 25.31 27.31 28 24 28Z" fill="white"/>
+                            <path d="M24 36C18.48 36 14 34.21 14 32V36H34V32C34 34.21 29.52 36 24 36Z" fill="white"/>
+                        </svg>
+                        <span class="text-xl font-heading font-bold text-primary">TiffinTrack</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="login.html" class="btn btn-outline">
+                        <i class="fas fa-sign-in-alt mr-2"></i>
+                        Login
+                    </a>
+                    <a href="register.html" class="btn btn-primary">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Register
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden touch-target text-text-primary hover:text-primary transition-colors" aria-label="Toggle mobile menu">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-surface">
+            <div class="px-4 py-4 space-y-3">
+                <a href="login.html" class="btn btn-outline w-full">
+                    <i class="fas fa-sign-in-alt mr-2"></i>
+                    Login
+                </a>
+                <a href="register.html" class="btn btn-primary w-full">
+                    <i class="fas fa-user-plus mr-2"></i>
+                    Register
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow flex items-center justify-center px-4 py-8 sm:py-12">
+        <div class="w-full max-w-6xl">
+            <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-start">
+                
+                <!-- Left Side - Branding & Benefits -->
+                <div class="hidden md:block sticky top-24">
+                    <div class="relative">
+                        <!-- Background Decoration -->
+                        <div class="absolute -top-4 -left-4 w-72 h-72 bg-primary-100 rounded-full opacity-20 blur-3xl"></div>
+                        <div class="absolute -bottom-4 -right-4 w-64 h-64 bg-secondary-100 rounded-full opacity-20 blur-3xl"></div>
+                        
+                        <!-- Main Image -->
+                        <div class="relative z-10 mb-8">
+                            <img 
+                                src="https://img.rocket.new/generatedImages/rocket_gen_img_1a739efb5-1764718511884.png" 
+                                alt="Variety of colorful, nutritious tiffin meals arranged in eco-friendly containers showcasing fresh vegetables, grains, and traditional Indian cuisine"
+                                class="rounded-2xl shadow-xl w-full h-auto object-cover"
+                                loading="lazy"
+                                onerror="this.src='https://images.pexels.com/photos/1640777/pexels-photo-1640777.jpeg?auto=compress&cs=tinysrgb&w=800'; this.onerror=null;"
+                            >
+                        </div>
+
+                        <!-- Benefits Section -->
+                        <div class="space-y-6">
+                            <h2 class="text-2xl font-heading font-bold text-text-primary">Why Join TiffinTrack?</h2>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-heart text-primary text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-text-primary mb-1">Home-Cooked Quality</h3>
+                                        <p class="text-sm text-text-secondary">Authentic meals prepared with love and traditional recipes</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-leaf text-secondary text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-text-primary mb-1">Fresh Ingredients</h3>
+                                        <p class="text-sm text-text-secondary">Sourced daily from local markets for maximum freshness</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-calendar-check text-accent text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-text-primary mb-1">Flexible Plans</h3>
+                                        <p class="text-sm text-text-secondary">Pause, resume, or customize your meal schedule anytime</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-4">
+                                    <div class="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-truck-fast text-success text-xl"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-semibold text-text-primary mb-1">Timely Delivery</h3>
+                                        <p class="text-sm text-text-secondary">Hot meals delivered right to your doorstep on time</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side - Registration Form -->
+                <div class="w-full">
+                    <div class="card">
+                        <!-- Header -->
+                        <div class="text-center mb-8">
+                            <h1 class="text-3xl sm:text-4xl font-heading font-bold text-text-primary mb-2">Create Your Account</h1>
+                            <p class="text-text-secondary">Join TiffinTrack and start enjoying delicious home-cooked meals</p>
+                        </div>
+
+                        <!-- Flash Message Area -->
+                        <div id="flash-message" class="hidden mb-6 p-4 rounded-lg border" role="alert">
+                            <div class="flex items-start">
+                                <i class="fas fa-info-circle mt-0.5 mr-3"></i>
+                                <div class="flex-1">
+                                    <p id="flash-text" class="text-sm font-medium"></p>
+                                </div>
+                                <button onclick="closeFlashMessage()" class="ml-3 touch-target" aria-label="Close message">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Registration Form -->
+                        <form id="register-form" class="space-y-6" novalidate>
+                            
+                            <!-- Personal Information Section -->
+                            <div class="space-y-4">
+                                <h3 class="text-lg font-semibold text-text-primary flex items-center">
+                                    <i class="fas fa-user-circle mr-2 text-primary"></i>
+                                    Personal Information
+                                </h3>
+
+                                <!-- Full Name -->
+                                <div>
+                                    <label for="fullname" class="block text-sm font-medium text-text-primary mb-2">
+                                        Full Name <span class="text-error">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fas fa-user text-text-tertiary"></i>
+                                        </div>
+                                        <input 
+                                            type="text" 
+                                            id="fullname" 
+                                            name="fullname"
+                                            class="input pl-12" 
+                                            placeholder="John Doe"
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="fullname-error"
+                                        >
+                                    </div>
+                                    <p id="fullname-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Please enter your full name
+                                    </p>
+                                </div>
+
+                                <!-- Email -->
+                                <div>
+                                    <label for="email" class="block text-sm font-medium text-text-primary mb-2">
+                                        Email Address <span class="text-error">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fas fa-envelope text-text-tertiary"></i>
+                                        </div>
+                                        <input 
+                                            type="email" 
+                                            id="email" 
+                                            name="email"
+                                            class="input pl-12" 
+                                            placeholder="you@example.com"
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="email-error"
+                                        >
+                                    </div>
+                                    <p id="email-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Please enter a valid email address
+                                    </p>
+                                </div>
+
+                                <!-- Phone Number -->
+                                <div>
+                                    <label for="phone" class="block text-sm font-medium text-text-primary mb-2">
+                                        Phone Number <span class="text-error">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fas fa-phone text-text-tertiary"></i>
+                                        </div>
+                                        <input 
+                                            type="tel" 
+                                            id="phone" 
+                                            name="phone"
+                                            class="input pl-12" 
+                                            placeholder="+1 (555) 123-4567"
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="phone-error"
+                                        >
+                                    </div>
+                                    <p id="phone-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Please enter a valid phone number
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Delivery Information Section -->
+                            <div class="space-y-4 pt-4 border-t border-border">
+                                <h3 class="text-lg font-semibold text-text-primary flex items-center">
+                                    <i class="fas fa-map-marker-alt mr-2 text-primary"></i>
+                                    Delivery Information
+                                </h3>
+
+                                <!-- Delivery Address -->
+                                <div>
+                                    <label for="address" class="block text-sm font-medium text-text-primary mb-2">
+                                        Delivery Address <span class="text-error">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute top-4 left-0 pl-4 flex items-start pointer-events-none">
+                                            <i class="fas fa-location-dot text-text-tertiary"></i>
+                                        </div>
+                                        <textarea 
+                                            id="address" 
+                                            name="address"
+                                            rows="3"
+                                            class="input pl-12 py-3 resize-none" 
+                                            placeholder="123 Main Street, Apartment 4B, City, State, ZIP"
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="address-error"
+                                        ></textarea>
+                                    </div>
+                                    <p id="address-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Please enter your delivery address
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Preferences Section -->
+                            <div class="space-y-4 pt-4 border-t border-border">
+                                <h3 class="text-lg font-semibold text-text-primary flex items-center">
+                                    <i class="fas fa-sliders mr-2 text-primary"></i>
+                                    Meal Preferences
+                                </h3>
+
+                                <!-- Dietary Preferences -->
+                                <div>
+                                    <label for="dietary" class="block text-sm font-medium text-text-primary mb-2">
+                                        Dietary Preferences <span class="text-text-tertiary text-xs">(Optional)</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fas fa-utensils text-text-tertiary"></i>
+                                        </div>
+                                        <select 
+                                            id="dietary" 
+                                            name="dietary"
+                                            class="input pl-12 cursor-pointer"
+                                            aria-describedby="dietary-help"
+                                        >
+                                            <option value="">Select preference</option>
+                                            <option value="vegetarian">Vegetarian</option>
+                                            <option value="vegan">Vegan</option>
+                                            <option value="non-vegetarian">Non-Vegetarian</option>
+                                            <option value="gluten-free">Gluten-Free</option>
+                                            <option value="dairy-free">Dairy-Free</option>
+                                        </select>
+                                    </div>
+                                    <p id="dietary-help" class="mt-1 text-xs text-text-tertiary">
+                                        Help us customize your meal plan
+                                    </p>
+                                </div>
+
+                                <!-- Meal Plan -->
+                                <div>
+                                    <label for="meal-plan" class="block text-sm font-medium text-text-primary mb-2">
+                                        Preferred Meal Plan <span class="text-text-tertiary text-xs">(Optional)</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fas fa-calendar-days text-text-tertiary"></i>
+                                        </div>
+                                        <select 
+                                            id="meal-plan" 
+                                            name="meal-plan"
+                                            class="input pl-12 cursor-pointer"
+                                        >
+                                            <option value="">Select plan</option>
+                                            <option value="lunch-only">Lunch Only</option>
+                                            <option value="dinner-only">Dinner Only</option>
+                                            <option value="lunch-dinner">Lunch & Dinner</option>
+                                            <option value="all-meals">All Meals (Breakfast, Lunch, Dinner)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Security Section -->
+                            <div class="space-y-4 pt-4 border-t border-border">
+                                <h3 class="text-lg font-semibold text-text-primary flex items-center">
+                                    <i class="fas fa-lock mr-2 text-primary"></i>
+                                    Account Security
+                                </h3>
+
+                                <!-- Password -->
+                                <div>
+                                    <label for="password" class="block text-sm font-medium text-text-primary mb-2">
+                                        Password <span class="text-error">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fas fa-key text-text-tertiary"></i>
+                                        </div>
+                                        <input 
+                                            type="password" 
+                                            id="password" 
+                                            name="password"
+                                            class="input pl-12 pr-12" 
+                                            placeholder="Create a strong password"
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="password-error password-strength"
+                                        >
+                                        <button 
+                                            type="button" 
+                                            id="toggle-password"
+                                            class="absolute inset-y-0 right-0 pr-4 flex items-center touch-target text-text-tertiary hover:text-text-primary transition-colors"
+                                            aria-label="Toggle password visibility"
+                                        >
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <div id="password-strength" class="mt-2">
+                                        <div class="flex items-center space-x-2">
+                                            <div class="flex-1 h-2 bg-border rounded-full overflow-hidden">
+                                                <div id="strength-bar" class="h-full transition-all duration-300" style="width: 0%"></div>
+                                            </div>
+                                            <span id="strength-text" class="text-xs text-text-tertiary"></span>
+                                        </div>
+                                    </div>
+                                    <p id="password-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Password must be at least 8 characters
+                                    </p>
+                                    <p class="mt-1 text-xs text-text-tertiary">
+                                        Use 8+ characters with a mix of letters, numbers & symbols
+                                    </p>
+                                </div>
+
+                                <!-- Confirm Password -->
+                                <div>
+                                    <label for="confirm-password" class="block text-sm font-medium text-text-primary mb-2">
+                                        Confirm Password <span class="text-error">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fas fa-check-double text-text-tertiary"></i>
+                                        </div>
+                                        <input 
+                                            type="password" 
+                                            id="confirm-password" 
+                                            name="confirm-password"
+                                            class="input pl-12 pr-12" 
+                                            placeholder="Re-enter your password"
+                                            required
+                                            aria-required="true"
+                                            aria-describedby="confirm-password-error"
+                                        >
+                                        <button 
+                                            type="button" 
+                                            id="toggle-confirm-password"
+                                            class="absolute inset-y-0 right-0 pr-4 flex items-center touch-target text-text-tertiary hover:text-text-primary transition-colors"
+                                            aria-label="Toggle confirm password visibility"
+                                        >
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <p id="confirm-password-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                        <i class="fas fa-exclamation-circle mr-1"></i>
+                                        Passwords do not match
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Terms & Conditions -->
+                            <div class="pt-4 border-t border-border">
+                                <label class="flex items-start cursor-pointer">
+                                    <input 
+                                        type="checkbox" 
+                                        id="terms"
+                                        name="terms"
+                                        class="w-5 h-5 text-primary border-border rounded focus:ring-2 focus:ring-primary-200 cursor-pointer mt-0.5 flex-shrink-0"
+                                        required
+                                        aria-required="true"
+                                        aria-describedby="terms-error"
+                                    >
+                                    <span class="ml-3 text-sm text-text-secondary">
+                                        I agree to the <a href="javascript:void(0)" class="text-primary hover:text-primary-700 font-medium">Terms of Service</a> and <a href="javascript:void(0)" class="text-primary hover:text-primary-700 font-medium">Privacy Policy</a> <span class="text-error">*</span>
+                                    </span>
+                                </label>
+                                <p id="terms-error" class="mt-2 text-sm text-error hidden" role="alert">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    You must accept the terms and conditions
+                                </p>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button 
+                                type="submit" 
+                                class="btn btn-primary w-full text-lg"
+                            >
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Create Account
+                            </button>
+
+                            <!-- Divider -->
+                            <div class="relative my-6">
+                                <div class="absolute inset-0 flex items-center">
+                                    <div class="w-full border-t border-border"></div>
+                                </div>
+                                <div class="relative flex justify-center text-sm">
+                                    <span class="px-4 bg-surface text-text-tertiary">Already have an account?</span>
+                                </div>
+                            </div>
+
+                            <!-- Login Link -->
+                            <div class="text-center">
+                                <a href="login.html" class="btn btn-outline w-full">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>
+                                    Sign In Instead
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Security Badge -->
+                    <div class="mt-6 flex items-center justify-center space-x-4 text-text-tertiary text-sm">
+                        <div class="flex items-center">
+                            <i class="fas fa-shield-alt mr-2"></i>
+                            <span>Secure Registration</span>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-lock mr-2"></i>
+                            <span>SSL Protected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface border-t border-border mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-sm text-text-secondary text-center sm:text-left">
+                    © 2025 TiffinTrack. All Rights Reserved.
+                </p>
+                <div class="flex items-center space-x-6">
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Privacy Policy
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Terms of Service
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        // Password Toggle Functions
+        function setupPasswordToggle(toggleId, inputId) {
+            const toggle = document.getElementById(toggleId);
+            const input = document.getElementById(inputId);
+
+            toggle.addEventListener('click', () => {
+                const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                input.setAttribute('type', type);
+                const icon = toggle.querySelector('i');
+                icon.classList.toggle('fa-eye');
+                icon.classList.toggle('fa-eye-slash');
+            });
+        }
+
+        setupPasswordToggle('toggle-password', 'password');
+        setupPasswordToggle('toggle-confirm-password', 'confirm-password');
+
+        // Flash Message Functions
+        function showFlashMessage(message, type = 'info') {
+            const flashMessage = document.getElementById('flash-message');
+            const flashText = document.getElementById('flash-text');
+            
+            flashMessage.classList.remove('hidden', 'bg-success-50', 'border-success-200', 'text-success-800', 
+                                         'bg-error-50', 'border-error-200', 'text-error-800',
+                                         'bg-warning-50', 'border-warning-200', 'text-warning-800');
+            
+            if (type === 'success') {
+                flashMessage.classList.add('bg-success-50', 'border-success-200', 'text-success-800');
+            } else if (type === 'error') {
+                flashMessage.classList.add('bg-error-50', 'border-error-200', 'text-error-800');
+            } else if (type === 'warning') {
+                flashMessage.classList.add('bg-warning-50', 'border-warning-200', 'text-warning-800');
+            }
+            
+            flashText.textContent = message;
+        }
+
+        function closeFlashMessage() {
+            document.getElementById('flash-message').classList.add('hidden');
+        }
+
+        // Password Strength Checker
+        const passwordInput = document.getElementById('password');
+        const strengthBar = document.getElementById('strength-bar');
+        const strengthText = document.getElementById('strength-text');
+
+        function checkPasswordStrength(password) {
+            let strength = 0;
+            
+            if (password.length >= 8) strength += 25;
+            if (password.length >= 12) strength += 25;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength += 25;
+            if (/\d/.test(password)) strength += 15;
+            if (/[^a-zA-Z0-9]/.test(password)) strength += 10;
+
+            return Math.min(strength, 100);
+        }
+
+        passwordInput.addEventListener('input', () => {
+            const password = passwordInput.value;
+            const strength = checkPasswordStrength(password);
+
+            strengthBar.style.width = strength + '%';
+
+            if (strength === 0) {
+                strengthBar.className = 'h-full transition-all duration-300';
+                strengthText.textContent = '';
+            } else if (strength < 40) {
+                strengthBar.className = 'h-full transition-all duration-300 bg-error';
+                strengthText.textContent = 'Weak';
+                strengthText.className = 'text-xs text-error';
+            } else if (strength < 70) {
+                strengthBar.className = 'h-full transition-all duration-300 bg-warning';
+                strengthText.textContent = 'Fair';
+                strengthText.className = 'text-xs text-warning-800';
+            } else {
+                strengthBar.className = 'h-full transition-all duration-300 bg-success';
+                strengthText.textContent = 'Strong';
+                strengthText.className = 'text-xs text-success';
+            }
+        });
+
+        // Form Validation
+        const registerForm = document.getElementById('register-form');
+        const fullnameInput = document.getElementById('fullname');
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone');
+        const addressInput = document.getElementById('address');
+        const confirmPasswordInput = document.getElementById('confirm-password');
+        const termsCheckbox = document.getElementById('terms');
+
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+
+        function validatePhone(phone) {
+            const re = /^[\d\s\-\+\(\)]+$/;
+            return re.test(phone) && phone.replace(/\D/g, '').length >= 10;
+        }
+
+        function showError(input, errorElement) {
+            input.classList.add('border-error');
+            errorElement.classList.remove('hidden');
+        }
+
+        function hideError(input, errorElement) {
+            input.classList.remove('border-error');
+            errorElement.classList.add('hidden');
+        }
+
+        // Real-time validation
+        fullnameInput.addEventListener('blur', () => {
+            const error = document.getElementById('fullname-error');
+            if (fullnameInput.value.trim().length < 2) {
+                showError(fullnameInput, error);
+            } else {
+                hideError(fullnameInput, error);
+            }
+        });
+
+        emailInput.addEventListener('blur', () => {
+            const error = document.getElementById('email-error');
+            if (!validateEmail(emailInput.value)) {
+                showError(emailInput, error);
+            } else {
+                hideError(emailInput, error);
+            }
+        });
+
+        phoneInput.addEventListener('blur', () => {
+            const error = document.getElementById('phone-error');
+            if (!validatePhone(phoneInput.value)) {
+                showError(phoneInput, error);
+            } else {
+                hideError(phoneInput, error);
+            }
+        });
+
+        addressInput.addEventListener('blur', () => {
+            const error = document.getElementById('address-error');
+            if (addressInput.value.trim().length < 10) {
+                showError(addressInput, error);
+            } else {
+                hideError(addressInput, error);
+            }
+        });
+
+        passwordInput.addEventListener('blur', () => {
+            const error = document.getElementById('password-error');
+            if (passwordInput.value.length < 8) {
+                showError(passwordInput, error);
+            } else {
+                hideError(passwordInput, error);
+            }
+        });
+
+        confirmPasswordInput.addEventListener('blur', () => {
+            const error = document.getElementById('confirm-password-error');
+            if (confirmPasswordInput.value !== passwordInput.value) {
+                showError(confirmPasswordInput, error);
+            } else {
+                hideError(confirmPasswordInput, error);
+            }
+        });
+
+        // Clear errors on input
+        [fullnameInput, emailInput, phoneInput, addressInput, passwordInput, confirmPasswordInput].forEach(input => {
+            input.addEventListener('input', () => {
+                const errorId = input.id + '-error';
+                const error = document.getElementById(errorId);
+                if (error && !error.classList.contains('hidden')) {
+                    hideError(input, error);
+                }
+            });
+        });
+
+        // Form Submission
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            let isValid = true;
+
+            // Validate full name
+            const fullnameError = document.getElementById('fullname-error');
+            if (fullnameInput.value.trim().length < 2) {
+                showError(fullnameInput, fullnameError);
+                isValid = false;
+            }
+
+            // Validate email
+            const emailError = document.getElementById('email-error');
+            if (!validateEmail(emailInput.value)) {
+                showError(emailInput, emailError);
+                isValid = false;
+            }
+
+            // Validate phone
+            const phoneError = document.getElementById('phone-error');
+            if (!validatePhone(phoneInput.value)) {
+                showError(phoneInput, phoneError);
+                isValid = false;
+            }
+
+            // Validate address
+            const addressError = document.getElementById('address-error');
+            if (addressInput.value.trim().length < 10) {
+                showError(addressInput, addressError);
+                isValid = false;
+            }
+
+            // Validate password
+            const passwordError = document.getElementById('password-error');
+            if (passwordInput.value.length < 8) {
+                showError(passwordInput, passwordError);
+                isValid = false;
+            }
+
+            // Validate confirm password
+            const confirmPasswordError = document.getElementById('confirm-password-error');
+            if (confirmPasswordInput.value !== passwordInput.value) {
+                showError(confirmPasswordInput, confirmPasswordError);
+                isValid = false;
+            }
+
+            // Validate terms
+            const termsError = document.getElementById('terms-error');
+            if (!termsCheckbox.checked) {
+                termsError.classList.remove('hidden');
+                isValid = false;
+            } else {
+                termsError.classList.add('hidden');
+            }
+
+            if (!isValid) {
+                showFlashMessage('Please correct the errors in the form', 'error');
+                return;
+            }
+
+            // Mock registration logic
+            showFlashMessage('Account created successfully! Redirecting to login...', 'success');
+            
+            // Simulate account creation and redirect
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        });
+
+        // Auto-hide flash messages after 5 seconds
+        setInterval(() => {
+            const flashMessage = document.getElementById('flash-message');
+            if (!flashMessage.classList.contains('hidden')) {
+                setTimeout(closeFlashMessage, 5000);
+            }
+        }, 100);
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>

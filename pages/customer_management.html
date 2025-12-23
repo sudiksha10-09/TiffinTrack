@@ -1,0 +1,1298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Customer Management - Manage and view all customer accounts and service details">
+    <title>Customer Management - TiffinTrack</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Ftiffintrac6995back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.12"></script>
+  <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2"></script>
+  </head>
+<body class="bg-background min-h-screen flex flex-col">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-surface border-b border-border sticky top-0 z-navigation shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="admin_dashboard.html" class="flex items-center space-x-2">
+                        <svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="48" height="48" rx="12" fill="#E67E22"/>
+                            <path d="M24 12C18.48 12 14 16.48 14 22C14 27.52 18.48 32 24 32C29.52 32 34 27.52 34 22C34 16.48 29.52 12 24 12ZM24 28C20.69 28 18 25.31 18 22C18 18.69 20.69 16 24 16C27.31 16 30 18.69 30 22C30 25.31 27.31 28 24 28Z" fill="white"/>
+                            <path d="M24 36C18.48 36 14 34.21 14 32V36H34V32C34 34.21 29.52 36 24 36Z" fill="white"/>
+                        </svg>
+                        <span class="text-xl font-heading font-bold text-primary">TiffinTrack</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="admin_dashboard.html" class="text-text-secondary hover:text-primary transition-colors font-medium">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="customer_management.html" class="text-primary font-semibold">
+                        <i class="fas fa-users mr-2"></i>
+                        Customers
+                    </a>
+                    <div class="flex items-center space-x-3 pl-4 border-l border-border">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user-shield text-primary"></i>
+                            </div>
+                            <div class="hidden lg:block">
+                                <p class="text-sm font-medium text-text-primary">Admin User</p>
+                                <p class="text-xs text-text-tertiary">Administrator</p>
+                            </div>
+                        </div>
+                        <button onclick="handleLogout()" class="btn btn-outline text-sm h-10 px-4" aria-label="Logout">
+                            <i class="fas fa-sign-out-alt mr-2"></i>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden touch-target text-text-primary hover:text-primary transition-colors" aria-label="Toggle mobile menu">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-surface">
+            <div class="px-4 py-4 space-y-3">
+                <a href="admin_dashboard.html" class="flex items-center space-x-3 p-3 rounded-lg text-text-secondary hover:bg-primary-50 hover:text-primary transition-colors">
+                    <i class="fas fa-home text-xl w-6"></i>
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a href="customer_management.html" class="flex items-center space-x-3 p-3 rounded-lg bg-primary-50 text-primary">
+                    <i class="fas fa-users text-xl w-6"></i>
+                    <span class="font-semibold">Customers</span>
+                </a>
+                <div class="pt-3 border-t border-border">
+                    <div class="flex items-center space-x-3 mb-3">
+                        <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user-shield text-primary"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-text-primary">Admin User</p>
+                            <p class="text-xs text-text-tertiary">Administrator</p>
+                        </div>
+                    </div>
+                    <button onclick="handleLogout()" class="btn btn-outline w-full">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Logout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            
+            <!-- Page Header -->
+            <div class="mb-6 sm:mb-8">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div>
+                        <h1 class="text-3xl sm:text-4xl font-heading font-bold text-text-primary mb-2">Customer Management</h1>
+                        <p class="text-text-secondary">Manage and view all customer accounts and service details</p>
+                    </div>
+                    <button onclick="openAddCustomerModal()" class="btn btn-primary">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Add Customer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Flash Message Area -->
+            <div id="flash-message" class="hidden mb-6 p-4 rounded-lg border" role="alert">
+                <div class="flex items-start">
+                    <i id="flash-icon" class="fas fa-info-circle mt-0.5 mr-3"></i>
+                    <div class="flex-1">
+                        <p id="flash-text" class="text-sm font-medium"></p>
+                    </div>
+                    <button onclick="closeFlashMessage()" class="ml-3 touch-target" aria-label="Close message">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                <!-- Total Customers -->
+                <div class="card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-text-tertiary text-sm mb-1">Total Customers</p>
+                            <p class="text-3xl font-bold text-text-primary" id="total-customers">0</p>
+                        </div>
+                        <div class="w-14 h-14 bg-primary-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-users text-primary text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Active Subscriptions -->
+                <div class="card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-text-tertiary text-sm mb-1">Active Subscriptions</p>
+                            <p class="text-3xl font-bold text-success" id="active-subscriptions">0</p>
+                        </div>
+                        <div class="w-14 h-14 bg-success-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-check-circle text-success text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paused Services -->
+                <div class="card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-text-tertiary text-sm mb-1">Paused Services</p>
+                            <p class="text-3xl font-bold text-warning" id="paused-services">0</p>
+                        </div>
+                        <div class="w-14 h-14 bg-warning-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-pause-circle text-warning text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Payments -->
+                <div class="card">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-text-tertiary text-sm mb-1">Pending Payments</p>
+                            <p class="text-3xl font-bold text-error" id="pending-payments">0</p>
+                        </div>
+                        <div class="w-14 h-14 bg-error-100 rounded-xl flex items-center justify-center">
+                            <i class="fas fa-exclamation-circle text-error text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters and Search Section -->
+            <div class="card mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <!-- Search -->
+                    <div class="lg:col-span-2">
+                        <label for="search-input" class="block text-sm font-medium text-text-primary mb-2">
+                            <i class="fas fa-search mr-2"></i>
+                            Search Customers
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="text" 
+                                id="search-input"
+                                class="input pl-10" 
+                                placeholder="Search by name, email, or phone..."
+                                oninput="filterCustomers()"
+                            >
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-text-tertiary"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subscription Status Filter -->
+                    <div>
+                        <label for="status-filter" class="block text-sm font-medium text-text-primary mb-2">
+                            <i class="fas fa-filter mr-2"></i>
+                            Subscription Status
+                        </label>
+                        <select id="status-filter" class="input" onchange="filterCustomers()">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="paused">Paused</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <!-- Payment Status Filter -->
+                    <div>
+                        <label for="payment-filter" class="block text-sm font-medium text-text-primary mb-2">
+                            <i class="fas fa-credit-card mr-2"></i>
+                            Payment Status
+                        </label>
+                        <select id="payment-filter" class="input" onchange="filterCustomers()">
+                            <option value="all">All Payments</option>
+                            <option value="paid">Paid</option>
+                            <option value="pending">Pending</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Additional Filters Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Delivery Area Filter -->
+                    <div>
+                        <label for="area-filter" class="block text-sm font-medium text-text-primary mb-2">
+                            <i class="fas fa-map-marker-alt mr-2"></i>
+                            Delivery Area
+                        </label>
+                        <select id="area-filter" class="input" onchange="filterCustomers()">
+                            <option value="all">All Areas</option>
+                            <option value="downtown">Downtown</option>
+                            <option value="suburbs">Suburbs</option>
+                            <option value="eastside">Eastside</option>
+                            <option value="westside">Westside</option>
+                        </select>
+                    </div>
+
+                    <!-- Dietary Preference Filter -->
+                    <div>
+                        <label for="diet-filter" class="block text-sm font-medium text-text-primary mb-2">
+                            <i class="fas fa-leaf mr-2"></i>
+                            Dietary Preference
+                        </label>
+                        <select id="diet-filter" class="input" onchange="filterCustomers()">
+                            <option value="all">All Preferences</option>
+                            <option value="vegetarian">Vegetarian</option>
+                            <option value="vegan">Vegan</option>
+                            <option value="non-vegetarian">Non-Vegetarian</option>
+                            <option value="gluten-free">Gluten-Free</option>
+                        </select>
+                    </div>
+
+                    <!-- Reset Filters Button -->
+                    <div class="flex items-end">
+                        <button onclick="resetFilters()" class="btn btn-outline w-full">
+                            <i class="fas fa-redo mr-2"></i>
+                            Reset Filters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Results Count -->
+                <div class="mt-4 pt-4 border-t border-border">
+                    <p class="text-sm text-text-secondary">
+                        Showing <span id="results-count" class="font-semibold text-text-primary">0</span> customers
+                    </p>
+                </div>
+            </div>
+
+            <!-- Bulk Actions Bar (Hidden by default) -->
+            <div id="bulk-actions-bar" class="hidden card mb-6 bg-primary-50 border-primary-200">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div class="flex items-center space-x-3">
+                        <i class="fas fa-check-square text-primary text-xl"></i>
+                        <span class="font-medium text-text-primary">
+                            <span id="selected-count">0</span> customers selected
+                        </span>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="bulkAction('email')" class="btn btn-outline text-sm h-10 px-4">
+                            <i class="fas fa-envelope mr-2"></i>
+                            Send Email
+                        </button>
+                        <button onclick="bulkAction('pause')" class="btn btn-outline text-sm h-10 px-4">
+                            <i class="fas fa-pause mr-2"></i>
+                            Pause Service
+                        </button>
+                        <button onclick="bulkAction('activate')" class="btn btn-outline text-sm h-10 px-4">
+                            <i class="fas fa-play mr-2"></i>
+                            Activate Service
+                        </button>
+                        <button onclick="clearSelection()" class="btn btn-outline text-sm h-10 px-4 text-error border-error hover:bg-error hover:text-white">
+                            <i class="fas fa-times mr-2"></i>
+                            Clear Selection
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Table - Desktop View -->
+            <div class="hidden lg:block card overflow-hidden">
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th class="w-12">
+                                    <input 
+                                        type="checkbox" 
+                                        id="select-all"
+                                        class="w-5 h-5 text-primary border-border rounded cursor-pointer"
+                                        onchange="toggleSelectAll()"
+                                    >
+                                </th>
+                                <th>Customer</th>
+                                <th>Subscription</th>
+                                <th>Delivery Status</th>
+                                <th>Payment</th>
+                                <th>Dietary</th>
+                                <th>Last Active</th>
+                                <th class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customer-table-body">
+                            <!-- Customer rows will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Customer Cards - Mobile View -->
+            <div class="lg:hidden space-y-4" id="customer-cards-container">
+                <!-- Customer cards will be inserted here by JavaScript -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty-state" class="hidden card text-center py-12">
+                <div class="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-users text-primary text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-semibold text-text-primary mb-2">No Customers Found</h3>
+                <p class="text-text-secondary mb-6">Try adjusting your filters or add a new customer to get started.</p>
+                <button onclick="resetFilters()" class="btn btn-primary">
+                    <i class="fas fa-redo mr-2"></i>
+                    Reset Filters
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Customer Details Modal -->
+    <div id="customer-modal" class="hidden modal-overlay" onclick="closeModalOnOverlay(event)">
+        <div class="modal-content max-w-4xl" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-border">
+                <h2 class="text-2xl font-heading font-bold text-text-primary">Customer Details</h2>
+                <button onclick="closeCustomerModal()" class="touch-target text-text-tertiary hover:text-text-primary transition-colors" aria-label="Close modal">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Tabs -->
+            <div class="border-b border-border">
+                <div class="flex overflow-x-auto">
+                    <button onclick="switchTab('info')" class="tab-button px-6 py-4 font-medium transition-colors border-b-2 border-primary text-primary" data-tab="info">
+                        <i class="fas fa-user mr-2"></i>
+                        Information
+                    </button>
+                    <button onclick="switchTab('orders')" class="tab-button px-6 py-4 font-medium transition-colors border-b-2 border-transparent text-text-secondary hover:text-primary" data-tab="orders">
+                        <i class="fas fa-shopping-bag mr-2"></i>
+                        Order History
+                    </button>
+                    <button onclick="switchTab('payments')" class="tab-button px-6 py-4 font-medium transition-colors border-b-2 border-transparent text-text-secondary hover:text-primary" data-tab="payments">
+                        <i class="fas fa-credit-card mr-2"></i>
+                        Payments
+                    </button>
+                    <button onclick="switchTab('preferences')" class="tab-button px-6 py-4 font-medium transition-colors border-b-2 border-transparent text-text-secondary hover:text-primary" data-tab="preferences">
+                        <i class="fas fa-cog mr-2"></i>
+                        Preferences
+                    </button>
+                </div>
+            </div>
+
+            <!-- Modal Content -->
+            <div class="p-6 max-h-[60vh] overflow-y-auto">
+                <!-- Information Tab -->
+                <div id="tab-info" class="tab-content">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Full Name</label>
+                            <input type="text" id="modal-name" class="input" placeholder="Customer name">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Email Address</label>
+                            <input type="email" id="modal-email" class="input" placeholder="email@example.com">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Phone Number</label>
+                            <input type="tel" id="modal-phone" class="input" placeholder="+1 (555) 000-0000">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Subscription Type</label>
+                            <select id="modal-subscription" class="input">
+                                <option value="monthly">Monthly</option>
+                                <option value="weekly">Weekly</option>
+                                <option value="daily">Daily</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm font-medium text-text-primary mb-2">Delivery Address</label>
+                            <textarea id="modal-address" class="input min-h-[80px]" placeholder="Enter delivery address"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Delivery Area</label>
+                            <select id="modal-area" class="input">
+                                <option value="downtown">Downtown</option>
+                                <option value="suburbs">Suburbs</option>
+                                <option value="eastside">Eastside</option>
+                                <option value="westside">Westside</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Account Status</label>
+                            <select id="modal-status" class="input">
+                                <option value="active">Active</option>
+                                <option value="paused">Paused</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order History Tab -->
+                <div id="tab-orders" class="tab-content hidden">
+                    <div class="space-y-4" id="order-history-list">
+                        <!-- Order history items will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Payments Tab -->
+                <div id="tab-payments" class="tab-content hidden">
+                    <div class="space-y-4" id="payment-history-list">
+                        <!-- Payment history items will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Preferences Tab -->
+                <div id="tab-preferences" class="tab-content hidden">
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Dietary Preference</label>
+                            <select id="modal-diet" class="input">
+                                <option value="vegetarian">Vegetarian</option>
+                                <option value="vegan">Vegan</option>
+                                <option value="non-vegetarian">Non-Vegetarian</option>
+                                <option value="gluten-free">Gluten-Free</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Spice Level</label>
+                            <select id="modal-spice" class="input">
+                                <option value="mild">Mild</option>
+                                <option value="medium">Medium</option>
+                                <option value="hot">Hot</option>
+                                <option value="extra-hot">Extra Hot</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Allergies & Restrictions</label>
+                            <textarea id="modal-allergies" class="input min-h-[100px]" placeholder="List any allergies or dietary restrictions"></textarea>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-text-primary mb-2">Special Instructions</label>
+                            <textarea id="modal-instructions" class="input min-h-[100px]" placeholder="Any special delivery or meal preparation instructions"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex flex-col sm:flex-row justify-end gap-3 p-6 border-t border-border">
+                <button onclick="closeCustomerModal()" class="btn btn-outline">
+                    <i class="fas fa-times mr-2"></i>
+                    Cancel
+                </button>
+                <button onclick="saveCustomerDetails()" class="btn btn-primary">
+                    <i class="fas fa-save mr-2"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-surface border-t border-border mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-sm text-text-secondary text-center sm:text-left">
+                    © 2025 TiffinTrack. All Rights Reserved.
+                </p>
+                <div class="flex items-center space-x-6">
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Privacy Policy
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Terms of Service
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Mock customer data
+        const mockCustomers = [
+            {
+                id: 1,
+                name: "Sarah Johnson",
+                email: "sarah.johnson@email.com",
+                phone: "+1 (555) 123-4567",
+                subscription: "monthly",
+                status: "active",
+                payment: "paid",
+                area: "downtown",
+                diet: "vegetarian",
+                address: "123 Main Street, Apt 4B, Downtown",
+                lastActive: "2025-12-23",
+                spice: "medium",
+                allergies: "None",
+                instructions: "Please ring doorbell twice"
+            },
+            {
+                id: 2,
+                name: "Michael Chen",
+                email: "michael.chen@email.com",
+                phone: "+1 (555) 234-5678",
+                subscription: "weekly",
+                status: "active",
+                payment: "paid",
+                area: "suburbs",
+                diet: "non-vegetarian",
+                address: "456 Oak Avenue, Suburbs",
+                lastActive: "2025-12-22",
+                spice: "hot",
+                allergies: "Peanuts",
+                instructions: "Leave at front door"
+            },
+            {
+                id: 3,
+                name: "Emily Rodriguez",
+                email: "emily.rodriguez@email.com",
+                phone: "+1 (555) 345-6789",
+                subscription: "monthly",
+                status: "paused",
+                payment: "pending",
+                area: "eastside",
+                diet: "vegan",
+                address: "789 Pine Road, Eastside",
+                lastActive: "2025-12-20",
+                spice: "mild",
+                allergies: "Dairy, Eggs",
+                instructions: "Call upon arrival"
+            },
+            {
+                id: 4,
+                name: "David Kim",
+                email: "david.kim@email.com",
+                phone: "+1 (555) 456-7890",
+                subscription: "daily",
+                status: "active",
+                payment: "paid",
+                area: "westside",
+                diet: "gluten-free",
+                address: "321 Elm Street, Westside",
+                lastActive: "2025-12-23",
+                spice: "medium",
+                allergies: "Gluten, Wheat",
+                instructions: "Contactless delivery preferred"
+            },
+            {
+                id: 5,
+                name: "Jessica Martinez",
+                email: "jessica.martinez@email.com",
+                phone: "+1 (555) 567-8901",
+                subscription: "weekly",
+                status: "active",
+                payment: "overdue",
+                area: "downtown",
+                diet: "vegetarian",
+                address: "654 Maple Drive, Downtown",
+                lastActive: "2025-12-21",
+                spice: "extra-hot",
+                allergies: "None",
+                instructions: "Buzz apartment 12C"
+            },
+            {
+                id: 6,
+                name: "Robert Taylor",
+                email: "robert.taylor@email.com",
+                phone: "+1 (555) 678-9012",
+                subscription: "monthly",
+                status: "cancelled",
+                payment: "paid",
+                area: "suburbs",
+                diet: "non-vegetarian",
+                address: "987 Cedar Lane, Suburbs",
+                lastActive: "2025-12-15",
+                spice: "mild",
+                allergies: "Shellfish",
+                instructions: "Gate code: 1234"
+            },
+            {
+                id: 7,
+                name: "Amanda White",
+                email: "amanda.white@email.com",
+                phone: "+1 (555) 789-0123",
+                subscription: "daily",
+                status: "active",
+                payment: "paid",
+                area: "eastside",
+                diet: "vegan",
+                address: "147 Birch Avenue, Eastside",
+                lastActive: "2025-12-23",
+                spice: "medium",
+                allergies: "Soy",
+                instructions: "Leave with doorman"
+            },
+            {
+                id: 8,
+                name: "James Anderson",
+                email: "james.anderson@email.com",
+                phone: "+1 (555) 890-1234",
+                subscription: "weekly",
+                status: "paused",
+                payment: "paid",
+                area: "westside",
+                diet: "non-vegetarian",
+                address: "258 Willow Court, Westside",
+                lastActive: "2025-12-18",
+                spice: "hot",
+                allergies: "None",
+                instructions: "Ring bell once"
+            }
+        ];
+
+        let filteredCustomers = [...mockCustomers];
+        let selectedCustomers = new Set();
+        let currentCustomer = null;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatistics();
+            renderCustomers();
+            updateResultsCount();
+        });
+
+        // Mobile menu toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        // Update statistics
+        function updateStatistics() {
+            const totalCustomers = mockCustomers.length;
+            const activeSubscriptions = mockCustomers.filter(c => c.status === 'active').length;
+            const pausedServices = mockCustomers.filter(c => c.status === 'paused').length;
+            const pendingPayments = mockCustomers.filter(c => c.payment === 'pending' || c.payment === 'overdue').length;
+
+            document.getElementById('total-customers').textContent = totalCustomers;
+            document.getElementById('active-subscriptions').textContent = activeSubscriptions;
+            document.getElementById('paused-services').textContent = pausedServices;
+            document.getElementById('pending-payments').textContent = pendingPayments;
+        }
+
+        // Filter customers
+        function filterCustomers() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const statusFilter = document.getElementById('status-filter').value;
+            const paymentFilter = document.getElementById('payment-filter').value;
+            const areaFilter = document.getElementById('area-filter').value;
+            const dietFilter = document.getElementById('diet-filter').value;
+
+            filteredCustomers = mockCustomers.filter(customer => {
+                const matchesSearch = customer.name.toLowerCase().includes(searchTerm) ||
+                                    customer.email.toLowerCase().includes(searchTerm) ||
+                                    customer.phone.includes(searchTerm);
+                const matchesStatus = statusFilter === 'all' || customer.status === statusFilter;
+                const matchesPayment = paymentFilter === 'all' || customer.payment === paymentFilter;
+                const matchesArea = areaFilter === 'all' || customer.area === areaFilter;
+                const matchesDiet = dietFilter === 'all' || customer.diet === dietFilter;
+
+                return matchesSearch && matchesStatus && matchesPayment && matchesArea && matchesDiet;
+            });
+
+            renderCustomers();
+            updateResultsCount();
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('status-filter').value = 'all';
+            document.getElementById('payment-filter').value = 'all';
+            document.getElementById('area-filter').value = 'all';
+            document.getElementById('diet-filter').value = 'all';
+            filterCustomers();
+        }
+
+        // Update results count
+        function updateResultsCount() {
+            document.getElementById('results-count').textContent = filteredCustomers.length;
+            
+            const emptyState = document.getElementById('empty-state');
+            const tableContainer = document.querySelector('.hidden.lg\\:block');
+            const cardsContainer = document.getElementById('customer-cards-container');
+
+            if (filteredCustomers.length === 0) {
+                emptyState.classList.remove('hidden');
+                if (tableContainer) tableContainer.classList.add('hidden');
+                cardsContainer.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                if (tableContainer) tableContainer.classList.remove('hidden');
+                cardsContainer.classList.remove('hidden');
+            }
+        }
+
+        // Render customers
+        function renderCustomers() {
+            renderDesktopTable();
+            renderMobileCards();
+        }
+
+        // Render desktop table
+        function renderDesktopTable() {
+            const tbody = document.getElementById('customer-table-body');
+            tbody.innerHTML = '';
+
+            filteredCustomers.forEach(customer => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <input 
+                            type="checkbox" 
+                            class="customer-checkbox w-5 h-5 text-primary border-border rounded cursor-pointer"
+                            data-customer-id="${customer.id}"
+                            onchange="toggleCustomerSelection(${customer.id})"
+                            ${selectedCustomers.has(customer.id) ? 'checked' : ''}
+                        >
+                    </td>
+                    <td>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-primary font-semibold">${customer.name.charAt(0)}</span>
+                            </div>
+                            <div>
+                                <p class="font-medium text-text-primary">${customer.name}</p>
+                                <p class="text-sm text-text-tertiary">${customer.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge ${getSubscriptionBadgeClass(customer.subscription)}">
+                            ${capitalizeFirst(customer.subscription)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${getStatusBadgeClass(customer.status)}">
+                            <i class="fas ${getStatusIcon(customer.status)} mr-1"></i>
+                            ${capitalizeFirst(customer.status)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${getPaymentBadgeClass(customer.payment)}">
+                            <i class="fas ${getPaymentIcon(customer.payment)} mr-1"></i>
+                            ${capitalizeFirst(customer.payment)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="text-sm text-text-secondary">
+                            <i class="fas fa-leaf mr-1"></i>
+                            ${capitalizeFirst(customer.diet)}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="text-sm text-text-secondary">${formatDate(customer.lastActive)}</span>
+                    </td>
+                    <td>
+                        <div class="flex items-center justify-center space-x-2">
+                            <button 
+                                onclick="openCustomerDetails(${customer.id})"
+                                class="touch-target text-primary hover:text-primary-700 transition-colors"
+                                aria-label="Edit customer"
+                            >
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button 
+                                onclick="viewOrderHistory(${customer.id})"
+                                class="touch-target text-secondary hover:text-secondary-700 transition-colors"
+                                aria-label="View orders"
+                            >
+                                <i class="fas fa-shopping-bag"></i>
+                            </button>
+                            <button 
+                                onclick="sendEmail(${customer.id})"
+                                class="touch-target text-accent hover:text-accent-700 transition-colors"
+                                aria-label="Send email"
+                            >
+                                <i class="fas fa-envelope"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Render mobile cards
+        function renderMobileCards() {
+            const container = document.getElementById('customer-cards-container');
+            container.innerHTML = '';
+
+            filteredCustomers.forEach(customer => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3 flex-1">
+                            <input 
+                                type="checkbox" 
+                                class="customer-checkbox w-5 h-5 text-primary border-border rounded cursor-pointer flex-shrink-0"
+                                data-customer-id="${customer.id}"
+                                onchange="toggleCustomerSelection(${customer.id})"
+                                ${selectedCustomers.has(customer.id) ? 'checked' : ''}
+                            >
+                            <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <span class="text-primary font-semibold text-lg">${customer.name.charAt(0)}</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-text-primary truncate">${customer.name}</p>
+                                <p class="text-sm text-text-tertiary truncate">${customer.email}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 mb-4">
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-text-secondary">Subscription:</span>
+                            <span class="badge ${getSubscriptionBadgeClass(customer.subscription)}">
+                                ${capitalizeFirst(customer.subscription)}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-text-secondary">Status:</span>
+                            <span class="badge ${getStatusBadgeClass(customer.status)}">
+                                <i class="fas ${getStatusIcon(customer.status)} mr-1"></i>
+                                ${capitalizeFirst(customer.status)}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-text-secondary">Payment:</span>
+                            <span class="badge ${getPaymentBadgeClass(customer.payment)}">
+                                <i class="fas ${getPaymentIcon(customer.payment)} mr-1"></i>
+                                ${capitalizeFirst(customer.payment)}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-text-secondary">Dietary:</span>
+                            <span class="text-sm text-text-primary">
+                                <i class="fas fa-leaf mr-1"></i>
+                                ${capitalizeFirst(customer.diet)}
+                            </span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-sm text-text-secondary">Last Active:</span>
+                            <span class="text-sm text-text-primary">${formatDate(customer.lastActive)}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 pt-4 border-t border-border">
+                        <button 
+                            onclick="openCustomerDetails(${customer.id})"
+                            class="btn btn-primary flex-1 text-sm h-10"
+                        >
+                            <i class="fas fa-edit mr-2"></i>
+                            Edit
+                        </button>
+                        <button 
+                            onclick="viewOrderHistory(${customer.id})"
+                            class="btn btn-outline flex-1 text-sm h-10"
+                        >
+                            <i class="fas fa-shopping-bag mr-2"></i>
+                            Orders
+                        </button>
+                        <button 
+                            onclick="sendEmail(${customer.id})"
+                            class="btn btn-outline text-sm h-10 px-4"
+                            aria-label="Send email"
+                        >
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Helper functions for styling
+        function getSubscriptionBadgeClass(subscription) {
+            const classes = {
+                'monthly': 'bg-primary-100 text-primary-800',
+                'weekly': 'bg-secondary-100 text-secondary-800',
+                'daily': 'bg-accent-100 text-accent-800'
+            };
+            return classes[subscription] || 'bg-gray-100 text-gray-800';
+        }
+
+        function getStatusBadgeClass(status) {
+            const classes = {
+                'active': 'badge-success',
+                'paused': 'badge-warning',
+                'cancelled': 'badge-error'
+            };
+            return classes[status] || '';
+        }
+
+        function getStatusIcon(status) {
+            const icons = {
+                'active': 'fa-check-circle',
+                'paused': 'fa-pause-circle',
+                'cancelled': 'fa-times-circle'
+            };
+            return icons[status] || 'fa-circle';
+        }
+
+        function getPaymentBadgeClass(payment) {
+            const classes = {
+                'paid': 'badge-success',
+                'pending': 'badge-warning',
+                'overdue': 'badge-error'
+            };
+            return classes[payment] || '';
+        }
+
+        function getPaymentIcon(payment) {
+            const icons = {
+                'paid': 'fa-check-circle',
+                'pending': 'fa-clock',
+                'overdue': 'fa-exclamation-circle'
+            };
+            return icons[payment] || 'fa-circle';
+        }
+
+        function capitalizeFirst(str) {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const today = new Date();
+            const diffTime = today - date;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Selection management
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('select-all');
+            const checkboxes = document.querySelectorAll('.customer-checkbox');
+            
+            if (selectAll.checked) {
+                filteredCustomers.forEach(customer => selectedCustomers.add(customer.id));
+                checkboxes.forEach(cb => cb.checked = true);
+            } else {
+                selectedCustomers.clear();
+                checkboxes.forEach(cb => cb.checked = false);
+            }
+            
+            updateBulkActionsBar();
+        }
+
+        function toggleCustomerSelection(customerId) {
+            if (selectedCustomers.has(customerId)) {
+                selectedCustomers.delete(customerId);
+            } else {
+                selectedCustomers.add(customerId);
+            }
+            
+            updateBulkActionsBar();
+            updateSelectAllCheckbox();
+        }
+
+        function updateSelectAllCheckbox() {
+            const selectAll = document.getElementById('select-all');
+            const visibleCustomerIds = filteredCustomers.map(c => c.id);
+            const allVisible = visibleCustomerIds.every(id => selectedCustomers.has(id));
+            selectAll.checked = allVisible && visibleCustomerIds.length > 0;
+        }
+
+        function updateBulkActionsBar() {
+            const bulkActionsBar = document.getElementById('bulk-actions-bar');
+            const selectedCount = document.getElementById('selected-count');
+            
+            if (selectedCustomers.size > 0) {
+                bulkActionsBar.classList.remove('hidden');
+                selectedCount.textContent = selectedCustomers.size;
+            } else {
+                bulkActionsBar.classList.add('hidden');
+            }
+        }
+
+        function clearSelection() {
+            selectedCustomers.clear();
+            document.querySelectorAll('.customer-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('select-all').checked = false;
+            updateBulkActionsBar();
+        }
+
+        // Bulk actions
+        function bulkAction(action) {
+            const count = selectedCustomers.size;
+            let message = '';
+            
+            switch(action) {
+                case 'email':
+                    message = `Email sent to ${count} customer${count > 1 ? 's' : ''}`;
+                    break;
+                case 'pause':
+                    message = `Service paused for ${count} customer${count > 1 ? 's' : ''}`;
+                    break;
+                case 'activate':
+                    message = `Service activated for ${count} customer${count > 1 ? 's' : ''}`;
+                    break;
+            }
+            
+            showFlashMessage(message, 'success');
+            clearSelection();
+        }
+
+        // Customer details modal
+        function openCustomerDetails(customerId) {
+            currentCustomer = mockCustomers.find(c => c.id === customerId);
+            if (!currentCustomer) return;
+
+            // Populate form fields
+            document.getElementById('modal-name').value = currentCustomer.name;
+            document.getElementById('modal-email').value = currentCustomer.email;
+            document.getElementById('modal-phone').value = currentCustomer.phone;
+            document.getElementById('modal-subscription').value = currentCustomer.subscription;
+            document.getElementById('modal-address').value = currentCustomer.address;
+            document.getElementById('modal-area').value = currentCustomer.area;
+            document.getElementById('modal-status').value = currentCustomer.status;
+            document.getElementById('modal-diet').value = currentCustomer.diet;
+            document.getElementById('modal-spice').value = currentCustomer.spice;
+            document.getElementById('modal-allergies').value = currentCustomer.allergies;
+            document.getElementById('modal-instructions').value = currentCustomer.instructions;
+
+            // Load order history
+            loadOrderHistory(customerId);
+            
+            // Load payment history
+            loadPaymentHistory(customerId);
+
+            // Show modal
+            document.getElementById('customer-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCustomerModal() {
+            document.getElementById('customer-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+            currentCustomer = null;
+        }
+
+        function closeModalOnOverlay(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeCustomerModal();
+            }
+        }
+
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('border-primary', 'text-primary');
+                btn.classList.add('border-transparent', 'text-text-secondary');
+            });
+            
+            const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
+            activeTab.classList.remove('border-transparent', 'text-text-secondary');
+            activeTab.classList.add('border-primary', 'text-primary');
+
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        }
+
+        function loadOrderHistory(customerId) {
+            const orderHistoryList = document.getElementById('order-history-list');
+            
+            // Mock order history data
+            const orders = [
+                { date: '2025-12-23', items: 'Dal Makhani, Roti, Rice', amount: '$12.99', status: 'delivered' },
+                { date: '2025-12-22', items: 'Paneer Tikka, Naan, Salad', amount: '$14.99', status: 'delivered' },
+                { date: '2025-12-21', items: 'Chole Bhature, Lassi', amount: '$11.99', status: 'delivered' },
+                { date: '2025-12-20', items: 'Biryani, Raita, Papad', amount: '$15.99', status: 'delivered' }
+            ];
+
+            orderHistoryList.innerHTML = orders.map(order => `
+                <div class="flex items-center justify-between p-4 bg-background rounded-lg border border-border">
+                    <div class="flex-1">
+                        <p class="font-medium text-text-primary mb-1">${order.items}</p>
+                        <p class="text-sm text-text-tertiary">${formatDate(order.date)}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold text-text-primary mb-1">${order.amount}</p>
+                        <span class="badge badge-success text-xs">
+                            <i class="fas fa-check mr-1"></i>
+                            ${capitalizeFirst(order.status)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadPaymentHistory(customerId) {
+            const paymentHistoryList = document.getElementById('payment-history-list');
+            
+            // Mock payment history data
+            const payments = [
+                { date: '2025-12-01', amount: '$299.99', method: 'Credit Card', status: 'paid' },
+                { date: '2025-11-01', amount: '$299.99', method: 'Credit Card', status: 'paid' },
+                { date: '2025-10-01', amount: '$299.99', method: 'Debit Card', status: 'paid' }
+            ];
+
+            paymentHistoryList.innerHTML = payments.map(payment => `
+                <div class="flex items-center justify-between p-4 bg-background rounded-lg border border-border">
+                    <div class="flex-1">
+                        <p class="font-medium text-text-primary mb-1">${payment.method}</p>
+                        <p class="text-sm text-text-tertiary">${formatDate(payment.date)}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-semibold text-text-primary mb-1">${payment.amount}</p>
+                        <span class="badge badge-success text-xs">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            ${capitalizeFirst(payment.status)}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function saveCustomerDetails() {
+            if (!currentCustomer) return;
+
+            // Update customer data (in real app, this would be an API call)
+            currentCustomer.name = document.getElementById('modal-name').value;
+            currentCustomer.email = document.getElementById('modal-email').value;
+            currentCustomer.phone = document.getElementById('modal-phone').value;
+            currentCustomer.subscription = document.getElementById('modal-subscription').value;
+            currentCustomer.address = document.getElementById('modal-address').value;
+            currentCustomer.area = document.getElementById('modal-area').value;
+            currentCustomer.status = document.getElementById('modal-status').value;
+            currentCustomer.diet = document.getElementById('modal-diet').value;
+            currentCustomer.spice = document.getElementById('modal-spice').value;
+            currentCustomer.allergies = document.getElementById('modal-allergies').value;
+            currentCustomer.instructions = document.getElementById('modal-instructions').value;
+
+            showFlashMessage('Customer details updated successfully', 'success');
+            closeCustomerModal();
+            renderCustomers();
+            updateStatistics();
+        }
+
+        // Quick actions
+        function viewOrderHistory(customerId) {
+            openCustomerDetails(customerId);
+            switchTab('orders');
+        }
+
+        function sendEmail(customerId) {
+            const customer = mockCustomers.find(c => c.id === customerId);
+            showFlashMessage(`Email sent to ${customer.name}`, 'success');
+        }
+
+        // Add customer modal
+        function openAddCustomerModal() {
+            // Reset form
+            document.getElementById('modal-name').value = '';
+            document.getElementById('modal-email').value = '';
+            document.getElementById('modal-phone').value = '';
+            document.getElementById('modal-subscription').value = 'monthly';
+            document.getElementById('modal-address').value = '';
+            document.getElementById('modal-area').value = 'downtown';
+            document.getElementById('modal-status').value = 'active';
+            document.getElementById('modal-diet').value = 'vegetarian';
+            document.getElementById('modal-spice').value = 'medium';
+            document.getElementById('modal-allergies').value = '';
+            document.getElementById('modal-instructions').value = '';
+
+            currentCustomer = null;
+            document.getElementById('customer-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Flash message functions
+        function showFlashMessage(message, type = 'info') {
+            const flashMessage = document.getElementById('flash-message');
+            const flashText = document.getElementById('flash-text');
+            const flashIcon = document.getElementById('flash-icon');
+            
+            flashMessage.classList.remove('hidden', 'bg-success-50', 'border-success-200', 'text-success-800', 
+                                         'bg-error-50', 'border-error-200', 'text-error-800',
+                                         'bg-warning-50', 'border-warning-200', 'text-warning-800',
+                                         'bg-primary-50', 'border-primary-200', 'text-primary-800');
+            
+            flashIcon.classList.remove('fa-info-circle', 'fa-check-circle', 'fa-exclamation-circle', 'fa-exclamation-triangle');
+            
+            if (type === 'success') {
+                flashMessage.classList.add('bg-success-50', 'border-success-200', 'text-success-800');
+                flashIcon.classList.add('fa-check-circle');
+            } else if (type === 'error') {
+                flashMessage.classList.add('bg-error-50', 'border-error-200', 'text-error-800');
+                flashIcon.classList.add('fa-exclamation-circle');
+            } else if (type === 'warning') {
+                flashMessage.classList.add('bg-warning-50', 'border-warning-200', 'text-warning-800');
+                flashIcon.classList.add('fa-exclamation-triangle');
+            } else {
+                flashMessage.classList.add('bg-primary-50', 'border-primary-200', 'text-primary-800');
+                flashIcon.classList.add('fa-info-circle');
+            }
+            
+            flashText.textContent = message;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(closeFlashMessage, 5000);
+        }
+
+        function closeFlashMessage() {
+            document.getElementById('flash-message').classList.add('hidden');
+        }
+
+        // Logout function
+        function handleLogout() {
+            showFlashMessage('Logging out...', 'info');
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 1000);
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Escape key closes modal
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('customer-modal');
+                if (!modal.classList.contains('hidden')) {
+                    closeCustomerModal();
+                }
+            }
+            
+            // Ctrl/Cmd + K focuses search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                document.getElementById('search-input').focus();
+            }
+        });
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>

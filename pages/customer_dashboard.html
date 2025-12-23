@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Customer Dashboard - Manage your tiffin service subscription, view today's menu, and control your meal deliveries">
+    <title>Customer Dashboard - TiffinTrack</title>
+    <link rel="stylesheet" href="../css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script type="module" async src="https://static.rocket.new/rocket-web.js?_cfg=https%3A%2F%2Ftiffintrac6995back.builtwithrocket.new&_be=https%3A%2F%2Fapplication.rocket.new&_v=0.1.12"></script>
+  <script type="module" defer src="https://static.rocket.new/rocket-shot.js?v=0.0.2"></script>
+  </head>
+<body class="bg-background min-h-screen flex flex-col">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-surface border-b border-border sticky top-0 z-navigation shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="customer_dashboard.html" class="flex items-center space-x-2">
+                        <svg class="w-10 h-10" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="48" height="48" rx="12" fill="#E67E22"/>
+                            <path d="M24 12C18.48 12 14 16.48 14 22C14 27.52 18.48 32 24 32C29.52 32 34 27.52 34 22C34 16.48 29.52 12 24 12ZM24 28C20.69 28 18 25.31 18 22C18 18.69 20.69 16 24 16C27.31 16 30 18.69 30 22C30 25.31 27.31 28 24 28Z" fill="white"/>
+                            <path d="M24 36C18.48 36 14 34.21 14 32V36H34V32C34 34.21 29.52 36 24 36Z" fill="white"/>
+                        </svg>
+                        <span class="text-xl font-heading font-bold text-primary">TiffinTrack</span>
+                    </a>
+                </div>
+
+                <!-- Desktop Navigation -->
+                <div class="hidden md:flex items-center space-x-4">
+                    <a href="customer_dashboard.html" class="text-primary font-medium px-4 py-2 rounded-md bg-primary-50">
+                        <i class="fas fa-home mr-2"></i>
+                        Dashboard
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors px-4 py-2 rounded-md hover:bg-primary-50">
+                        <i class="fas fa-user-circle mr-2"></i>
+                        Profile
+                    </a>
+                    <button onclick="handleLogout()" class="btn btn-outline">
+                        <i class="fas fa-sign-out-alt mr-2"></i>
+                        Logout
+                    </button>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="mobile-menu-btn" class="md:hidden touch-target text-text-primary hover:text-primary transition-colors" aria-label="Toggle mobile menu">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden border-t border-border bg-surface">
+            <div class="px-4 py-4 space-y-3">
+                <a href="customer_dashboard.html" class="flex items-center text-primary font-medium px-4 py-3 rounded-md bg-primary-50">
+                    <i class="fas fa-home mr-3"></i>
+                    Dashboard
+                </a>
+                <a href="javascript:void(0)" class="flex items-center text-text-secondary hover:text-primary transition-colors px-4 py-3 rounded-md hover:bg-primary-50">
+                    <i class="fas fa-user-circle mr-3"></i>
+                    Profile
+                </a>
+                <button onclick="handleLogout()" class="btn btn-outline w-full">
+                    <i class="fas fa-sign-out-alt mr-2"></i>
+                    Logout
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Message Area -->
+    <div id="flash-message" class="hidden max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4" role="alert">
+        <div class="p-4 rounded-lg border flex items-start">
+            <i class="fas fa-info-circle mt-0.5 mr-3"></i>
+            <div class="flex-1">
+                <p id="flash-text" class="text-sm font-medium"></p>
+            </div>
+            <button onclick="closeFlashMessage()" class="ml-3 touch-target" aria-label="Close message">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 w-full">
+        
+        <!-- Welcome Header -->
+        <div class="mb-6 sm:mb-8">
+            <h1 class="text-3xl sm:text-4xl font-heading font-bold text-text-primary mb-2">Welcome Back, Sarah!</h1>
+            <p class="text-text-secondary">Manage your tiffin service and view today's delicious menu</p>
+        </div>
+
+        <!-- Service Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+            <!-- Subscription Status -->
+            <div class="card">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-text-secondary text-sm mb-1">Subscription Status</p>
+                        <h3 class="text-2xl font-heading font-bold text-text-primary mb-2">Active</h3>
+                        <span class="badge badge-success">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Premium Plan
+                        </span>
+                    </div>
+                    <div class="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-check-circle text-success text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Next Delivery -->
+            <div class="card">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-text-secondary text-sm mb-1">Next Delivery</p>
+                        <h3 class="text-2xl font-heading font-bold text-text-primary mb-2">Today</h3>
+                        <p class="text-text-secondary text-sm">
+                            <i class="fas fa-clock mr-1"></i>
+                            12:30 PM - 1:00 PM
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-truck text-primary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Balance -->
+            <div class="card sm:col-span-2 lg:col-span-1">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <p class="text-text-secondary text-sm mb-1">Account Balance</p>
+                        <h3 class="text-2xl font-heading font-bold text-text-primary mb-2">$245.00</h3>
+                        <p class="text-text-secondary text-sm">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            Valid until Jan 15, 2025
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-wallet text-secondary text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Today's Menu Section -->
+        <section class="mb-6 sm:mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl sm:text-3xl font-heading font-bold text-text-primary">Today's Menu</h2>
+                <span class="text-sm text-text-secondary">
+                    <i class="fas fa-calendar-day mr-1"></i>
+                    December 23, 2025
+                </span>
+            </div>
+
+            <div class="card">
+                <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+                    <!-- Menu Image -->
+                    <div class="relative overflow-hidden rounded-xl h-64 md:h-full">
+                        <img 
+                            src="https://img.rocket.new/generatedImages/rocket_gen_img_1f317e347-1764831922949.png" 
+                            alt="Today's delicious tiffin meal featuring aromatic biryani rice with tender chicken pieces, fresh cucumber raita, crispy papad, and colorful mixed vegetable curry garnished with cilantro"
+                            class="w-full h-full object-cover"
+                            loading="lazy"
+                            onerror="this.src='https://images.unsplash.com/photo-1585937421612-70a008356fbe?q=80&w=800&auto=format&fit=crop'; this.onerror=null;"
+                        >
+                        <div class="absolute top-4 right-4 bg-primary text-on-primary px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-star mr-1"></i>
+                            Chef's Special
+                        </div>
+                    </div>
+
+                    <!-- Menu Details -->
+                    <div class="flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-heading font-bold text-text-primary mb-3">Chicken Biryani Combo</h3>
+                            <p class="text-text-secondary mb-4 leading-relaxed">
+                                Aromatic basmati rice layered with tender chicken pieces, slow-cooked with authentic spices. Served with cooling cucumber raita, crispy papad, and a side of mixed vegetable curry.
+                            </p>
+
+                            <!-- Nutritional Info -->
+                            <div class="grid grid-cols-2 gap-4 mb-4">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-fire text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-text-tertiary">Calories</p>
+                                        <p class="font-semibold text-text-primary">650 kcal</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <i class="fas fa-drumstick-bite text-secondary"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-text-tertiary">Protein</p>
+                                        <p class="font-semibold text-text-primary">35g</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Dietary Tags -->
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="badge bg-primary-50 text-primary border border-primary-200">
+                                    <i class="fas fa-pepper-hot mr-1"></i>
+                                    Spicy
+                                </span>
+                                <span class="badge bg-success-50 text-success-800 border border-success-200">
+                                    <i class="fas fa-leaf mr-1"></i>
+                                    Fresh Ingredients
+                                </span>
+                                <span class="badge bg-secondary-50 text-secondary border border-secondary-200">
+                                    <i class="fas fa-clock mr-1"></i>
+                                    Hot & Fresh
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Delivery Time -->
+                        <div class="bg-primary-50 border border-primary-200 rounded-lg p-4">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <i class="fas fa-truck text-primary text-xl"></i>
+                                    <div>
+                                        <p class="text-sm font-semibold text-text-primary">Delivery Time</p>
+                                        <p class="text-xs text-text-secondary">Expected between 12:30 PM - 1:00 PM</p>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary text-sm h-10">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>
+                                    Track
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Service Management Section -->
+        <section class="mb-6 sm:mb-8">
+            <h2 class="text-2xl sm:text-3xl font-heading font-bold text-text-primary mb-4">Service Management</h2>
+            
+            <div class="grid md:grid-cols-2 gap-4 sm:gap-6">
+                <!-- Pause Service Card -->
+                <div class="card">
+                    <div class="flex items-start space-x-4 mb-4">
+                        <div class="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-pause-circle text-warning text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-heading font-semibold text-text-primary mb-1">Pause Service</h3>
+                            <p class="text-sm text-text-secondary">Temporarily pause your meal deliveries for specific dates</p>
+                        </div>
+                    </div>
+                    <button onclick="openPauseModal()" class="btn btn-warning w-full text-lg">
+                        <i class="fas fa-pause mr-2"></i>
+                        Pause Deliveries
+                    </button>
+                </div>
+
+                <!-- Modify Preferences Card -->
+                <div class="card">
+                    <div class="flex items-start space-x-4 mb-4">
+                        <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-sliders-h text-secondary text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-lg font-heading font-semibold text-text-primary mb-1">Dietary Preferences</h3>
+                            <p class="text-sm text-text-secondary">Update your meal preferences and dietary restrictions</p>
+                        </div>
+                    </div>
+                    <button onclick="openPreferencesModal()" class="btn btn-secondary w-full text-lg">
+                        <i class="fas fa-edit mr-2"></i>
+                        Update Preferences
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upcoming Deliveries Section -->
+        <section class="mb-6 sm:mb-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-2xl sm:text-3xl font-heading font-bold text-text-primary">Upcoming Deliveries</h2>
+                <button onclick="toggleCalendarView()" class="btn btn-outline text-sm h-10">
+                    <i class="fas fa-calendar-alt mr-2"></i>
+                    <span id="view-toggle-text">Calendar View</span>
+                </button>
+            </div>
+
+            <!-- List View -->
+            <div id="list-view" class="space-y-4">
+                <!-- Delivery Card 1 -->
+                <div class="card">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-16 h-16 bg-primary-100 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                                <span class="text-xs text-primary font-medium">TUE</span>
+                                <span class="text-xl font-bold text-primary">24</span>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-heading font-semibold text-text-primary mb-1">Paneer Tikka Masala</h4>
+                                <p class="text-sm text-text-secondary mb-2">Creamy cottage cheese curry with naan and rice</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="badge bg-success-50 text-success-800 text-xs">
+                                        <i class="fas fa-leaf mr-1"></i>
+                                        Vegetarian
+                                    </span>
+                                    <span class="text-xs text-text-tertiary">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        12:30 PM - 1:00 PM
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="pauseDelivery('2025-12-24')" class="btn btn-outline text-sm h-10 sm:w-auto w-full">
+                            <i class="fas fa-pause mr-2"></i>
+                            Pause
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Delivery Card 2 -->
+                <div class="card">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-16 h-16 bg-primary-100 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                                <span class="text-xs text-primary font-medium">WED</span>
+                                <span class="text-xl font-bold text-primary">25</span>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="font-heading font-semibold text-text-primary mb-1">Fish Curry Special</h4>
+                                <p class="text-sm text-text-secondary mb-2">Bengali style fish curry with steamed rice</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="badge bg-secondary-50 text-secondary text-xs">
+                                        <i class="fas fa-fish mr-1"></i>
+                                        Seafood
+                                    </span>
+                                    <span class="text-xs text-text-tertiary">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        12:30 PM - 1:00 PM
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="pauseDelivery('2025-12-25')" class="btn btn-outline text-sm h-10 sm:w-auto w-full">
+                            <i class="fas fa-pause mr-2"></i>
+                            Pause
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calendar View (Hidden by default) -->
+            <div id="calendar-view" class="hidden">
+                <div class="card">
+                    <div class="grid grid-cols-7 gap-2 mb-4">
+                        <div class="text-center text-sm font-semibold text-text-secondary py-2">Sun</div>
+                        <div class="text-center text-sm font-semibold text-text-secondary py-2">Mon</div>
+                        <div class="text-center text-sm font-semibold text-text-secondary py-2">Tue</div>
+                        <div class="text-center text-sm font-semibold text-text-secondary py-2">Wed</div>
+                        <div class="text-center text-sm font-semibold text-text-secondary py-2">Thu</div>
+                        <div class="text-center text-sm font-semibold text-text-secondary py-2">Fri</div>
+                        <div class="text-center text-sm font-semibold text-text-secondary py-2">Sat</div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-2" id="calendar-grid">
+                        <!-- Calendar will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions Section -->
+        <section>
+            <h2 class="text-2xl sm:text-3xl font-heading font-bold text-text-primary mb-4">Quick Actions</h2>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Delivery Address -->
+                <button onclick="updateAddress()" class="card hover:shadow-md transition-all text-left">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-map-marker-alt text-primary text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-text-primary">Delivery Address</h4>
+                            <p class="text-xs text-text-secondary">Update location</p>
+                        </div>
+                    </div>
+                </button>
+
+                <!-- Billing Info -->
+                <button onclick="manageBilling()" class="card hover:shadow-md transition-all text-left">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-credit-card text-secondary text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-text-primary">Billing Info</h4>
+                            <p class="text-xs text-text-secondary">Manage payments</p>
+                        </div>
+                    </div>
+                </button>
+
+                <!-- Order History -->
+                <button onclick="viewHistory()" class="card hover:shadow-md transition-all text-left">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-accent-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-history text-accent text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-text-primary">Order History</h4>
+                            <p class="text-xs text-text-secondary">View past orders</p>
+                        </div>
+                    </div>
+                </button>
+
+                <!-- Support -->
+                <button onclick="contactSupport()" class="card hover:shadow-md transition-all text-left">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-12 h-12 bg-success-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-headset text-success text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-text-primary">Support</h4>
+                            <p class="text-xs text-text-secondary">Get help</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-surface border-t border-border mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <p class="text-sm text-text-secondary text-center sm:text-left">
+                    © 2025 TiffinTrack. All Rights Reserved.
+                </p>
+                <div class="flex items-center space-x-6">
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Privacy Policy
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Terms of Service
+                    </a>
+                    <a href="javascript:void(0)" class="text-text-secondary hover:text-primary transition-colors text-sm">
+                        Contact Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Pause Service Modal -->
+    <div id="pause-modal" class="modal-overlay hidden" onclick="closePauseModal(event)">
+        <div class="modal-content max-w-md" onclick="event.stopPropagation()">
+            <div class="p-6 border-b border-border">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-heading font-bold text-text-primary">Pause Service</h3>
+                    <button onclick="closePauseModal()" class="touch-target text-text-tertiary hover:text-text-primary transition-colors" aria-label="Close modal">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6">
+                <p class="text-text-secondary mb-4">Select the dates you want to pause your meal deliveries:</p>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="pause-start-date" class="block text-sm font-medium text-text-primary mb-2">Start Date</label>
+                        <input type="date" id="pause-start-date" class="input" min="2025-12-24">
+                    </div>
+                    <div>
+                        <label for="pause-end-date" class="block text-sm font-medium text-text-primary mb-2">End Date</label>
+                        <input type="date" id="pause-end-date" class="input" min="2025-12-24">
+                    </div>
+                    <div>
+                        <label for="pause-reason" class="block text-sm font-medium text-text-primary mb-2">Reason (Optional)</label>
+                        <textarea id="pause-reason" class="input h-24 py-3" placeholder="Let us know why you're pausing..."></textarea>
+                    </div>
+                </div>
+
+                <div class="bg-warning-50 border border-warning-200 rounded-lg p-4 mt-4">
+                    <div class="flex items-start">
+                        <i class="fas fa-info-circle text-warning mt-0.5 mr-3"></i>
+                        <p class="text-sm text-text-secondary">Your subscription will remain active. You can resume deliveries anytime.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 border-t border-border flex flex-col sm:flex-row gap-3">
+                <button onclick="closePauseModal()" class="btn btn-outline flex-1">Cancel</button>
+                <button onclick="confirmPause()" class="btn btn-warning flex-1">
+                    <i class="fas fa-pause mr-2"></i>
+                    Confirm Pause
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+        });
+
+        // Flash Message Functions
+        function showFlashMessage(message, type = 'info') {
+            const flashMessage = document.getElementById('flash-message');
+            const flashText = document.getElementById('flash-text');
+            
+            flashMessage.classList.remove('hidden', 'bg-success-50', 'border-success-200', 'text-success-800', 
+                                         'bg-error-50', 'border-error-200', 'text-error-800',
+                                         'bg-warning-50', 'border-warning-200', 'text-warning-800',
+                                         'bg-primary-50', 'border-primary-200', 'text-primary');
+            
+            if (type === 'success') {
+                flashMessage.classList.add('bg-success-50', 'border-success-200', 'text-success-800');
+            } else if (type === 'error') {
+                flashMessage.classList.add('bg-error-50', 'border-error-200', 'text-error-800');
+            } else if (type === 'warning') {
+                flashMessage.classList.add('bg-warning-50', 'border-warning-200', 'text-warning-800');
+            } else {
+                flashMessage.classList.add('bg-primary-50', 'border-primary-200', 'text-primary');
+            }
+            
+            flashText.textContent = message;
+            
+            setTimeout(() => {
+                closeFlashMessage();
+            }, 5000);
+        }
+
+        function closeFlashMessage() {
+            document.getElementById('flash-message').classList.add('hidden');
+        }
+
+        // Logout Handler
+        function handleLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                showFlashMessage('Logging out...', 'info');
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1000);
+            }
+        }
+
+        // Pause Service Modal
+        function openPauseModal() {
+            document.getElementById('pause-modal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePauseModal(event) {
+            if (!event || event.target === event.currentTarget) {
+                document.getElementById('pause-modal').classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        }
+
+        function confirmPause() {
+            const startDate = document.getElementById('pause-start-date').value;
+            const endDate = document.getElementById('pause-end-date').value;
+            
+            if (!startDate || !endDate) {
+                showFlashMessage('Please select both start and end dates', 'error');
+                return;
+            }
+
+            if (new Date(startDate) > new Date(endDate)) {
+                showFlashMessage('End date must be after start date', 'error');
+                return;
+            }
+
+            closePauseModal();
+            showFlashMessage('Service paused successfully for selected dates', 'success');
+            
+            // Reset form
+            document.getElementById('pause-start-date').value = '';
+            document.getElementById('pause-end-date').value = '';
+            document.getElementById('pause-reason').value = '';
+        }
+
+        // Pause Individual Delivery
+        function pauseDelivery(date) {
+            if (confirm(`Pause delivery for ${date}?`)) {
+                showFlashMessage(`Delivery paused for ${date}`, 'success');
+            }
+        }
+
+        // Preferences Modal
+        function openPreferencesModal() {
+            showFlashMessage('Preferences update feature coming soon!', 'info');
+        }
+
+        // Calendar View Toggle
+        function toggleCalendarView() {
+            const listView = document.getElementById('list-view');
+            const calendarView = document.getElementById('calendar-view');
+            const toggleText = document.getElementById('view-toggle-text');
+            
+            if (listView.classList.contains('hidden')) {
+                listView.classList.remove('hidden');
+                calendarView.classList.add('hidden');
+                toggleText.textContent = 'Calendar View';
+            } else {
+                listView.classList.add('hidden');
+                calendarView.classList.remove('hidden');
+                toggleText.textContent = 'List View';
+                generateCalendar();
+            }
+        }
+
+        // Generate Calendar
+        function generateCalendar() {
+            const calendarGrid = document.getElementById('calendar-grid');
+            const today = new Date();
+            const currentMonth = today.getMonth();
+            const currentYear = today.getFullYear();
+            
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            
+            calendarGrid.innerHTML = '';
+            
+            // Empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'aspect-square';
+                calendarGrid.appendChild(emptyCell);
+            }
+            
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayCell = document.createElement('div');
+                dayCell.className = 'aspect-square border border-border rounded-lg p-2 hover:bg-primary-50 transition-colors cursor-pointer flex flex-col items-center justify-center';
+                
+                const isToday = day === today.getDate();
+                const hasDelivery = day >= 23 && day <= 27;
+                
+                if (isToday) {
+                    dayCell.classList.add('bg-primary', 'text-on-primary', 'font-bold');
+                }
+                
+                dayCell.innerHTML = `
+                    <span class="text-sm ${isToday ? 'text-on-primary' : 'text-text-primary'}">${day}</span>
+                    ${hasDelivery ? '<i class="fas fa-circle text-xs text-success mt-1"></i>' : ''}
+                `;
+                
+                calendarGrid.appendChild(dayCell);
+            }
+        }
+
+        // Quick Actions
+        function updateAddress() {
+            showFlashMessage('Address update feature coming soon!', 'info');
+        }
+
+        function manageBilling() {
+            showFlashMessage('Billing management feature coming soon!', 'info');
+        }
+
+        function viewHistory() {
+            showFlashMessage('Order history feature coming soon!', 'info');
+        }
+
+        function contactSupport() {
+            showFlashMessage('Support chat feature coming soon!', 'info');
+        }
+
+        // Set minimum date for pause inputs
+        document.addEventListener('DOMContentLoaded', () => {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('pause-start-date').setAttribute('min', today);
+            document.getElementById('pause-end-date').setAttribute('min', today);
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closePauseModal();
+            }
+        });
+    </script>
+<script id="dhws-dataInjector" src="../public/dhws-data-injector.js"></script>
+</body>
+</html>
