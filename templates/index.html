@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TiffinTrack – Healthy Meals Made Simple</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="app">
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <div class="nav-container">
+    <div class="logo">🥗 TiffinTrack</div>
+
+    <div class="nav-actions">
+      <a href="{{ url_for('login') }}" class="btn-outline">Login</a>
+      <a href="{{ url_for('register') }}" class="btn-primary">Get Started</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid">
+
+    <!-- Text -->
+    <div class="hero-text">
+      <span class="badge">Healthy • Fresh • Trusted</span>
+      <h1>Daily Healthy Meals, <br>Delivered With Care</h1>
+      <p>
+        Enjoy chef-prepared tiffins made from fresh ingredients. 
+        Designed for busy professionals who care about health.
+      </p>
+
+      <div class="hero-buttons">
+        <a href="{{ url_for('register') }}" class="btn-primary">Start Subscription</a>
+        <a href="#menu" class="btn-secondary">View Menu</a>
+      </div>
+
+      <div class="trust">
+        <div>⭐ 4.9 Rating</div>
+        <div>🥗 500+ Daily Meals</div>
+        <div>🚚 Same-day Delivery</div>
+      </div>
+    </div>
+
+    <!-- Image -->
+    <div class="hero-image">
+      <img src="{{ url_for('static', filename='images/healthy-food.jpeg') }}" alt="Healthy Food">
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="feature-card">
+    <i class="fas fa-seedling"></i>
+    <h3>Fresh Ingredients</h3>
+    <p>Locally sourced vegetables cooked daily.</p>
+  </div>
+
+  <div class="feature-card">
+    <i class="fas fa-heart"></i>
+    <h3>Nutrition Focused</h3>
+    <p>Balanced meals designed by diet experts.</p>
+  </div>
+
+  <div class="feature-card">
+    <i class="fas fa-truck"></i>
+    <h3>Fast Delivery</h3>
+    <p>Hot meals delivered on schedule.</p>
+  </div>
+</section>
+
+</body>
+</html>

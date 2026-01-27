@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Account – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+    <div>
+      <a href="{{ url_for('login') }}" class="btn-secondary">Sign In</a>
+    </div>
+  </div>
+</nav>
+
+<!-- REGISTER PAGE -->
+<section class="hero" style="padding-top: 60px;">
+  <div class="hero-grid" style="grid-template-columns: 1fr 1fr;">
+
+    <!-- LEFT BRANDING -->
+    <div class="hero-text">
+      <span class="badge">Join TiffinTrack</span>
+      <h1>Create your account</h1>
+      <p>
+        Start receiving healthy, home-cooked meals delivered fresh every day.
+        Manage subscriptions, meals and delivery from one dashboard.
+      </p>
+
+      <div class="trust">
+        <div>🥗 Nutritious</div>
+        <div>🚚 On Time</div>
+        <div>💚 Trusted</div>
+      </div>
+    </div>
+
+    <!-- REGISTER CARD -->
+    <div class="card">
+
+      <h2 style="font-size: 1.8rem; margin-bottom: 1.2rem;">
+        Get Started
+      </h2>
+
+      <form id="register-form" class="space-y-4">
+
+        <input class="input" type="text" placeholder="Full Name" required>
+        <input class="input" type="email" placeholder="Email Address" required>
+        <input class="input" type="tel" placeholder="Phone Number" required>
+        <input class="input" type="text" placeholder="Delivery Address" required>
+
+        <input class="input" type="password" placeholder="Password" required>
+        <input class="input" type="password" placeholder="Confirm Password" required>
+
+        <label class="text-sm">
+          <input type="checkbox" required>
+          I agree to the Terms & Conditions
+        </label>
+
+        <button type="submit" class="btn-primary w-full">
+          Create Account
+        </button>
+
+        <p class="text-sm" style="text-align:center; margin-top: 1rem;">
+          Already have an account?
+          <a href="{{ url_for('login') }}" style="color: var(--primary); font-weight:600;">
+            Sign in here
+          </a>
+        </p>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById("register-form");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    alert("Account created successfully!");
+    window.location.href = "/login";
+  });
+</script>
+
+</body>
+</html>

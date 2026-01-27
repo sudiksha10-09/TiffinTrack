@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+    <div>
+      <a href="{{ url_for('register') }}" class="btn-secondary">Create Account</a>
+    </div>
+  </div>
+</nav>
+
+<!-- LOGIN PAGE -->
+<section class="hero" style="padding-top: 60px;">
+  <div class="hero-grid" style="grid-template-columns: 1fr 1fr;">
+
+    <!-- LEFT BRANDING -->
+    <div class="hero-text">
+      <span class="badge">Welcome Back</span>
+      <h1>Login to your account</h1>
+      <p>
+        Manage your tiffin orders, subscriptions and deliveries from one dashboard.
+      </p>
+
+      <div class="trust">
+        <div>🥗 Healthy Meals</div>
+        <div>🚚 Fast Delivery</div>
+        <div>⭐ Trusted Service</div>
+      </div>
+    </div>
+
+    <!-- LOGIN CARD -->
+    <div class="card">
+
+      <h2 style="font-size: 1.8rem; margin-bottom: 1.2rem;">Sign In</h2>
+
+      <form id="login-form" class="space-y-4">
+
+        <input
+          type="email"
+          id="email"
+          class="input"
+          placeholder="Email address"
+          required
+        >
+
+        <input
+          type="password"
+          id="password"
+          class="input"
+          placeholder="Password"
+          required
+        >
+
+        <button type="submit" class="btn-primary w-full">
+          Sign In
+        </button>
+
+        <p class="text-sm" style="text-align:center; margin-top: 1rem;">
+          Don't have an account?
+          <a href="{{ url_for('register') }}" style="color: var(--primary); font-weight:600;">
+            Register here
+          </a>
+        </p>
+
+      </form>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+  const form = document.getElementById("login-form");
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.toLowerCase();
+    const password = document.getElementById("password").value;
+
+    if (email === "admin@tiffintrack.com" && password === "admin123") {
+      alert("Login successful! Redirecting to admin...");
+      window.location.href = "/admin";
+    }
+    else if (email === "customer@example.com" && password === "customer123") {
+      alert("Login successful! Redirecting to dashboard...");
+      window.location.href = "/customers";
+    }
+    else {
+      alert("Invalid credentials!");
+    }
+  });
+</script>
+
+</body>
+</html>

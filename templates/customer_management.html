@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Customers – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- ✅ CSS MUST LOAD -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="app">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+
+    <div>
+      <a href="/admin" class="btn-outline">Dashboard</a>
+      <button onclick="handleLogout()" class="btn-secondary">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE -->
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Customers</h1>
+      <p>Manage all customer subscriptions and payments.</p>
+    </div>
+
+    <div class="toolbar">
+      <input class="search-input" placeholder="Search customers...">
+      <button class="btn-primary">+ Add Customer</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-grid">
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#2563eb;">
+        <i class="fas fa-users"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Total</h3>
+        <p id="total-customers">0</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#16a34a;">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Active</h3>
+        <p id="active-subscriptions">0</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#ca8a04;">
+        <i class="fas fa-pause-circle"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Paused</h3>
+        <p id="paused-services">0</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon" style="background:#dc2626;">
+        <i class="fas fa-credit-card"></i>
+      </div>
+      <div class="stat-info">
+        <h3>Pending</h3>
+        <p id="pending-payments">0</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+
+    <div class="table-header">
+      Customer List
+    </div>
+
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>Payment</th>
+          <th>Diet</th>
+        </tr>
+      </thead>
+      <tbody id="customer-table-body"></tbody>
+    </table>
+
+  </div>
+
+</div>
+
+<script>
+  const customers = [
+    { name: "Sarah", status: "active", payment: "paid", diet: "vegetarian" },
+    { name: "Michael", status: "paused", payment: "pending", diet: "non-veg" },
+    { name: "Emily", status: "active", payment: "paid", diet: "vegan" }
+  ];
+
+  function badgeClass(type) {
+    return "badge-pill badge-" + type;
+  }
+
+  function renderCustomers() {
+    const tbody = document.getElementById("customer-table-body");
+    tbody.innerHTML = "";
+
+    customers.forEach(c => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td><strong>${c.name}</strong></td>
+        <td><span class="${badgeClass(c.status)}">${c.status}</span></td>
+        <td><span class="${badgeClass(c.payment)}">${c.payment}</span></td>
+        <td style="text-transform:capitalize">${c.diet}</td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    document.getElementById("total-customers").innerText = customers.length;
+    document.getElementById("active-subscriptions").innerText =
+      customers.filter(c => c.status === "active").length;
+    document.getElementById("paused-services").innerText =
+      customers.filter(c => c.status === "paused").length;
+    document.getElementById("pending-payments").innerText =
+      customers.filter(c => c.payment === "pending").length;
+  }
+
+  renderCustomers();
+
+  function handleLogout() {
+    window.location.href = "/login";
+  }
+</script>
+
+</body>
+</html>
