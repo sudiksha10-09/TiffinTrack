@@ -718,3 +718,122 @@ a:hover {
     flex: 1;
   }
 }
+/* ===== SECTIONS ===== */
+
+section {
+  padding: 80px 8%;
+}
+
+h2 {
+  text-align: center;
+  font-size: 2.4rem;
+  margin-bottom: 50px;
+  color: #1f2937;
+}
+
+/* HOW IT WORKS */
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 25px;
+}
+
+.step-card {
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 18px;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  transition: 0.3s ease;
+}
+
+.step-card:hover {
+  transform: translateY(-6px);
+}
+
+.step-card i {
+  font-size: 2.2rem;
+  color: #22c55e;
+  margin-bottom: 15px;
+}
+
+/* PLANS */
+
+.plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+  gap: 25px;
+}
+
+.plan-card {
+  background: #ffffff;
+  padding: 35px;
+  border-radius: 22px;
+  text-align: center;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+}
+
+.plan-card span {
+  font-weight: bold;
+  color: #16a34a;
+}
+
+.plan-card.featured {
+  border: 3px solid #22c55e;
+  transform: scale(1.03);
+}
+
+/* TESTIMONIALS */
+
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+  gap: 30px;
+}
+
+.testimonial-card {
+  background: #f9fafb;
+  padding: 30px;
+  border-radius: 18px;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.04);
+}
+
+.testimonial-card p {
+  font-style: italic;
+  color: #374151;
+}
+
+/* CTA */
+
+.cta {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  text-align: center;
+  color: white;
+  border-radius: 40px;
+  margin: 80px 8%;
+}
+
+.cta h2 {
+  color: white;
+}
+
+.cta a {
+  margin-top: 20px;
+  display: inline-block;
+}
+
+/* FOOTER */
+
+.footer {
+  background: #020617;
+  color: #e5e7eb;
+  padding: 50px 8%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap: 30px;
+}
+
+.footer strong {
+  font-size: 1.3rem;
+}

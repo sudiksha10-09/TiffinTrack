@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My Billing – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+
+<body class="app">
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+    <div>
+      <a href="/dashboard" class="btn-outline">Dashboard</a>
+      <a href="/logout" class="btn-secondary">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard" style="max-width:800px; margin:auto;">
+
+  <h2>Billing Breakdown</h2>
+
+  {% if billing_rows %}
+
+  <table class="dashboard-table">
+    <thead>
+      <tr>
+        <th>Plan</th>
+        <th>Rate</th>
+        <th>Allocated Days</th>
+        <th>Paused Days</th>
+        <th>Billable Days</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+
+    <!-- ✅ UPDATED TABLE BODY -->
+    <tbody>
+      {% for row in billing_rows %}
+      <tr>
+        <td>{{ row.plan }}</td>
+        <td>₹ {{ row.rate }}</td>
+        <td>{{ row.total_days }}</td>
+        <td>{{ row.paused_days }}</td>
+        <td>{{ row.billable_days }}</td>
+        <td><strong>₹ {{ row.amount }}</strong></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div style="text-align:right; margin-top:20px;">
+    <h3>Total Payable: ₹ {{ grand_total }}</h3>
+  </div>
+
+  {% else %}
+    <p>No plans selected yet.</p>
+  {% endif %}
+
+</div>
+
+</body>
+</html>

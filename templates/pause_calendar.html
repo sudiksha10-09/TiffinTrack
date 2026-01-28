@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Pause Tiffin – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <style>
+    .pause-container {
+      max-width: 600px;
+      margin: auto;
+    }
+
+    .paused-list {
+      margin-top: 20px;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 10px;
+    }
+
+    .paused-item {
+      padding: 6px 0;
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    .flash-error {
+      background: #fee2e2;
+      color: #b91c1c;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .flash-success {
+      background: #dcfce7;
+      color: #15803d;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body class="app">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+    <div>
+      <a href="/dashboard" class="btn-outline">Dashboard</a>
+      <a href="/logout" class="btn-secondary">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard pause-container">
+
+  <h2>Pause Your Tiffin</h2>
+  <p>Select a date to pause your meal.</p>
+
+  <!-- FLASH MESSAGES -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      {% if category == "error" %}
+        <div class="flash-error">{{ message }}</div>
+      {% else %}
+        <div class="flash-success">{{ message }}</div>
+      {% endif %}
+    {% endfor %}
+  {% endwith %}
+
+  <!-- PAUSE FORM -->
+  <form method="POST" action="/pause/save">
+    <label>Select Date</label>
+    <input type="date" name="pause_date" class="input" required>
+
+    <button class="btn-primary" style="margin-top:10px;">
+      Pause Tiffin
+    </button>
+  </form>
+
+  <!-- EXISTING PAUSED DATES -->
+  <div class="paused-list">
+    <h4>Already Paused Dates</h4>
+
+    {% if paused_dates %}
+      {% for d in paused_dates %}
+        <div class="paused-item">📅 {{ d }}</div>
+      {% endfor %}
+    {% else %}
+      <p style="color:#6b7280;">No paused dates yet.</p>
+    {% endif %}
+  </div>
+
+</div>
+
+</body>
+</html>

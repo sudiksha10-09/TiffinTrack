@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Select Plans – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+
+<body class="app">
+
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+    <div>
+      <a href="/dashboard" class="btn-outline">Dashboard</a>
+      <a href="/logout" class="btn-secondary">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard" style="max-width:800px; margin:auto;">
+
+  <h2>Select Your Monthly Plans</h2>
+  <p>Choose plan and date range within this month.</p>
+
+  <form method="POST" action="/plans/save">
+
+    {% for plan in plans %}
+    <div class="kpi-card" style="margin-bottom:15px;">
+      <h4>{{ plan.name }}</h4>
+      <p>{{ plan.description }}</p>
+      <p><strong>₹ {{ plan.daily_rate }} / day</strong></p>
+
+      <input type="hidden" name="plan_{{ plan.id }}" value="1">
+
+      <!-- ✅ Start Date -->
+      <label>Start Date</label>
+      <input 
+        type="date" 
+        name="start_{{ plan.id }}" 
+        class="input" 
+        min="{{ date.today() }}"
+        required
+      >
+
+      <!-- ✅ End Date -->
+      <label>End Date</label>
+      <input 
+        type="date" 
+        name="end_{{ plan.id }}" 
+        class="input" 
+        min="{{ date.today() }}"
+        required
+      >
+    </div>
+    {% endfor %}
+
+    <button class="btn-primary">Save Plans</button>
+  </form>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Dashboard – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+
+<body class="app">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+
+    <div>
+      <span style="margin-right:15px;">
+        Welcome, {{ session.get('user_name') }}
+      </span>
+      <a href="/logout" class="btn-secondary">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="dashboard">
+
+  <h1 style="margin-bottom:20px;">Customer Dashboard</h1>
+
+  <!-- QUICK CARDS -->
+  <div class="kpi-grid">
+
+    <div class="kpi-card">
+      <h3>This Month Bill</h3>
+      <p>₹ --</p>
+    </div>
+
+    <div class="kpi-card">
+      <h3>Status</h3>
+      <p>Active</p>
+    </div>
+
+  </div>
+
+  <!-- ACTIONS -->
+  <div class="quick-actions">
+    <div class="action-card" onclick="location.href='/plans'">
+        <h4>Select Plans</h4>
+        <p>Choose your meal plans and duration.</p>
+    </div>
+
+    <div class="action-card" onclick="location.href='/pause'">
+      <h4>Pause Tiffin</h4>
+      <p>Select dates to skip meals.</p>
+    </div>
+
+    <div class="action-card" onclick="location.href='/billing'">
+      <h4>View Billing</h4>
+      <p>Check monthly bills and payments.</p>
+    </div>
+
+    <div class="action-card">
+      <h4>Profile</h4>
+      <p>View your personal details.</p>
+    </div>
+
+  </div>
+
+</div>
+
+</body>
+</html>
