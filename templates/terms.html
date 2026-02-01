@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Terms & Conditions – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+</head>
+
+<body class="app">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+    <div>
+      <a href="{{ url_for('home') }}" class="btn-outline">Home</a>
+      <a href="{{ url_for('login') }}" class="btn-secondary">Login</a>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard" style="max-width: 800px; margin: 40px auto;">
+  <h1>Terms & Conditions</h1>
+  
+  <div class="activity-card" style="margin-top: 20px;">
+    <h3>1. Service Agreement</h3>
+    <p>By using TiffinTrack, you agree to receive meal delivery services as per your selected subscription plan.</p>
+    
+    <h3>2. Subscription & Billing</h3>
+    <p>Monthly bills are calculated based on active days minus paused days. Payment is due by the 5th of each month.</p>
+    
+    <h3>3. Pause Policy</h3>
+    <p>Meals can be paused until 8:00 AM on the delivery date. No refunds for same-day cancellations after cutoff time.</p>
+    
+    <h3>4. Delivery</h3>
+    <p>We deliver fresh meals to your registered address. Customers must be available during delivery hours.</p>
+    
+    <h3>5. Food Safety</h3>
+    <p>All meals are prepared in hygienic conditions. Please consume within 2 hours of delivery for best quality.</p>
+    
+    <h3>6. Privacy</h3>
+    <p>Your personal information is protected and used only for service delivery and communication.</p>
+    
+    <h3>7. Modifications</h3>
+    <p>TiffinTrack reserves the right to modify these terms with 7 days notice to customers.</p>
+    
+    <p style="margin-top: 30px; color: #6b7280; font-size: 14px;">
+      Last updated: January 2026<br>
+      For questions, contact: support@tiffintrack.com
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

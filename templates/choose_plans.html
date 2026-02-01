@@ -1,9 +1,259 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Select Plans – TiffinTrack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    .plan-selector {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .plan-card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: all 0.3s ease;
+    }
+    
+    .plan-card:hover {
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+    }
+    
+    .plan-header {
+      background: linear-gradient(135deg, var(--primary), #4f46e5);
+      color: white;
+      padding: 20px;
+      position: relative;
+    }
+    
+    .plan-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0 0 8px 0;
+    }
+    
+    .plan-description {
+      opacity: 0.9;
+      margin: 0;
+    }
+    
+    .plan-price {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    
+    .plan-body {
+      padding: 25px;
+    }
+    
+    .plan-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background: #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    .toggle-switch.active {
+      background: var(--primary);
+    }
+    
+    .toggle-slider {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    
+    .toggle-switch.active .toggle-slider {
+      transform: translateX(26px);
+    }
+    
+    .plan-options {
+      display: none;
+      animation: slideDown 0.3s ease;
+    }
+    
+    .plan-options.active {
+      display: block;
+    }
+    
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .duration-tabs {
+      display: flex;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .duration-tab {
+      flex: 1;
+      padding: 10px 16px;
+      text-align: center;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+    
+    .duration-tab.active {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .date-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+    
+    .quick-duration {
+      display: none;
+    }
+    
+    .quick-duration.active {
+      display: block;
+    }
+    
+    .duration-buttons {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .duration-btn {
+      padding: 12px 16px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      background: white;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      font-weight: 500;
+    }
+    
+    .duration-btn:hover {
+      border-color: var(--primary);
+      background: #f0f9ff;
+    }
+    
+    .duration-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary);
+      color: white;
+    }
+    
+    .cost-summary {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+    }
+    
+    .cost-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .cost-total {
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--primary);
+      border-top: 1px solid #ddd;
+      padding-top: 8px;
+      margin-top: 8px;
+    }
+    
+    .plan-items {
+      margin-top: 15px;
+    }
+    
+    .plan-items h5 {
+      margin: 0 0 10px 0;
+      color: #374151;
+    }
+    
+    .items-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 8px;
+    }
+    
+    .item-tag {
+      background: #e5e7eb;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+    
+    .submit-section {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin-top: 30px;
+      text-align: center;
+    }
+    
+    .selected-plans {
+      margin-bottom: 20px;
+    }
+    
+    .selected-plan {
+      background: #f0f9ff;
+      border: 1px solid var(--primary);
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .error-message {
+      background: #fee2e2;
+      color: #dc2626;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+  </style>
 </head>
 
 <body class="app">
@@ -18,47 +268,344 @@
   </div>
 </nav>
 
-<div class="dashboard" style="max-width:800px; margin:auto;">
+<div class="plan-selector">
+  <div style="text-align: center; margin-bottom: 30px;">
+    <h1>Choose Your Meal Plans</h1>
+    <p style="color: #6b7280; font-size: 1.1rem;">Select plans for any duration - from single days to months</p>
+  </div>
 
-  <h2>Select Your Monthly Plans</h2>
-  <p>Choose plan and date range within this month.</p>
+  <div class="error-message" id="error-message"></div>
 
-  <form method="POST" action="/plans/save">
-
+  <form method="POST" action="/plans/save" id="plan-form">
     {% for plan in plans %}
-    <div class="kpi-card" style="margin-bottom:15px;">
-      <h4>{{ plan.name }}</h4>
-      <p>{{ plan.description }}</p>
-      <p><strong>₹ {{ plan.daily_rate }} / day</strong></p>
-
-      <input type="hidden" name="plan_{{ plan.id }}" value="1">
-
-      <!-- ✅ Start Date -->
-      <label>Start Date</label>
-      <input 
-        type="date" 
-        name="start_{{ plan.id }}" 
-        class="input" 
-        min="{{ date.today() }}"
-        required
-      >
-
-      <!-- ✅ End Date -->
-      <label>End Date</label>
-      <input 
-        type="date" 
-        name="end_{{ plan.id }}" 
-        class="input" 
-        min="{{ date.today() }}"
-        required
-      >
+    <div class="plan-card" data-plan-id="{{ plan.id }}">
+      <div class="plan-header">
+        <h3 class="plan-name">{{ plan.name }}</h3>
+        <p class="plan-description">{{ plan.description }}</p>
+        <div class="plan-price">₹{{ plan.daily_rate }}/day</div>
+      </div>
+      
+      <div class="plan-body">
+        <div class="plan-toggle">
+          <div class="toggle-switch" onclick="togglePlan({{ plan.id }})">
+            <div class="toggle-slider"></div>
+          </div>
+          <span>Select this plan</span>
+        </div>
+        
+        <div class="plan-options" id="options-{{ plan.id }}">
+          <div class="duration-tabs">
+            <div class="duration-tab active" onclick="switchTab({{ plan.id }}, 'quick')">
+              <i class="fas fa-bolt"></i> Quick Select
+            </div>
+            <div class="duration-tab" onclick="switchTab({{ plan.id }}, 'custom')">
+              <i class="fas fa-calendar"></i> Custom Dates
+            </div>
+          </div>
+          
+          <!-- Quick Duration Selection -->
+          <div class="quick-duration active" id="quick-{{ plan.id }}">
+            <div class="duration-buttons">
+              <div class="duration-btn" onclick="selectDuration({{ plan.id }}, 1)">
+                <div>1 Day</div>
+                <small>₹{{ plan.daily_rate }}</small>
+              </div>
+              <div class="duration-btn" onclick="selectDuration({{ plan.id }}, 3)">
+                <div>3 Days</div>
+                <small>₹{{ plan.daily_rate * 3 }}</small>
+              </div>
+              <div class="duration-btn" onclick="selectDuration({{ plan.id }}, 7)">
+                <div>1 Week</div>
+                <small>₹{{ plan.daily_rate * 7 }}</small>
+              </div>
+              <div class="duration-btn" onclick="selectDuration({{ plan.id }}, 15)">
+                <div>2 Weeks</div>
+                <small>₹{{ plan.daily_rate * 15 }}</small>
+              </div>
+              <div class="duration-btn" onclick="selectDuration({{ plan.id }}, 30)">
+                <div>1 Month</div>
+                <small>₹{{ plan.daily_rate * 30 }}</small>
+              </div>
+              <div class="duration-btn" onclick="selectDuration({{ plan.id }}, 90)">
+                <div>3 Months</div>
+                <small>₹{{ plan.daily_rate * 90 }}</small>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Custom Date Selection -->
+          <div class="quick-duration" id="custom-{{ plan.id }}">
+            <div class="date-inputs">
+              <div>
+                <label>Start Date</label>
+                <input type="date" 
+                       name="start_{{ plan.id }}" 
+                       id="start-{{ plan.id }}"
+                       class="input" 
+                       min="{{ date.today() }}"
+                       onchange="calculateCost({{ plan.id }})">
+              </div>
+              <div>
+                <label>End Date</label>
+                <input type="date" 
+                       name="end_{{ plan.id }}" 
+                       id="end-{{ plan.id }}"
+                       class="input" 
+                       min="{{ date.today() }}"
+                       onchange="calculateCost({{ plan.id }})">
+              </div>
+            </div>
+          </div>
+          
+          <div class="cost-summary" id="cost-{{ plan.id }}" style="display: none;">
+            <div class="cost-row">
+              <span>Duration:</span>
+              <span id="duration-{{ plan.id }}">0 days</span>
+            </div>
+            <div class="cost-row">
+              <span>Daily Rate:</span>
+              <span>₹{{ plan.daily_rate }}</span>
+            </div>
+            <div class="cost-row cost-total">
+              <span>Total Cost:</span>
+              <span id="total-{{ plan.id }}">₹0</span>
+            </div>
+          </div>
+          
+          {% if plan.items %}
+          <div class="plan-items">
+            <h5><i class="fas fa-utensils"></i> What's Included:</h5>
+            <div class="items-list">
+              {% for item in plan.items|from_json %}
+              <div class="item-tag">{{ item }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        
+        <input type="hidden" name="plan_{{ plan.id }}" id="plan-input-{{ plan.id }}" value="">
+      </div>
     </div>
     {% endfor %}
-
-    <button class="btn-primary">Save Plans</button>
+    
+    <div class="submit-section">
+      <div class="selected-plans" id="selected-plans" style="display: none;">
+        <h4>Selected Plans Summary:</h4>
+        <div id="plans-summary"></div>
+      </div>
+      
+      <button type="submit" class="btn-primary" id="submit-btn" disabled>
+        <i class="fas fa-check"></i> Confirm Plan Selection
+      </button>
+      
+      <p style="margin-top: 15px; color: #6b7280; font-size: 0.9rem;">
+        <i class="fas fa-info-circle"></i> You can pause meals anytime and modify plans later
+      </p>
+    </div>
   </form>
-
 </div>
+
+<script>
+let selectedPlans = {};
+const today = new Date().toISOString().split('T')[0];
+
+function togglePlan(planId) {
+  const toggle = document.querySelector(`[data-plan-id="${planId}"] .toggle-switch`);
+  const options = document.getElementById(`options-${planId}`);
+  
+  if (toggle.classList.contains('active')) {
+    // Deactivate plan
+    toggle.classList.remove('active');
+    options.classList.remove('active');
+    delete selectedPlans[planId];
+    document.getElementById(`plan-input-${planId}`).value = '';
+  } else {
+    // Activate plan
+    toggle.classList.add('active');
+    options.classList.add('active');
+  }
+  
+  updateSummary();
+}
+
+function switchTab(planId, tabType) {
+  const tabs = document.querySelectorAll(`[data-plan-id="${planId}"] .duration-tab`);
+  const quickDiv = document.getElementById(`quick-${planId}`);
+  const customDiv = document.getElementById(`custom-${planId}`);
+  
+  tabs.forEach(tab => tab.classList.remove('active'));
+  
+  if (tabType === 'quick') {
+    tabs[0].classList.add('active');
+    quickDiv.classList.add('active');
+    customDiv.classList.remove('active');
+  } else {
+    tabs[1].classList.add('active');
+    quickDiv.classList.remove('active');
+    customDiv.classList.add('active');
+  }
+  
+  // Clear previous selection
+  document.querySelectorAll(`[data-plan-id="${planId}"] .duration-btn`).forEach(btn => {
+    btn.classList.remove('selected');
+  });
+  
+  calculateCost(planId);
+}
+
+function selectDuration(planId, days) {
+  // Clear other selections
+  document.querySelectorAll(`[data-plan-id="${planId}"] .duration-btn`).forEach(btn => {
+    btn.classList.remove('selected');
+  });
+  
+  // Select clicked button
+  event.target.closest('.duration-btn').classList.add('selected');
+  
+  // Calculate dates
+  const startDate = new Date();
+  const endDate = new Date();
+  endDate.setDate(startDate.getDate() + days - 1);
+  
+  // Update hidden inputs
+  document.getElementById(`start-${planId}`).value = startDate.toISOString().split('T')[0];
+  document.getElementById(`end-${planId}`).value = endDate.toISOString().split('T')[0];
+  
+  // Store selection
+  selectedPlans[planId] = {
+    startDate: startDate.toISOString().split('T')[0],
+    endDate: endDate.toISOString().split('T')[0],
+    days: days,
+    cost: days * getPlanRate(planId)
+  };
+  
+  // Update plan input
+  document.getElementById(`plan-input-${planId}`).value = '1';
+  
+  // Show cost summary
+  showCostSummary(planId, days);
+  updateSummary();
+}
+
+function calculateCost(planId) {
+  const startInput = document.getElementById(`start-${planId}`);
+  const endInput = document.getElementById(`end-${planId}`);
+  
+  if (startInput.value && endInput.value) {
+    const startDate = new Date(startInput.value);
+    const endDate = new Date(endInput.value);
+    
+    if (endDate >= startDate) {
+      const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+      const cost = days * getPlanRate(planId);
+      
+      selectedPlans[planId] = {
+        startDate: startInput.value,
+        endDate: endInput.value,
+        days: days,
+        cost: cost
+      };
+      
+      document.getElementById(`plan-input-${planId}`).value = '1';
+      showCostSummary(planId, days);
+      updateSummary();
+    }
+  }
+}
+
+function showCostSummary(planId, days) {
+  const cost = days * getPlanRate(planId);
+  document.getElementById(`duration-${planId}`).textContent = `${days} day${days > 1 ? 's' : ''}`;
+  document.getElementById(`total-${planId}`).textContent = `₹${cost}`;
+  document.getElementById(`cost-${planId}`).style.display = 'block';
+}
+
+function getPlanRate(planId) {
+  const rates = {
+    {% for plan in plans %}
+    {{ plan.id }}: {{ plan.daily_rate }},
+    {% endfor %}
+  };
+  return rates[planId] || 0;
+}
+
+function getPlanName(planId) {
+  const names = {
+    {% for plan in plans %}
+    {{ plan.id }}: "{{ plan.name }}",
+    {% endfor %}
+  };
+  return names[planId] || '';
+}
+
+function updateSummary() {
+  const summaryDiv = document.getElementById('plans-summary');
+  const selectedPlansDiv = document.getElementById('selected-plans');
+  const submitBtn = document.getElementById('submit-btn');
+  
+  const planCount = Object.keys(selectedPlans).length;
+  
+  if (planCount > 0) {
+    selectedPlansDiv.style.display = 'block';
+    submitBtn.disabled = false;
+    
+    let summaryHTML = '';
+    let totalCost = 0;
+    
+    for (const [planId, details] of Object.entries(selectedPlans)) {
+      summaryHTML += `
+        <div class="selected-plan">
+          <div>
+            <strong>${getPlanName(planId)}</strong><br>
+            <small>${details.startDate} to ${details.endDate} (${details.days} days)</small>
+          </div>
+          <div>₹${details.cost}</div>
+        </div>
+      `;
+      totalCost += details.cost;
+    }
+    
+    summaryHTML += `
+      <div class="selected-plan" style="background: var(--primary); color: white;">
+        <div><strong>Grand Total</strong></div>
+        <div><strong>₹${totalCost}</strong></div>
+      </div>
+    `;
+    
+    summaryDiv.innerHTML = summaryHTML;
+  } else {
+    selectedPlansDiv.style.display = 'none';
+    submitBtn.disabled = true;
+  }
+}
+
+// Form validation
+document.getElementById('plan-form').addEventListener('submit', function(e) {
+  const errorDiv = document.getElementById('error-message');
+  
+  if (Object.keys(selectedPlans).length === 0) {
+    e.preventDefault();
+    errorDiv.textContent = 'Please select at least one plan.';
+    errorDiv.style.display = 'block';
+    window.scrollTo(0, 0);
+    return;
+  }
+  
+  // Validate dates
+  for (const [planId, details] of Object.entries(selectedPlans)) {
+    if (!details.startDate || !details.endDate) {
+      e.preventDefault();
+      errorDiv.textContent = 'Please select valid dates for all plans.';
+      errorDiv.style.display = 'block';
+      window.scrollTo(0, 0);
+      return;
+    }
+  }
+  
+  errorDiv.style.display = 'none';
+});
+</script>
 
 </body>
 </html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Delivery Routes – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="app">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+    <div>
+      <a href="/admin" class="btn-outline">Dashboard</a>
+      <button onclick="window.print()" class="btn-primary">Print Routes</button>
+      <a href="/logout" class="btn-secondary">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Delivery Routes</h1>
+      <p>Delivery schedule for {{ delivery_date.strftime('%B %d, %Y') }}</p>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#ca8a04;">
+        <i class="fas fa-truck"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Total Deliveries</h3>
+        <p>{{ routes.values() | map('length') | sum }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#2563eb;">
+        <i class="fas fa-map-marker-alt"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Delivery Areas</h3>
+        <p>{{ routes|length }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROUTES BY AREA -->
+  {% if routes %}
+    {% for area, customers in routes.items() %}
+    <div class="table-card" style="margin-bottom:30px;">
+      <div class="table-header">
+        <i class="fas fa-map-marker-alt"></i> {{ area }}
+        <span class="badge-pill badge-active">{{ customers|length }} deliveries</span>
+      </div>
+
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Customer</th>
+            <th>Phone</th>
+            <th>Address</th>
+            <th>Plan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for customer in customers %}
+          <tr>
+            <td><strong>{{ customer.name }}</strong></td>
+            <td>{{ customer.phone }}</td>
+            <td>{{ customer.address }}</td>
+            <td>
+              <span class="badge-pill badge-paid">{{ customer.plan }}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="table-card">
+      <div style="padding:40px; text-align:center; color:#6b7280;">
+        <i class="fas fa-truck" style="font-size:48px; margin-bottom:16px;"></i>
+        <p>No deliveries scheduled for today</p>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- DELIVERY INSTRUCTIONS -->
+  <div class="activity-card">
+    <h3>Delivery Instructions</h3>
+    <ul style="color:#6b7280; line-height:1.6;">
+      <li>Follow the area-wise grouping for efficient routing</li>
+      <li>Call customers if they're not available at delivery time</li>
+      <li>Ensure meals are delivered hot and fresh</li>
+      <li>Mark deliveries as completed in the system</li>
+      <li>Report any delivery issues immediately</li>
+    </ul>
+  </div>
+
+</div>
+
+<style>
+@media print {
+  .navbar, .btn-primary, .btn-secondary, .btn-outline { display: none !important; }
+  .dashboard { margin: 0; padding: 20px; }
+  .table-card { page-break-inside: avoid; }
+}
+</style>
+
+</body>
+</html>

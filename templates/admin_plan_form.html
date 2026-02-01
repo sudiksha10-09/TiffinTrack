@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ 'Edit Plan' if plan else 'Add New Plan' }} – TiffinTrack Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="app">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack Admin</div>
+    <div class="nav-actions">
+      <a href="{{ url_for('admin_plans') }}" class="btn-outline">
+        <i class="fas fa-arrow-left"></i>
+        Back to Plans
+      </a>
+      <a href="/logout" class="btn-secondary">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </a>
+    </div>
+  </div>
+</nav>
+
+<!-- FLASH MESSAGES -->
+<div class="flash-messages">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash-message flash-{{ category }}">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+</div>
+
+<div class="dashboard" style="max-width: 800px;">
+  <div class="page-header" style="text-align: center; margin-bottom: 40px;">
+    <div class="page-title">
+      <h1>
+        <i class="fas fa-{{ 'edit' if plan else 'plus' }}" style="margin-right: 12px; color: var(--primary);"></i>
+        {{ 'Edit Plan' if plan else 'Add New Plan' }}
+      </h1>
+      <p>{{ 'Update the details of your meal plan' if plan else 'Create a new meal plan for your customers' }}</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <form method="POST" enctype="multipart/form-data" id="planForm">
+      
+      <!-- Plan Image -->
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+          <i class="fas fa-image" style="margin-right: 8px; color: var(--primary);"></i>
+          Plan Image
+        </label>
+        
+        <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+          {% if plan and plan.image_filename %}
+            <img id="imagePreview" 
+                 src="{{ url_for('static', filename='uploads/dishes/' + plan.image_filename) }}" 
+                 alt="Current plan image"
+                 style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px;">
+          {% else %}
+            <div id="imagePreview" class="image-placeholder">
+              <i class="fas fa-camera" style="font-size: 2rem; margin-bottom: 12px; color: var(--muted);"></i>
+              <p style="margin: 0; color: var(--text-secondary);">Click to upload dish image</p>
+              <p style="margin: 4px 0 0 0; font-size: 12px; color: var(--muted);">PNG, JPG, JPEG up to 16MB</p>
+            </div>
+          {% endif %}
+        </div>
+        
+        <input type="file" 
+               id="imageInput" 
+               name="image" 
+               accept="image/*" 
+               style="display: none;" 
+               onchange="previewImage(this)">
+      </div>
+
+      <!-- Plan Name -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+          <i class="fas fa-utensils" style="margin-right: 8px; color: var(--primary);"></i>
+          Plan Name *
+        </label>
+        <input type="text" 
+               name="name" 
+               class="input" 
+               placeholder="e.g., Veg Thali, Diet Special" 
+               value="{{ plan.name if plan else '' }}" 
+               required>
+      </div>
+
+      <!-- Daily Rate -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+          <i class="fas fa-rupee-sign" style="margin-right: 8px; color: var(--primary);"></i>
+          Daily Rate (₹) *
+        </label>
+        <input type="number" 
+               name="daily_rate" 
+               class="input" 
+               placeholder="120" 
+               min="1" 
+               value="{{ plan.daily_rate if plan else '' }}" 
+               required>
+      </div>
+
+      <!-- Description -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+          <i class="fas fa-align-left" style="margin-right: 8px; color: var(--primary);"></i>
+          Description
+        </label>
+        <textarea name="description" 
+                  class="input" 
+                  rows="3" 
+                  placeholder="Brief description of the meal plan"
+                  style="resize: vertical;">{{ plan.description if plan else '' }}</textarea>
+      </div>
+
+      <!-- Menu Items -->
+      <div style="margin-bottom: 24px;">
+        <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
+          <i class="fas fa-list" style="margin-right: 8px; color: var(--primary);"></i>
+          Menu Items
+        </label>
+        
+        <div id="itemsContainer">
+          {% if plan and plan.items %}
+            {% set items = plan.items | from_json %}
+            {% for item in items %}
+              <div class="item-input-group">
+                <input type="text" name="items" class="input" value="{{ item }}" placeholder="e.g., Basmati Rice">
+                <button type="button" onclick="removeItem(this)" class="btn-danger" style="padding: 12px; margin-left: 8px;">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            {% endfor %}
+          {% else %}
+            <div class="item-input-group">
+              <input type="text" name="items" class="input" placeholder="e.g., Basmati Rice">
+              <button type="button" onclick="removeItem(this)" class="btn-danger" style="padding: 12px; margin-left: 8px;">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          {% endif %}
+        </div>
+        
+        <button type="button" onclick="addItem()" class="btn-outline" style="margin-top: 12px;">
+          <i class="fas fa-plus"></i>
+          Add Item
+        </button>
+      </div>
+
+      <!-- Form Actions -->
+      <div style="display: flex; gap: 12px; justify-content: flex-end; padding-top: 20px; border-top: 1px solid var(--border);">
+        <a href="{{ url_for('admin_plans') }}" class="btn-outline">
+          <i class="fas fa-times"></i>
+          Cancel
+        </a>
+        <button type="submit" class="btn-primary" id="submitBtn">
+          <i class="fas fa-{{ 'save' if plan else 'plus' }}"></i>
+          {{ 'Update Plan' if plan else 'Create Plan' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function previewImage(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width: 100%; height: 200px; object-fit: cover; border-radius: 12px;">`;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  function addItem() {
+    const container = document.getElementById('itemsContainer');
+    const div = document.createElement('div');
+    div.className = 'item-input-group';
+    div.innerHTML = `
+      <input type="text" name="items" class="input" placeholder="e.g., Dal Tadka">
+      <button type="button" onclick="removeItem(this)" class="btn-danger" style="padding: 12px; margin-left: 8px;">
+        <i class="fas fa-trash"></i>
+      </button>
+    `;
+    container.appendChild(div);
+  }
+
+  function removeItem(button) {
+    const container = document.getElementById('itemsContainer');
+    if (container.children.length > 1) {
+      button.parentElement.remove();
+    } else {
+      // Clear the input instead of removing if it's the last one
+      button.parentElement.querySelector('input').value = '';
+    }
+  }
+
+  // Form submission with loading state
+  document.getElementById('planForm').addEventListener('submit', function(e) {
+    const btn = document.getElementById('submitBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<div class="loading"></div> Saving...';
+    btn.disabled = true;
+    
+    // Re-enable after 5 seconds in case of error
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }, 5000);
+  });
+
+  // Auto-hide flash messages
+  setTimeout(() => {
+    const flashMessages = document.querySelectorAll('.flash-message');
+    flashMessages.forEach(msg => {
+      msg.style.animation = 'slideOut 0.3s ease-out forwards';
+      setTimeout(() => msg.remove(), 300);
+    });
+  }, 5000);
+</script>
+
+<style>
+@keyframes slideOut {
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+.image-upload-area {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: var(--surface-hover);
+}
+
+.image-upload-area:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.image-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.item-input-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.item-input-group .input {
+  flex: 1;
+  margin-bottom: 0;
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+textarea.input {
+  font-family: inherit;
+  line-height: 1.5;
+}
+</style>
+
+</body>
+</html>

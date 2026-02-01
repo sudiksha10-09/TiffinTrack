@@ -37,7 +37,7 @@
       </div>
       <div class="kpi-info">
         <h3>Total Customers</h3>
-        <p>128</p>
+        <p>{{ stats.total_customers }}</p>
       </div>
     </div>
 
@@ -47,17 +47,17 @@
       </div>
       <div class="kpi-info">
         <h3>Meals Today</h3>
-        <p>312</p>
+        <p>{{ stats.today_meals }}</p>
       </div>
     </div>
 
     <div class="kpi-card">
       <div class="kpi-icon" style="background:#ca8a04;">
-        <i class="fas fa-truck"></i>
+        <i class="fas fa-pause-circle"></i>
       </div>
       <div class="kpi-info">
-        <h3>Deliveries</h3>
-        <p>286</p>
+        <h3>Paused Today</h3>
+        <p>{{ stats.today_paused }}</p>
       </div>
     </div>
 
@@ -66,8 +66,8 @@
         <i class="fas fa-wallet"></i>
       </div>
       <div class="kpi-info">
-        <h3>Pending Payments</h3>
-        <p>14</p>
+        <h3>Pending Bills</h3>
+        <p>{{ stats.pending_bills }}</p>
       </div>
     </div>
 
@@ -76,33 +76,53 @@
   <!-- QUICK ACTIONS -->
   <div class="quick-actions">
 
+    <div class="action-card" onclick="location.href='/admin/plans'">
+      <div class="action-icon">
+        <i class="fas fa-utensils"></i>
+      </div>
+      <div class="action-info">
+        <h4>Manage Plans</h4>
+        <p>Create, edit, and manage meal plans with images.</p>
+      </div>
+    </div>
+
     <div class="action-card" onclick="location.href='/customers'">
       <div class="action-icon">
         <i class="fas fa-users"></i>
       </div>
       <div class="action-info">
         <h4>Manage Customers</h4>
-        <p>Add, update or pause subscriptions.</p>
+        <p>Add, update or manage customer subscriptions.</p>
       </div>
     </div>
 
-    <div class="action-card">
+    <div class="action-card" onclick="location.href='/kitchen-report'">
       <div class="action-icon">
-        <i class="fas fa-calendar-check"></i>
+        <i class="fas fa-utensils"></i>
       </div>
       <div class="action-info">
-        <h4>Meal Planning</h4>
-        <p>Plan today's menu and quantities.</p>
+        <h4>Kitchen Report</h4>
+        <p>View today's meal preparation requirements.</p>
       </div>
     </div>
 
-    <div class="action-card">
+    <div class="action-card" onclick="location.href='/delivery-routes'">
       <div class="action-icon">
-        <i class="fas fa-chart-line"></i>
+        <i class="fas fa-truck"></i>
       </div>
       <div class="action-info">
-        <h4>Reports</h4>
-        <p>View revenue and delivery metrics.</p>
+        <h4>Delivery Routes</h4>
+        <p>Manage delivery schedules and routes.</p>
+      </div>
+    </div>
+
+    <div class="action-card" onclick="location.href='/bills'">
+      <div class="action-icon">
+        <i class="fas fa-file-invoice"></i>
+      </div>
+      <div class="action-info">
+        <h4>Bill Management</h4>
+        <p>Generate and manage customer bills.</p>
       </div>
     </div>
 
@@ -117,30 +137,31 @@
 
       <div class="activity-item">
         <div class="activity-dot" style="background:#16a34a;"></div>
-        <div class="activity-text">New customer Sarah subscribed.</div>
-        <div class="activity-time">2m ago</div>
+        <div class="activity-text">Kitchen report generated for today.</div>
+        <div class="activity-time">5m ago</div>
       </div>
 
       <div class="activity-item">
         <div class="activity-dot" style="background:#2563eb;"></div>
-        <div class="activity-text">Today's meal plan generated.</div>
+        <div class="activity-text">{{ stats.today_meals }} meals scheduled for delivery.</div>
         <div class="activity-time">18m ago</div>
       </div>
 
       <div class="activity-item">
         <div class="activity-dot" style="background:#dc2626;"></div>
-        <div class="activity-text">Payment pending from Michael.</div>
+        <div class="activity-text">{{ stats.pending_bills }} pending payment reminders sent.</div>
         <div class="activity-time">1h ago</div>
       </div>
     </div>
 
     <!-- Tips -->
     <div class="activity-card">
-      <h3>Tips</h3>
+      <h3>Daily Checklist</h3>
       <p style="color:#6b7280;">
-        ✔ Check pending payments daily.<br><br>
-        ✔ Optimize meal planning based on demand.<br><br>
-        ✔ Keep customer satisfaction high.
+        ✔ Check kitchen report for meal preparation<br><br>
+        ✔ Review delivery routes and assignments<br><br>
+        ✔ Follow up on pending payments<br><br>
+        ✔ Monitor customer pause requests
       </p>
     </div>
 
@@ -150,7 +171,7 @@
 
 <script>
   function handleLogout() {
-    window.location.href = "/login";
+    window.location.href = "/logout";
   }
 </script>
 

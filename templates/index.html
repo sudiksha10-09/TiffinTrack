@@ -17,8 +17,14 @@
     <div class="logo">🥗 TiffinTrack</div>
 
     <div class="nav-actions">
-      <a href="{{ url_for('login') }}" class="btn-outline">Login</a>
-      <a href="{{ url_for('register') }}" class="btn-primary">Get Started</a>
+      <a href="{{ url_for('login') }}" class="btn-outline">
+        <i class="fas fa-sign-in-alt"></i>
+        Login
+      </a>
+      <a href="{{ url_for('register') }}" class="btn-primary">
+        <i class="fas fa-user-plus"></i>
+        Get Started
+      </a>
     </div>
   </div>
 </header>
@@ -29,117 +35,264 @@
 
     <!-- Text -->
     <div class="hero-text">
-      <span class="badge">Healthy • Fresh • Trusted</span>
+      <span class="badge">
+        <i class="fas fa-leaf"></i>
+        Healthy • Fresh • Trusted
+      </span>
       <h1>Daily Healthy Meals, <br>Delivered With Care</h1>
       <p>
-        Enjoy chef-prepared tiffins made from fresh ingredients. 
-        Designed for busy professionals who care about health.
+        Experience the convenience of chef-prepared tiffins made from the freshest ingredients. 
+        Perfect for busy professionals who never want to compromise on health and taste.
       </p>
 
       <div class="hero-buttons">
-        <a href="{{ url_for('register') }}" class="btn-primary">Start Subscription</a>
-        <a href="#menu" class="btn-secondary">View Menu</a>
+        <a href="{{ url_for('register') }}" class="btn-primary">
+          <i class="fas fa-rocket"></i>
+          Start Your Journey
+        </a>
+        <a href="#features" class="btn-secondary">
+          <i class="fas fa-play-circle"></i>
+          Learn More
+        </a>
       </div>
 
       <div class="trust">
-        <div>⭐ 4.9 Rating</div>
-        <div>🥗 500+ Daily Meals</div>
-        <div>🚚 Same-day Delivery</div>
+        <div><i class="fas fa-star"></i> 4.9 Rating</div>
+        <div><i class="fas fa-utensils"></i> 500+ Daily Meals</div>
+        <div><i class="fas fa-truck-fast"></i> Same-day Delivery</div>
       </div>
     </div>
 
     <!-- Image -->
     <div class="hero-image">
       <img src="{{ url_for('static', filename='images/healthy-food.jpeg') }}" alt="Healthy Food">
+      <div style="position: absolute; top: 20px; right: 20px; background: var(--success); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+        <i class="fas fa-check-circle"></i> Fresh Daily
+      </div>
     </div>
 
   </div>
 </section>
 
 <!-- FEATURES -->
-<section class="features">
+<section class="features" id="features">
   <div class="feature-card">
     <i class="fas fa-seedling"></i>
-    <h3>Fresh Ingredients</h3>
-    <p>Locally sourced vegetables cooked daily.</p>
+    <h3>Farm Fresh Ingredients</h3>
+    <p>Locally sourced vegetables and ingredients, prepared fresh every morning for maximum nutrition and taste.</p>
   </div>
 
   <div class="feature-card">
-    <i class="fas fa-heart"></i>
+    <i class="fas fa-heart-pulse"></i>
     <h3>Nutrition Focused</h3>
-    <p>Balanced meals designed by diet experts.</p>
+    <p>Balanced meals designed by nutrition experts to fuel your body with the right nutrients for optimal health.</p>
   </div>
 
   <div class="feature-card">
-    <i class="fas fa-truck"></i>
-    <h3>Fast Delivery</h3>
-    <p>Hot meals delivered on schedule.</p>
+    <i class="fas fa-clock"></i>
+    <h3>Always On Time</h3>
+    <p>Reliable delivery schedule ensures your hot, fresh meals arrive exactly when you need them, every single day.</p>
   </div>
 </section>
+
 <section class="how-it-works">
-  <h2>How It Works</h2>
+  <h2>How TiffinTrack Works</h2>
 
   <div class="steps">
     <div class="step-card">
       <i class="fas fa-user-plus"></i>
-      <h4>Register</h4>
-      <p>Create your account in seconds.</p>
+      <h4>1. Create Account</h4>
+      <p>Sign up in seconds with your delivery details and preferences.</p>
     </div>
 
     <div class="step-card">
-      <i class="fas fa-calendar-check"></i>
-      <h4>Select Plan</h4>
-      <p>Choose your meal plan and dates.</p>
+      <i class="fas fa-clipboard-list"></i>
+      <h4>2. Choose Your Plan</h4>
+      <p>Select from our variety of meal plans and set your delivery schedule.</p>
     </div>
 
     <div class="step-card">
-      <i class="fas fa-pause-circle"></i>
-      <h4>Pause Anytime</h4>
-      <p>Skip meals when you're away.</p>
+      <i class="fas fa-mobile-alt"></i>
+      <h4>3. Manage Easily</h4>
+      <p>Use our smart pause feature to skip meals when you're away - save money automatically.</p>
     </div>
 
     <div class="step-card">
       <i class="fas fa-truck"></i>
-      <h4>Enjoy Delivery</h4>
-      <p>Fresh meals delivered daily.</p>
+      <h4>4. Enjoy Fresh Meals</h4>
+      <p>Receive hot, delicious meals delivered right to your doorstep daily.</p>
     </div>
   </div>
 </section>
+
+<!-- UNIQUE FEATURES -->
+<section style="padding: 80px 20px; background: linear-gradient(135deg, var(--primary-light) 0%, var(--surface) 100%);">
+  <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+    <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; color: var(--text-primary);">
+      Why Choose TiffinTrack?
+    </h2>
+    <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 48px; max-width: 600px; margin-left: auto; margin-right: auto;">
+      We're not just another food delivery service. We're your partner in healthy living.
+    </p>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; margin-top: 48px;">
+      
+      <div class="feature-card" style="text-align: left;">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+          <div style="width: 48px; height: 48px; background: var(--primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-pause-circle" style="color: white; font-size: 20px;"></i>
+          </div>
+          <h3 style="margin: 0; color: var(--primary);">Smart Pause System</h3>
+        </div>
+        <p>Our unique pause feature lets you skip meals when traveling or busy. Paused days are automatically excluded from your bill - no manual adjustments needed!</p>
+      </div>
+      
+      <div class="feature-card" style="text-align: left;">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+          <div style="width: 48px; height: 48px; background: var(--secondary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-chart-line" style="color: white; font-size: 20px;"></i>
+          </div>
+          <h3 style="margin: 0; color: var(--secondary);">Transparent Billing</h3>
+        </div>
+        <p>See exactly what you're paying for with our detailed billing breakdown. Track your paused days, active days, and total costs with complete transparency.</p>
+      </div>
+      
+      <div class="feature-card" style="text-align: left;">
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+          <div style="width: 48px; height: 48px; background: var(--success); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-leaf" style="color: white; font-size: 20px;"></i>
+          </div>
+          <h3 style="margin: 0; color: var(--success);">Zero Waste Promise</h3>
+        </div>
+        <p>Our smart kitchen reports ensure we prepare exactly the right amount of food based on active orders, minimizing waste and keeping meals fresh.</p>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
 <section class="testimonials">
   <h2>What Our Customers Say</h2>
 
   <div class="testimonial-grid">
     <div class="testimonial-card">
-      <p>"Fresh food, great taste and always on time!"</p>
-      <h4>— Riya Sharma</h4>
+      <p>"The pause feature is a game-changer! I travel frequently for work, and TiffinTrack automatically adjusts my bill for the days I'm away. So convenient!"</p>
+      <h4>— Riya Sharma, Software Engineer</h4>
     </div>
 
     <div class="testimonial-card">
-      <p>"Pause feature saves money when traveling."</p>
-      <h4>— Aman Patil</h4>
+      <p>"Fresh, healthy meals delivered on time every day. The transparent billing system shows exactly what I'm paying for. Highly recommended!"</p>
+      <h4>— Aman Patil, Marketing Manager</h4>
     </div>
 
     <div class="testimonial-card">
-      <p>"Best tiffin service in Navi Mumbai."</p>
-      <h4>— Sneha Kulkarni</h4>
+      <p>"Best tiffin service in Mumbai! The food quality is excellent, and the digital platform makes managing my subscription so easy."</p>
+      <h4>— Sneha Kulkarni, Doctor</h4>
     </div>
   </div>
 </section>
+
+<!-- CTA SECTION -->
+<section style="padding: 80px 20px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; text-align: center;">
+  <div style="max-width: 800px; margin: 0 auto;">
+    <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px;">
+      Ready to Transform Your Meals?
+    </h2>
+    <p style="font-size: 1.2rem; margin-bottom: 32px; opacity: 0.9;">
+      Join thousands of satisfied customers who have made the smart choice for healthy, convenient dining.
+    </p>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <a href="{{ url_for('register') }}" class="btn-primary" style="background: white; color: var(--primary); font-size: 16px; padding: 16px 32px;">
+        <i class="fas fa-rocket"></i>
+        Start Your Free Trial
+      </a>
+      <a href="{{ url_for('login') }}" class="btn-outline" style="border-color: white; color: white; font-size: 16px; padding: 16px 32px;">
+        <i class="fas fa-sign-in-alt"></i>
+        Sign In
+      </a>
+    </div>
+  </div>
+</section>
+
 <footer class="footer">
   <div>
     <strong>TiffinTrack</strong>
-    <p>Healthy meals delivered with care.</p>
+    <p>Revolutionizing meal delivery with smart technology and fresh, healthy food.</p>
+    <div style="margin-top: 16px;">
+      <a href="#" style="color: var(--primary); margin-right: 16px;"><i class="fab fa-facebook"></i></a>
+      <a href="#" style="color: var(--primary); margin-right: 16px;"><i class="fab fa-twitter"></i></a>
+      <a href="#" style="color: var(--primary); margin-right: 16px;"><i class="fab fa-instagram"></i></a>
+    </div>
   </div>
 
   <div>
-    <p>Email: support@tiffintrack.com</p>
-    <p>Phone: +91 90000 00000</p>
+    <strong>Contact Us</strong>
+    <p><i class="fas fa-envelope"></i> support@tiffintrack.com</p>
+    <p><i class="fas fa-phone"></i> +91 90000 00000</p>
+    <p><i class="fas fa-map-marker-alt"></i> Mumbai, Maharashtra</p>
   </div>
 
   <div>
-    <p>© 2026 TiffinTrack</p>
+    <strong>Quick Links</strong>
+    <p><a href="{{ url_for('login') }}" style="color: #d1d5db;">Login</a></p>
+    <p><a href="{{ url_for('register') }}" style="color: #d1d5db;">Register</a></p>
+    <p><a href="{{ url_for('terms') }}" style="color: #d1d5db;">Terms & Conditions</a></p>
+  </div>
+
+  <div>
+    <p style="font-size: 14px; opacity: 0.8;">© 2026 TiffinTrack</p>
+    <p style="font-size: 12px; opacity: 0.6;">Made with ❤️ for healthy living</p>
   </div>
 </footer>
+
+<script>
+  // Smooth scrolling for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      }
+    });
+  });
+
+  // Add scroll effect to navbar
+  window.addEventListener('scroll', function() {
+    const navbar = document.querySelector('.navbar');
+    if (window.scrollY > 100) {
+      navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+      navbar.style.boxShadow = 'var(--shadow-md)';
+    } else {
+      navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+      navbar.style.boxShadow = 'var(--shadow-sm)';
+    }
+  });
+
+  // Animate elements on scroll
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver(function(entries) {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animation = 'slideIn 0.6s ease-out forwards';
+      }
+    });
+  }, observerOptions);
+
+  // Observe all feature cards and step cards
+  document.querySelectorAll('.feature-card, .step-card, .testimonial-card').forEach(card => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(20px)';
+    observer.observe(card);
+  });
+</script>
 
 </body>
 </html>

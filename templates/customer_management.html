@@ -5,7 +5,6 @@
   <title>Customers – TiffinTrack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- ✅ CSS MUST LOAD -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
@@ -35,8 +34,8 @@
     </div>
 
     <div class="toolbar">
-      <input class="search-input" placeholder="Search customers...">
-      <button class="btn-primary">+ Add Customer</button>
+      <input class="search-input" placeholder="Search customers..." onkeyup="filterCustomers()">
+      <button class="btn-primary" onclick="showAddCustomerModal()">+ Add Customer</button>
     </div>
   </div>
 
@@ -49,7 +48,7 @@
       </div>
       <div class="stat-info">
         <h3>Total</h3>
-        <p id="total-customers">0</p>
+        <p>{{ customers|length }}</p>
       </div>
     </div>
 
@@ -59,7 +58,7 @@
       </div>
       <div class="stat-info">
         <h3>Active</h3>
-        <p id="active-subscriptions">0</p>
+        <p>{{ customers | selectattr('status', 'equalto', 'Active') | list | length }}</p>
       </div>
     </div>
 
@@ -69,7 +68,7 @@
       </div>
       <div class="stat-info">
         <h3>Paused</h3>
-        <p id="paused-services">0</p>
+        <p>{{ customers | selectattr('status', 'equalto', 'Paused') | list | length }}</p>
       </div>
     </div>
 
@@ -79,7 +78,7 @@
       </div>
       <div class="stat-info">
         <h3>Pending</h3>
-        <p id="pending-payments">0</p>
+        <p>{{ customers | selectattr('payment', 'equalto', 'Pending') | list | length }}</p>
       </div>
     </div>
 
@@ -96,58 +95,229 @@
       <thead>
         <tr>
           <th>Name</th>
+          <th>Contact</th>
+          <th>Area</th>
+          <th>Plan</th>
           <th>Status</th>
           <th>Payment</th>
-          <th>Diet</th>
         </tr>
       </thead>
-      <tbody id="customer-table-body"></tbody>
+      <tbody id="customer-table-body">
+        {% for customer in customers %}
+        <tr>
+          <td><strong>{{ customer.name }}</strong></td>
+          <td>
+            {{ customer.phone }}<br>
+            <small style="color:#6b7280;">{{ customer.email }}</small>
+          </td>
+          <td>{{ customer.area }}</td>
+          <td>{{ customer.plan }}</td>
+          <td>
+            {% if customer.status == 'Active' %}
+              <span class="badge-pill badge-active">{{ customer.status }}</span>
+            {% else %}
+              <span class="badge-pill badge-paused">{{ customer.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if customer.payment == 'Paid' %}
+              <span class="badge-pill badge-paid">{{ customer.payment }}</span>
+            {% else %}
+              <span class="badge-pill badge-pending">{{ customer.payment }}</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
     </table>
 
   </div>
 
 </div>
 
+<!-- ADD CUSTOMER MODAL -->
+<div id="addCustomerModal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Add New Customer</h3>
+      <button onclick="hideAddCustomerModal()" class="modal-close">&times;</button>
+    </div>
+    
+    <form id="addCustomerForm">
+      <div class="form-grid">
+        <div>
+          <label>Full Name</label>
+          <input type="text" name="fullname" class="input" required>
+        </div>
+        
+        <div>
+          <label>Email</label>
+          <input type="email" name="email" class="input" required>
+        </div>
+        
+        <div>
+          <label>Phone</label>
+          <input type="tel" name="phone" class="input" required>
+        </div>
+        
+        <div>
+          <label>Delivery Area</label>
+          <select name="delivery_area" class="input" required>
+            <option value="">Select Area</option>
+            <option value="Sector 9">Sector 9</option>
+            <option value="Sector 10">Sector 10</option>
+            <option value="Sector 11">Sector 11</option>
+            <option value="Vashi">Vashi</option>
+            <option value="Nerul">Nerul</option>
+          </select>
+        </div>
+        
+        <div>
+          <label>Address Line 1</label>
+          <input type="text" name="addr1" class="input" required>
+        </div>
+        
+        <div>
+          <label>Address Line 2</label>
+          <input type="text" name="addr2" class="input">
+        </div>
+        
+        <div>
+          <label>City</label>
+          <input type="text" name="city" class="input" required>
+        </div>
+        
+        <div>
+          <label>State</label>
+          <input type="text" name="state" class="input" required>
+        </div>
+        
+        <div>
+          <label>Pincode</label>
+          <input type="text" name="pincode" class="input" required>
+        </div>
+      </div>
+      
+      <div class="modal-actions">
+        <button type="button" onclick="hideAddCustomerModal()" class="btn-outline">Cancel</button>
+        <button type="submit" class="btn-primary">Add Customer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  padding: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+
 <script>
-  const customers = [
-    { name: "Sarah", status: "active", payment: "paid", diet: "vegetarian" },
-    { name: "Michael", status: "paused", payment: "pending", diet: "non-veg" },
-    { name: "Emily", status: "active", payment: "paid", diet: "vegan" }
-  ];
+function filterCustomers() {
+  const searchTerm = document.querySelector('.search-input').value.toLowerCase();
+  const rows = document.querySelectorAll('#customer-table-body tr');
+  
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(searchTerm) ? '' : 'none';
+  });
+}
 
-  function badgeClass(type) {
-    return "badge-pill badge-" + type;
-  }
+function showAddCustomerModal() {
+  document.getElementById('addCustomerModal').style.display = 'flex';
+}
 
-  function renderCustomers() {
-    const tbody = document.getElementById("customer-table-body");
-    tbody.innerHTML = "";
+function hideAddCustomerModal() {
+  document.getElementById('addCustomerModal').style.display = 'none';
+  document.getElementById('addCustomerForm').reset();
+}
 
-    customers.forEach(c => {
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td><strong>${c.name}</strong></td>
-        <td><span class="${badgeClass(c.status)}">${c.status}</span></td>
-        <td><span class="${badgeClass(c.payment)}">${c.payment}</span></td>
-        <td style="text-transform:capitalize">${c.diet}</td>
-      `;
-      tbody.appendChild(row);
+document.getElementById('addCustomerForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  
+  const formData = new FormData(this);
+  const data = Object.fromEntries(formData.entries());
+  
+  try {
+    const response = await fetch('/customers/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
     });
-
-    document.getElementById("total-customers").innerText = customers.length;
-    document.getElementById("active-subscriptions").innerText =
-      customers.filter(c => c.status === "active").length;
-    document.getElementById("paused-services").innerText =
-      customers.filter(c => c.status === "paused").length;
-    document.getElementById("pending-payments").innerText =
-      customers.filter(c => c.payment === "pending").length;
+    
+    const result = await response.json();
+    
+    if (result.success) {
+      alert('Customer added successfully!');
+      location.reload();
+    } else {
+      alert('Error: ' + result.message);
+    }
+  } catch (error) {
+    alert('Error adding customer');
   }
+});
 
-  renderCustomers();
-
-  function handleLogout() {
-    window.location.href = "/login";
-  }
+function handleLogout() {
+  window.location.href = "/logout";
+}
 </script>
 
 </body>

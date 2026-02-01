@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bill Management – TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body class="app">
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="nav-container">
+    <div class="logo">🍱 TiffinTrack</div>
+    <div>
+      <a href="/admin" class="btn-outline">Dashboard</a>
+      <a href="/logout" class="btn-secondary">Logout</a>
+    </div>
+  </div>
+</nav>
+
+<div class="dashboard">
+  <div class="page-header">
+    <div class="page-title">
+      <h1>Bill Management</h1>
+      <p>Manage customer billing and payments</p>
+    </div>
+
+    <div class="toolbar">
+      <select id="monthSelect" class="input" style="width:auto;">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+      
+      <select id="yearSelect" class="input" style="width:auto;">
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2026" selected>2026</option>
+      </select>
+      
+      <button onclick="generateBills()" class="btn-primary">Generate Bills</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#2563eb;">
+        <i class="fas fa-file-invoice"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Total Bills</h3>
+        <p>{{ bills|length }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#16a34a;">
+        <i class="fas fa-check-circle"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Paid</h3>
+        <p>{{ bills | selectattr('0.is_paid') | list | length }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#dc2626;">
+        <i class="fas fa-clock"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Pending</h3>
+        <p>{{ bills | rejectattr('0.is_paid') | list | length }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background:#ca8a04;">
+        <i class="fas fa-rupee-sign"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Total Revenue</h3>
+        <p>₹ {{ bills | map(attribute='0.amount') | sum }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BILLS TABLE -->
+  <div class="table-card">
+    <div class="table-header">
+      Customer Bills
+    </div>
+
+    {% if bills %}
+    <table class="dashboard-table">
+      <thead>
+        <tr>
+          <th>Customer</th>
+          <th>Month/Year</th>
+          <th>Total Days</th>
+          <th>Paused Days</th>
+          <th>Billable Days</th>
+          <th>Amount</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for bill, user in bills %}
+        <tr>
+          <td><strong>{{ user.fullname }}</strong></td>
+          <td>{{ bill.month }}/{{ bill.year }}</td>
+          <td>{{ bill.total_days }}</td>
+          <td>{{ bill.paused_days }}</td>
+          <td>{{ bill.billable_days }}</td>
+          <td><strong>₹ {{ bill.amount }}</strong></td>
+          <td>
+            {% if bill.is_paid %}
+              <span class="badge-pill badge-paid">Paid</span>
+            {% else %}
+              <span class="badge-pill badge-pending">Pending</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if not bill.is_paid %}
+              <button onclick="markPaid({{ bill.id }})" class="btn-outline" style="font-size:12px; padding:4px 8px;">
+                Mark Paid
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div style="padding:40px; text-align:center; color:#6b7280;">
+      <i class="fas fa-file-invoice" style="font-size:48px; margin-bottom:16px;"></i>
+      <p>No bills generated yet</p>
+      <p>Use the "Generate Bills" button to create monthly bills</p>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+function generateBills() {
+  const month = document.getElementById('monthSelect').value;
+  const year = document.getElementById('yearSelect').value;
+  
+  if (confirm(`Generate bills for ${month}/${year}?`)) {
+    window.location.href = `/bills/generate/${month}/${year}`;
+  }
+}
+
+function markPaid(billId) {
+  if (confirm('Mark this bill as paid?')) {
+    window.location.href = `/bills/mark-paid/${billId}`;
+  }
+}
+
+// Set current month/year as default
+const now = new Date();
+document.getElementById('monthSelect').value = now.getMonth() + 1;
+document.getElementById('yearSelect').value = now.getFullYear();
+</script>
+
+</body>
+</html>
