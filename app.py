@@ -17,24 +17,34 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Database Configuration for MySQL/SQLite
+# Database Configuration for Neon PostgreSQL
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    DATABASE_URL = "sqlite:///tiffintrack.db"
+    # Default to Neon PostgreSQL
+    DATABASE_URL = "postgresql://neondb_owner:npg_nsMXcjJ1pB9t@ep-red-paper-ah0u6oe0-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
-# Force SQLite for development if PostgreSQL connection fails
+# Enhanced connection handling for Neon
 if "postgresql" in DATABASE_URL:
     try:
+        # Test connection with a simple query
         import psycopg2
-        # Test if we can resolve the hostname
-        import socket
-        hostname = DATABASE_URL.split('@')[1].split('/')[0].split(':')[0]
-        socket.gethostbyname(hostname)
-        print(f"🔗 Using PostgreSQL database: {hostname}")
-    except (ImportError, socket.gaierror, IndexError) as e:
-        print(f"⚠️ PostgreSQL connection issue: {e}")
-        print("🔄 Falling back to SQLite for development")
-        DATABASE_URL = "sqlite:///tiffintrack.db"
+        test_conn = psycopg2.connect(DATABASE_URL)
+        test_conn.close()
+        print(f"🔗 Connected to Neon PostgreSQL database")
+    except Exception as e:
+        print(f"⚠️ Neon connection issue: {e}")
+        # Try alternative connection string (without pooler)
+        if "pooler" in DATABASE_URL:
+            alt_url = DATABASE_URL.replace("-pooler", "").replace("?sslmode=require", "?sslmode=prefer")
+            try:
+                test_conn = psycopg2.connect(alt_url)
+                test_conn.close()
+                DATABASE_URL = alt_url
+                print(f"🔄 Using direct Neon connection")
+            except Exception as alt_e:
+                print(f"❌ Alternative connection also failed: {alt_e}")
+                print("💡 Please check your internet connection and Neon database status")
+                raise
 
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -55,24 +65,20 @@ migrate = Migrate(app, db)
 
 # Database connection verification
 def verify_database_connection():
-    """Verify database connection and fallback if needed"""
+    """Verify database connection and setup"""
     try:
         with app.app_context():
-            db.engine.connect()
+            # Test connection
+            connection = db.engine.connect()
+            connection.close()
+            
+            # Check if we have data
+            user_count = User.query.count()
+            print(f"✅ Database ready with {user_count} users")
+            
         return True
     except Exception as e:
         print(f"❌ Database connection failed: {e}")
-        if "postgresql" in app.config["SQLALCHEMY_DATABASE_URI"]:
-            print("🔄 Switching to SQLite fallback...")
-            app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tiffintrack.db"
-            try:
-                with app.app_context():
-                    db.engine.connect()
-                print("✅ SQLite fallback successful")
-                return True
-            except Exception as fallback_error:
-                print(f"❌ SQLite fallback also failed: {fallback_error}")
-                return False
         return False
 
 if "mysql" in DATABASE_URL:

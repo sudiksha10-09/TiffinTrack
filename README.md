@@ -1,11 +1,11 @@
 # TiffinTrack - Modern Tiffin Service Management System
 
-A comprehensive web-based management system for tiffin services in Navi Mumbai, built with Flask and SQLite database.
+A comprehensive web-based management system for tiffin services in Navi Mumbai, built with Flask and Neon PostgreSQL database.
 
 ## 🚀 Tech Stack
 
 - **Backend**: Python Flask 3.1.0
-- **Database**: SQLite (Development) / MySQL (Production)
+- **Database**: Neon PostgreSQL (Production) / SQLite (Development fallback)
 - **ORM**: SQLAlchemy with Flask-SQLAlchemy
 - **Migrations**: Flask-Migrate (Alembic)
 - **Frontend**: HTML5, CSS3, JavaScript
@@ -22,7 +22,7 @@ Flask Application (app.py)
 ├── Routes (Flask Blueprints)
 ├── Templates (Jinja2)
 ├── Static Assets (CSS/JS/Images)
-└── Database (SQLite/MySQL)
+└── Database (Neon PostgreSQL/SQLite)
 ```
 
 ## 🚀 Quick Start
@@ -30,6 +30,7 @@ Flask Application (app.py)
 ### Prerequisites
 - Python 3.9+
 - Git
+- Internet connection (for Neon PostgreSQL)
 
 ### Installation
 
@@ -49,24 +50,20 @@ Flask Application (app.py)
    # Copy the example environment file
    cp .env.example .env
    
-   # Edit .env with your database configuration
-   # For development, you can use SQLite:
-   DATABASE_URL=sqlite:///tiffintrack.db
-   SECRET_KEY=your-secret-key-here
+   # The app is pre-configured with Neon PostgreSQL
+   # DATABASE_URL is already set for production use
    ```
 
-4. **Initialize Database**
+4. **Run Application**
    ```bash
-   # Create database tables and seed initial data
-   python -c "from app import app, db, seed_initial_data; app.app_context().push(); db.create_all(); seed_initial_data()"
-   ```
-
-5. **Run Application**
-   ```bash
+   # Recommended: Use the startup script (handles database automatically)
+   python start_app.py
+   
+   # Alternative: Direct run
    python app.py
    ```
 
-6. **Access Application**
+5. **Access Application**
    - URL: http://127.0.0.1:5000
    - Admin: `admin@tiffintrack.com` / `admin123`
    - Test Customer: `rahul.sharma@email.com` / `password123`
@@ -181,21 +178,25 @@ python -c "from app import app, db, seed_initial_data; app.app_context().push();
 
 ## 🚀 Deployment
 
-### Production Setup (MySQL)
-1. **Update .env for MySQL**
+### Production Setup (Neon PostgreSQL)
+1. **Database is pre-configured**
    ```bash
-   DATABASE_URL=mysql+pymysql://root:password@localhost/tiffintrack
-   SECRET_KEY=your-production-secret-key
+   # Neon PostgreSQL is already configured in .env
+   # DATABASE_URL=postgresql://neondb_owner:...@ep-red-paper-ah0u6oe0-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require
    ```
 
-2. **Install MySQL dependencies**
-   ```bash
-   pip install PyMySQL
-   ```
-
-3. **Run Application**
+2. **Run Application**
    ```bash
    python app.py
+   # or
+   python start_app.py
+   ```
+
+### Development Setup (SQLite fallback)
+1. **Switch to SQLite for local development**
+   ```bash
+   python switch_database.py
+   # Choose option 2: Switch to SQLite
    ```
 
 ## 📈 Business Logic
@@ -265,15 +266,20 @@ def calculate_bill(customer_id, month, year):
 ### Database Testing
 ```bash
 # Test database connection
-python -c "from app import app, db; app.app_context().push(); print('Database connected:', db.engine.execute('SELECT 1').scalar())"
+python -c "from app import app, db; app.app_context().push(); print('Database connected:', db.engine.connect())"
+
+# Check current database status
+python switch_database.py
+# Choose option 1: Show current database
 ```
 
 ## 📞 Support
 
 ### Database Issues
-- Check if tiffintrack.db file exists
-- Verify DATABASE_URL in .env file
-- Review Flask debug output for errors
+- Use `python switch_database.py` to switch between Neon PostgreSQL and SQLite
+- Check if DATABASE_URL in .env file is correct
+- For Neon issues, verify internet connection and database status
+- SQLite fallback available for offline development
 
 ### Application Issues
 - Check Flask debug output

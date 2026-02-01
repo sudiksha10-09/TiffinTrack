@@ -31,7 +31,15 @@ def switch_to_neon():
     """Switch to Neon PostgreSQL database"""
     print("🔄 Switching to Neon PostgreSQL...")
     
-    neon_url = input("Enter your Neon PostgreSQL URL: ").strip()
+    # Default Neon URL (pre-configured)
+    default_neon_url = "postgresql://neondb_owner:npg_nsMXcjJ1pB9t@ep-red-paper-ah0u6oe0-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require"
+    
+    print("Using pre-configured Neon PostgreSQL database...")
+    neon_url = input(f"Press Enter to use default Neon URL, or enter custom URL: ").strip()
+    
+    if not neon_url:
+        neon_url = default_neon_url
+        print("✅ Using default Neon PostgreSQL configuration")
     
     if not neon_url.startswith('postgresql://'):
         print("❌ Invalid PostgreSQL URL. Should start with 'postgresql://'")
@@ -42,18 +50,25 @@ def switch_to_neon():
     
     # Test connection
     try:
-        from app import app, db, seed_initial_data
+        from app import app, db, User, Plan
         with app.app_context():
             # Test connection
             db.engine.connect()
             print("✅ Neon connection successful!")
             
+            # Show current data
+            user_count = User.query.count()
+            plan_count = Plan.query.count()
+            print(f"📊 Database contains {user_count} users and {plan_count} plans")
+            
             # Initialize if needed
-            choice = input("Initialize database with tables and data? (y/N): ").lower()
-            if choice == 'y':
-                db.create_all()
-                seed_initial_data()
-                print("✅ Neon database initialized!")
+            if user_count == 0:
+                choice = input("Database is empty. Initialize with sample data? (Y/n): ").lower()
+                if choice != 'n':
+                    from app import seed_initial_data
+                    db.create_all()
+                    seed_initial_data()
+                    print("✅ Neon database initialized!")
             
         print("🚀 You can now run: python app.py")
     except Exception as e:
@@ -116,16 +131,25 @@ def test_connection():
     print("🔍 Testing database connection...")
     
     try:
-        from app import app, db, User
+        from app import app, db, User, Plan
         with app.app_context():
             # Test connection
             db.engine.connect()
             
             # Test query
             user_count = User.query.count()
+            plan_count = Plan.query.count()
             
             print("✅ Connection successful!")
             print(f"👥 Users in database: {user_count}")
+            print(f"🍱 Plans in database: {plan_count}")
+            
+            # Show database type
+            db_url = os.getenv('DATABASE_URL', '')
+            if 'postgresql' in db_url.lower():
+                print("🌐 Database type: Neon PostgreSQL")
+            elif 'sqlite' in db_url.lower():
+                print("🗄️  Database type: SQLite")
             
     except Exception as e:
         print(f"❌ Connection failed: {e}")
