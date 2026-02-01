@@ -94,6 +94,13 @@ def strptime_filter(date_string, format='%Y-%m-%d'):
     """Parse date string to datetime object"""
     return datetime.strptime(date_string, format).date()
 
+@app.template_filter('strftime')
+def strftime_filter(date_obj, format='%Y-%m-%d'):
+    """Format date object to string"""
+    if isinstance(date_obj, str):
+        return date_obj
+    return date_obj.strftime(format) if date_obj else ''
+
 @app.template_filter('from_json')
 def from_json_filter(json_string):
     """Parse JSON string to Python object"""
@@ -410,6 +417,9 @@ def admin_dashboard():
     # Calculate today's meals
     today_meals = active_plans - today_paused
     
+    # Get current date formatted
+    current_date = date.today().strftime('%B %d, %Y')
+    
     stats = {
         'total_customers': total_customers,
         'today_meals': today_meals,
@@ -417,7 +427,7 @@ def admin_dashboard():
         'pending_bills': pending_bills
     }
     
-    return render_template("admin_dashboard_professional.html", stats=stats)
+    return render_template("admin_dashboard_professional.html", stats=stats, current_date=current_date)
 
 # ---------- Admin Plan Management ----------
 @app.route("/admin/plans")
@@ -862,17 +872,22 @@ def customer_dashboard():
         db.extract('year', PausedDate.pause_date) == current_year
     ).count()
     
-    # Calculate estimated bill for current month
+    # Calculate estimated bill for current month and total plan days
     estimated_bill = 0
-    total_days = monthrange(current_year, current_month)[1]
+    total_plan_days = 0
+    current_month_start = date(current_year, current_month, 1)
+    current_month_end = date(current_year, current_month, monthrange(current_year, current_month)[1])
     
     for cp, plan in active_plans:
         # Calculate overlap with current month
-        plan_start = max(cp.start_date, date(current_year, current_month, 1))
-        plan_end = min(cp.end_date, date(current_year, current_month, total_days))
+        plan_start = max(cp.start_date, current_month_start)
+        plan_end = min(cp.end_date, current_month_end)
         
         if plan_start <= plan_end:
             plan_days = (plan_end - plan_start).days + 1
+            total_plan_days += plan_days
+            
+            # Get paused days for this specific plan period
             plan_paused = PausedDate.query.filter(
                 PausedDate.customer_id == customer_id,
                 PausedDate.pause_date >= plan_start,
@@ -899,7 +914,8 @@ def customer_dashboard():
         'paused_this_month': paused_this_month,
         'recent_pauses': recent_pauses,
         'paused_today': paused_today,
-        'total_days': total_days
+        'total_days': total_plan_days,  # Use actual plan days instead of month days
+        'billable_days': total_plan_days - paused_this_month
     }
     
     return render_template("customer_dashboard_professional.html", **dashboard_data)

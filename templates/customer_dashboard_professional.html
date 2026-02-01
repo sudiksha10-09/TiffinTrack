@@ -113,7 +113,7 @@
                 </div>
                 <div class="kpi-info">
                     <h3>Billable Days</h3>
-                    <p>{{ total_days - paused_this_month }}</p>
+                    <p>{{ billable_days }}</p>
                 </div>
             </div>
         </div>
@@ -333,12 +333,12 @@
                     
                     <div>
                         <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--primary); margin-bottom: var(--spacing-sm);">{{ total_days }}</div>
-                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Total Days</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Plan Days</div>
                         <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">This month</div>
                     </div>
 
                     <div>
-                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--success); margin-bottom: var(--spacing-sm);">{{ total_days - paused_this_month }}</div>
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--success); margin-bottom: var(--spacing-sm);">{{ billable_days }}</div>
                         <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Active Days</div>
                         <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Meals delivered</div>
                     </div>
