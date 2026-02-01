@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dashboard - TiffinTrack</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('customer_dashboard') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+            </a>
+            
+            <div class="nav-actions">
+                <div style="display: flex; align-items: center; gap: var(--spacing-lg); margin-right: var(--spacing-lg);">
+                    <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                        <i class="fas fa-user-circle" style="margin-right: var(--spacing-xs); color: var(--primary);"></i>
+                        {{ session.get('user_name', 'Customer') }}
+                    </span>
+                </div>
+                
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">
+                    Welcome back, {{ session.get('user_name', 'Customer').split()[0] }}! 👋
+                </h1>
+                <p class="dashboard-subtitle">
+                    Here's your tiffin service overview and quick actions for today
+                </p>
+            </div>
+            
+            <div class="dashboard-actions">
+                {% if paused_today %}
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius); color: var(--warning-dark);">
+                        <i class="fas fa-pause-circle"></i>
+                        <span style="font-weight: 600; font-size: var(--font-size-sm);">Paused Today</span>
+                    </div>
+                {% else %}
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius); color: var(--success-dark);">
+                        <i class="fas fa-check-circle"></i>
+                        <span style="font-weight: 600; font-size: var(--font-size-sm);">Active Today</span>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: var(--primary-gradient);">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>This Month's Bill</h3>
+                    <p>₹{{ estimated_bill }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: var(--secondary-gradient);">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Active Plans</h3>
+                    <p>{{ active_plans|length }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, var(--warning) 0%, #f59e0b 100%);">
+                    <i class="fas fa-pause-circle"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Paused This Month</h3>
+                    <p>{{ paused_this_month }} days</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, var(--success) 0%, #059669 100%);">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Billable Days</h3>
+                    <p>{{ total_days - paused_this_month }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div style="margin-bottom: var(--spacing-2xl);">
+            <h2 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-lg); color: var(--text-primary);">
+                <i class="fas fa-bolt" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                Quick Actions
+            </h2>
+            
+            <div class="quick-actions">
+                <div class="action-card" onclick="location.href='/plans'">
+                    <div class="action-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Manage Plans</h4>
+                        <p class="action-description">Select and customize your meal plans and delivery schedules</p>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="location.href='/pause'">
+                    <div class="action-icon">
+                        <i class="fas fa-calendar-times"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Pause Meals</h4>
+                        <p class="action-description">Skip meals for specific dates when you're traveling or away</p>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="location.href='/billing'">
+                    <div class="action-icon">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">View Billing</h4>
+                        <p class="action-description">Check your monthly bills and detailed payment history</p>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="showProfileModal()">
+                    <div class="action-icon">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Profile Settings</h4>
+                        <p class="action-description">Update your personal details and delivery preferences</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-2xl); margin-bottom: var(--spacing-2xl);">
+            
+            <!-- Active Plans -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-utensils" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                        Active Plans
+                    </h3>
+                    <p class="card-subtitle">Your current meal subscriptions</p>
+                </div>
+                
+                <div class="card-body">
+                    {% if active_plans %}
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-lg);">
+                            {% for cp, plan in active_plans %}
+                            <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--border-radius-lg); border-left: 4px solid var(--primary);">
+                                <div style="width: 60px; height: 60px; background: var(--primary-gradient); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-utensils" style="color: white; font-size: var(--font-size-lg);"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; font-size: var(--font-size-lg); margin-bottom: var(--spacing-xs);">{{ plan.name }}</div>
+                                    <div style="color: var(--text-secondary); margin-bottom: var(--spacing-sm);">
+                                        <i class="fas fa-calendar" style="margin-right: var(--spacing-xs);"></i>
+                                        {{ cp.start_date.strftime('%b %d') }} to {{ cp.end_date.strftime('%b %d, %Y') }}
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                                        <span class="badge badge-success">Active</span>
+                                        <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                                            <i class="fas fa-rupee-sign" style="margin-right: var(--spacing-xs);"></i>
+                                            ₹{{ plan.daily_rate }}/day
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--primary);">
+                                        ₹{{ plan.daily_rate }}
+                                    </div>
+                                    <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">per day</div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: var(--spacing-2xl); color: var(--text-secondary);">
+                            <i class="fas fa-clipboard-list" style="font-size: 4rem; margin-bottom: var(--spacing-lg); opacity: 0.3;"></i>
+                            <h4 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">No Active Plans</h4>
+                            <p style="margin-bottom: var(--spacing-lg);">You don't have any active meal plans. Choose from our delicious options to get started!</p>
+                            <a href="/plans" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Select Plans
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-history" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
+                        Recent Activity
+                    </h3>
+                    <p class="card-subtitle">Your latest actions</p>
+                </div>
+                
+                <div class="card-body">
+                    {% if recent_pauses %}
+                        <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                            {% for pause in recent_pauses %}
+                            <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-sm) 0; border-bottom: 1px solid var(--border-light);">
+                                <div style="width: 32px; height: 32px; background: var(--warning-light); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-pause" style="color: var(--warning); font-size: var(--font-size-sm);"></i>
+                                </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 600; font-size: var(--font-size-sm);">Meal Paused</div>
+                                    <div style="color: var(--text-secondary); font-size: var(--font-size-xs);">{{ pause.pause_date.strftime('%B %d, %Y') }}</div>
+                                </div>
+                                <div style="color: var(--text-muted); font-size: var(--font-size-xs);">
+                                    {{ pause.created_at.strftime('%b %d') }}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div style="text-align: center; padding: var(--spacing-lg); color: var(--text-secondary);">
+                            <i class="fas fa-history" style="font-size: 2rem; margin-bottom: var(--spacing-md); opacity: 0.3;"></i>
+                            <p>No recent activity</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Tips and Insights -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-lightbulb" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
+                    Tips & Insights
+                </h3>
+                <p class="card-subtitle">Helpful information to optimize your tiffin experience</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--primary-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--primary);">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                            <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-clock" style="color: white; font-size: var(--font-size-sm);"></i>
+                            </div>
+                            <h4 style="font-weight: 700; color: var(--primary-dark);">Pause Cutoff Time</h4>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); line-height: var(--leading-relaxed);">
+                            Remember to pause meals before 8:00 AM to avoid charges for that day. Plan ahead for your travel dates!
+                        </p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--success);">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                            <div style="width: 40px; height: 40px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-money-bill-wave" style="color: white; font-size: var(--font-size-sm);"></i>
+                            </div>
+                            <h4 style="font-weight: 700; color: var(--success-dark);">Smart Billing</h4>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); line-height: var(--leading-relaxed);">
+                            Paused days are automatically excluded from your monthly bill. No manual calculations needed!
+                        </p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--info);">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                            <div style="width: 40px; height: 40px; background: var(--info); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-phone" style="color: white; font-size: var(--font-size-sm);"></i>
+                            </div>
+                            <h4 style="font-weight: 700; color: var(--info-dark);">Need Help?</h4>
+                        </div>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); line-height: var(--leading-relaxed);">
+                            Contact our support team at +91 90000 00000 for any assistance or questions.
+                        </p>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Monthly Summary -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-pie" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
+                    Monthly Summary
+                </h3>
+                <p class="card-subtitle">Your meal consumption and billing overview</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: var(--spacing-xl); text-align: center;">
+                    
+                    <div>
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--primary); margin-bottom: var(--spacing-sm);">{{ total_days }}</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Total Days</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">This month</div>
+                    </div>
+
+                    <div>
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--success); margin-bottom: var(--spacing-sm);">{{ total_days - paused_this_month }}</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Active Days</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Meals delivered</div>
+                    </div>
+
+                    <div>
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--warning); margin-bottom: var(--spacing-sm);">{{ paused_this_month }}</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Paused Days</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Money saved</div>
+                    </div>
+
+                    <div>
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--info); margin-bottom: var(--spacing-sm);">₹{{ estimated_bill }}</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Estimated Bill</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">This month</div>
+                    </div>
+
+                </div>
+                
+                <div style="margin-top: var(--spacing-xl); padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--border-radius); text-align: center;">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                        <i class="fas fa-leaf" style="color: var(--success);"></i>
+                        <span style="font-weight: 600; color: var(--success);">Eco-Friendly Impact</span>
+                    </div>
+                    <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                        By using our smart pause system, you've helped us reduce food waste by approximately {{ paused_this_month * 0.5 }}kg this month!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profileModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Profile Settings</h3>
+                <button onclick="hideProfileModal()" class="modal-close">&times;</button>
+            </div>
+            <div style="padding: var(--spacing-xl); text-align: center; color: var(--text-secondary);">
+                <i class="fas fa-user-cog" style="font-size: 4rem; margin-bottom: var(--spacing-lg); opacity: 0.5; color: var(--primary);"></i>
+                <h4 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">Profile Management Coming Soon!</h4>
+                <p style="margin-bottom: var(--spacing-lg);">We're working on a comprehensive profile management system where you can update your details, preferences, and delivery settings.</p>
+                <button onclick="hideProfileModal()" class="btn btn-primary">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showProfileModal() {
+            document.getElementById('profileModal').style.display = 'flex';
+        }
+        
+        function hideProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                msg.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+
+        // Add click handlers for action cards
+        document.querySelectorAll('.action-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+
+        // Add loading animation to KPI cards
+        document.querySelectorAll('.kpi-card').forEach((card, index) => {
+            card.style.animation = `fadeIn 0.6s ease-out ${index * 0.1}s both`;
+        });
+    </script>
+
+    <style>
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: var(--z-modal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--border-radius-xl);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-xl);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--font-size-2xl);
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color var(--transition-base);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+    </style>
+</body>
+</html>

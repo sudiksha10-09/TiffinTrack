@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - TiffinTrack</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('admin_dashboard') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+                <span class="badge badge-primary" style="margin-left: var(--spacing-sm); font-size: var(--font-size-xs);">Admin</span>
+            </a>
+            
+            <div class="nav-actions">
+                <div style="display: flex; align-items: center; gap: var(--spacing-lg); margin-right: var(--spacing-lg);">
+                    <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                        <i class="fas fa-user-shield" style="margin-right: var(--spacing-xs); color: var(--primary);"></i>
+                        {{ session.get('user_name', 'Admin') }}
+                    </span>
+                </div>
+                
+                <a href="/customers" class="btn btn-ghost">
+                    <i class="fas fa-users"></i>
+                    Customers
+                </a>
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Dashboard -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Admin Dashboard</h1>
+                <p class="dashboard-subtitle">
+                    Manage your tiffin service operations and monitor business performance
+                </p>
+            </div>
+            
+            <div class="dashboard-actions">
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius); color: var(--success-dark);">
+                    <i class="fas fa-calendar-check"></i>
+                    <span style="font-weight: 600; font-size: var(--font-size-sm);">{{ "Today" | strftime('%B %d, %Y') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Total Customers</h3>
+                    <p>{{ stats.total_customers }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Meals Today</h3>
+                    <p>{{ stats.today_meals }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-pause-circle"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Paused Today</h3>
+                    <p>{{ stats.today_paused }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Pending Bills</h3>
+                    <p>{{ stats.pending_bills }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div style="margin-bottom: var(--spacing-2xl);">
+            <h2 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-lg); color: var(--text-primary);">
+                <i class="fas fa-bolt" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                Quick Actions
+            </h2>
+            
+            <div class="quick-actions">
+                <div class="action-card" onclick="location.href='/admin/plans'">
+                    <div class="action-icon">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Manage Plans</h4>
+                        <p class="action-description">Create, edit, and manage meal plans with images and pricing.</p>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="location.href='/customers'">
+                    <div class="action-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Customer Management</h4>
+                        <p class="action-description">View and manage customer accounts and subscriptions.</p>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="location.href='/kitchen-report'">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Kitchen Report</h4>
+                        <p class="action-description">View today's meal preparation requirements and production planning.</p>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="location.href='/delivery-routes'">
+                    <div class="action-icon">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Delivery Routes</h4>
+                        <p class="action-description">Manage delivery schedules and optimize routes across Navi Mumbai.</p>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="location.href='/bills'">
+                    <div class="action-icon">
+                        <i class="fas fa-file-invoice"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Bill Management</h4>
+                        <p class="action-description">Generate monthly bills and track payment status.</p>
+                    </div>
+                </div>
+
+                <div class="action-card" onclick="showAnalyticsModal()">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div>
+                        <h4 class="action-title">Analytics</h4>
+                        <p class="action-description">View detailed business analytics and performance metrics.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity and Insights -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-2xl); margin-bottom: var(--spacing-2xl);">
+            
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-clock" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                        Recent Activity
+                    </h3>
+                    <p class="card-subtitle">Latest system activities and updates</p>
+                </div>
+                
+                <div class="card-body">
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-lg);">
+                        
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: var(--success-light); border-radius: var(--border-radius); border-left: 4px solid var(--success);">
+                            <div style="width: 40px; height: 40px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-chart-bar" style="color: white; font-size: var(--font-size-sm);"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--success-dark);">Kitchen report generated</div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Daily production report for {{ stats.today_meals }} meals</div>
+                            </div>
+                            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">5m ago</div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: var(--info-light); border-radius: var(--border-radius); border-left: 4px solid var(--info);">
+                            <div style="width: 40px; height: 40px; background: var(--info); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-truck" style="color: white; font-size: var(--font-size-sm);"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--info-dark);">Delivery routes optimized</div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ stats.today_meals }} meals scheduled for delivery</div>
+                            </div>
+                            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">18m ago</div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: var(--warning-light); border-radius: var(--border-radius); border-left: 4px solid var(--warning);">
+                            <div style="width: 40px; height: 40px; background: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-exclamation-triangle" style="color: white; font-size: var(--font-size-sm);"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--warning-dark);">Payment reminders sent</div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ stats.pending_bills }} customers with pending payments</div>
+                            </div>
+                            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">1h ago</div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); background: var(--primary-light); border-radius: var(--border-radius); border-left: 4px solid var(--primary);">
+                            <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-user-plus" style="color: white; font-size: var(--font-size-sm);"></i>
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; color: var(--primary-dark);">New customer registered</div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Customer from Kharghar area joined</div>
+                            </div>
+                            <div style="color: var(--text-muted); font-size: var(--font-size-xs);">2h ago</div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Checklist -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-tasks" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
+                        Daily Checklist
+                    </h3>
+                    <p class="card-subtitle">Essential daily tasks</p>
+                </div>
+                
+                <div class="card-body">
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-md);">
+                        
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-sm) 0;">
+                            <div style="width: 20px; height: 20px; background: var(--success); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-check" style="color: white; font-size: var(--font-size-xs);"></i>
+                            </div>
+                            <span style="color: var(--text-secondary); text-decoration: line-through;">Check kitchen report for meal preparation</span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-sm) 0;">
+                            <div style="width: 20px; height: 20px; background: var(--success); border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-check" style="color: white; font-size: var(--font-size-xs);"></i>
+                            </div>
+                            <span style="color: var(--text-secondary); text-decoration: line-through;">Review delivery routes and assignments</span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-sm) 0;">
+                            <div style="width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 4px;"></div>
+                            <span style="color: var(--text-primary);">Follow up on pending payments</span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-sm) 0;">
+                            <div style="width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 4px;"></div>
+                            <span style="color: var(--text-primary);">Monitor customer pause requests</span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-sm) 0;">
+                            <div style="width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 4px;"></div>
+                            <span style="color: var(--text-primary);">Update meal plans if needed</span>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-sm) 0;">
+                            <div style="width: 20px; height: 20px; border: 2px solid var(--border); border-radius: 4px;"></div>
+                            <span style="color: var(--text-primary);">Review customer feedback</span>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <div class="card-footer">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                        <div style="flex: 1; background: var(--border-light); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="width: 33%; height: 100%; background: var(--success);"></div>
+                        </div>
+                        <span style="font-size: var(--font-size-sm); color: var(--text-secondary); font-weight: 600;">2/6 Complete</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Performance Metrics -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
+                    Performance Overview
+                </h3>
+                <p class="card-subtitle">Key business metrics and trends</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-xl);">
+                    
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--success); margin-bottom: var(--spacing-sm);">98.5%</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">On-Time Delivery</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">This month</div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); margin-top: var(--spacing-sm);">
+                            <i class="fas fa-arrow-up" style="color: var(--success); font-size: var(--font-size-xs);"></i>
+                            <span style="color: var(--success); font-size: var(--font-size-sm); font-weight: 600;">+2.1%</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--primary); margin-bottom: var(--spacing-sm);">4.9</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Customer Rating</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Average score</div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); margin-top: var(--spacing-sm);">
+                            <i class="fas fa-star" style="color: #fbbf24; font-size: var(--font-size-xs);"></i>
+                            <span style="color: var(--success); font-size: var(--font-size-sm); font-weight: 600;">Excellent</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--info); margin-bottom: var(--spacing-sm);">{{ stats.total_customers }}</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Active Customers</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Total subscribers</div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); margin-top: var(--spacing-sm);">
+                            <i class="fas fa-arrow-up" style="color: var(--success); font-size: var(--font-size-xs);"></i>
+                            <span style="color: var(--success); font-size: var(--font-size-sm); font-weight: 600;">+12%</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: center;">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--secondary); margin-bottom: var(--spacing-sm);">₹2.4L</div>
+                        <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Monthly Revenue</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">This month</div>
+                        <div style="display: flex; align-items: center; justify-content: center; gap: var(--spacing-xs); margin-top: var(--spacing-sm);">
+                            <i class="fas fa-arrow-up" style="color: var(--success); font-size: var(--font-size-xs);"></i>
+                            <span style="color: var(--success); font-size: var(--font-size-sm); font-weight: 600;">+18%</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analyticsModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Business Analytics</h3>
+                <button onclick="hideAnalyticsModal()" class="modal-close">&times;</button>
+            </div>
+            <div style="padding: var(--spacing-xl); text-align: center; color: var(--text-secondary);">
+                <i class="fas fa-chart-line" style="font-size: 4rem; margin-bottom: var(--spacing-lg); opacity: 0.5; color: var(--primary);"></i>
+                <h4 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">Advanced Analytics Coming Soon!</h4>
+                <p style="margin-bottom: var(--spacing-lg);">We're working on comprehensive analytics dashboard with detailed insights, trends, and forecasting.</p>
+                <button onclick="hideAnalyticsModal()" class="btn btn-primary">Got it</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showAnalyticsModal() {
+            document.getElementById('analyticsModal').style.display = 'flex';
+        }
+        
+        function hideAnalyticsModal() {
+            document.getElementById('analyticsModal').style.display = 'none';
+        }
+
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                msg.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+
+        // Add click handlers for action cards
+        document.querySelectorAll('.action-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+
+    <style>
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: var(--z-modal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border-radius: var(--border-radius-xl);
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-2xl);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-xl);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: var(--font-size-2xl);
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color var(--transition-base);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+            background: var(--danger-light);
+        }
+    </style>
+</body>
+</html>

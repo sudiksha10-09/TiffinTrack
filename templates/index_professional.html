@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TiffinTrack - Premium Meal Delivery Service | Fresh, Healthy, Delivered Daily</title>
+    <meta name="description" content="Experience premium tiffin delivery in Navi Mumbai. Fresh, healthy meals prepared by expert chefs and delivered to your doorstep. Smart pause system, transparent billing, zero waste promise.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="TiffinTrack - Premium Meal Delivery Service">
+    <meta property="og:description" content="Fresh, healthy meals delivered daily in Navi Mumbai. Smart pause system and transparent billing.">
+    <meta property="og:image" content="{{ url_for('static', filename='images/og-image.jpg') }}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:type" content="website">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TiffinTrack - Premium Meal Delivery Service">
+    <meta name="twitter:description" content="Fresh, healthy meals delivered daily in Navi Mumbai.">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/twitter-card.jpg') }}">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('home') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+            </a>
+            
+            <ul class="nav-menu">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#plans">Plans</a></li>
+                <li><a href="#testimonials">Reviews</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+            
+            <div class="nav-actions">
+                <a href="{{ url_for('login') }}" class="btn btn-ghost">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </a>
+                <a href="{{ url_for('register') }}" class="btn btn-primary">
+                    <i class="fas fa-rocket"></i>
+                    Get Started
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-leaf"></i>
+                    <span>Fresh • Healthy • Trusted</span>
+                </div>
+                
+                <h1 class="hero-title">
+                    Premium Tiffin Service<br>
+                    <span style="color: var(--primary);">Delivered Fresh Daily</span>
+                </h1>
+                
+                <p class="hero-subtitle">
+                    Experience the perfect blend of taste, nutrition, and convenience. Our chef-prepared meals are made from the freshest ingredients and delivered right to your doorstep in Navi Mumbai.
+                </p>
+                
+                <div class="hero-actions">
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-rocket"></i>
+                        Start Your Journey
+                    </a>
+                    <a href="#features" class="btn btn-outline btn-lg">
+                        <i class="fas fa-play-circle"></i>
+                        Learn More
+                    </a>
+                </div>
+                
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <i class="fas fa-star"></i>
+                        <span>4.9/5 Rating</span>
+                    </div>
+                    <div class="hero-stat">
+                        <i class="fas fa-utensils"></i>
+                        <span>500+ Daily Meals</span>
+                    </div>
+                    <div class="hero-stat">
+                        <i class="fas fa-truck-fast"></i>
+                        <span>On-Time Delivery</span>
+                    </div>
+                    <div class="hero-stat">
+                        <i class="fas fa-shield-check"></i>
+                        <span>100% Fresh</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="hero-visual">
+                <img src="{{ url_for('static', filename='images/hero-meal.jpg') }}" 
+                     alt="Fresh healthy tiffin meal" 
+                     class="hero-image"
+                     loading="eager">
+                
+                <div class="hero-floating-card top-right">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-check" style="color: white; font-size: 16px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">Fresh Daily</div>
+                            <div style="color: var(--text-secondary); font-size: 12px;">Prepared this morning</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="hero-floating-card bottom-left">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-clock" style="color: white; font-size: 16px;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px;">On Time</div>
+                            <div style="color: var(--text-secondary); font-size: 12px;">Delivered by 12 PM</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="features-container">
+            <div class="section-header">
+                <div class="section-badge">Why Choose TiffinTrack</div>
+                <h2 class="section-title">Revolutionizing Meal Delivery</h2>
+                <p class="section-subtitle">
+                    We're not just another food delivery service. We're your partner in healthy living with innovative features that make meal management effortless.
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-pause-circle"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Pause System</h3>
+                    <p class="feature-description">
+                        Our unique pause feature lets you skip meals when traveling or busy. Paused days are automatically excluded from your bill - no manual adjustments needed!
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3 class="feature-title">Transparent Billing</h3>
+                    <p class="feature-description">
+                        See exactly what you're paying for with our detailed billing breakdown. Track your paused days, active days, and total costs with complete transparency.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-leaf"></i>
+                    </div>
+                    <h3 class="feature-title">Zero Waste Promise</h3>
+                    <p class="feature-description">
+                        Our smart kitchen reports ensure we prepare exactly the right amount of food based on active orders, minimizing waste and keeping meals fresh.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h3 class="feature-title">Farm Fresh Ingredients</h3>
+                    <p class="feature-description">
+                        Locally sourced vegetables and ingredients, prepared fresh every morning for maximum nutrition and taste. Supporting local farmers and communities.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-heart-pulse"></i>
+                    </div>
+                    <h3 class="feature-title">Nutrition Focused</h3>
+                    <p class="feature-description">
+                        Balanced meals designed by nutrition experts to fuel your body with the right nutrients for optimal health and sustained energy throughout the day.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Digital First</h3>
+                    <p class="feature-description">
+                        Manage your entire tiffin experience through our intuitive digital platform. Schedule, pause, track, and pay - all from your smartphone or computer.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works" id="how-it-works" style="padding: var(--spacing-4xl) var(--spacing-lg); background: var(--bg-primary);">
+        <div class="features-container">
+            <div class="section-header">
+                <div class="section-badge">Simple Process</div>
+                <h2 class="section-title">How TiffinTrack Works</h2>
+                <p class="section-subtitle">
+                    Get started in minutes and enjoy fresh, healthy meals delivered to your doorstep every day.
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h3 class="feature-title">1. Create Account</h3>
+                    <p class="feature-description">
+                        Sign up in seconds with your delivery details and preferences. Choose your location in Navi Mumbai and set up your profile.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <h3 class="feature-title">2. Choose Your Plan</h3>
+                    <p class="feature-description">
+                        Select from our variety of meal plans and set your delivery schedule. Customize duration from single days to months.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="feature-title">3. Manage Easily</h3>
+                    <p class="feature-description">
+                        Use our smart pause feature to skip meals when you're away. Track your billing and manage your subscription effortlessly.
+                    </p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                        <i class="fas fa-truck"></i>
+                    </div>
+                    <h3 class="feature-title">4. Enjoy Fresh Meals</h3>
+                    <p class="feature-description">
+                        Receive hot, delicious meals delivered right to your doorstep daily. Fresh ingredients, expert preparation, perfect timing.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Plans Section -->
+    <section class="plans" id="plans" style="padding: var(--spacing-4xl) var(--spacing-lg); background: var(--bg-secondary);">
+        <div class="features-container">
+            <div class="section-header">
+                <div class="section-badge">Meal Plans</div>
+                <h2 class="section-title">Choose Your Perfect Plan</h2>
+                <p class="section-subtitle">
+                    Carefully crafted meal plans to suit every taste and dietary requirement. All plans include fresh ingredients and expert preparation.
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div style="text-align: center; margin-bottom: var(--spacing-lg);">
+                        <img src="{{ url_for('static', filename='images/veg-thali.jpg') }}" 
+                             alt="Vegetarian Thali" 
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-lg);">
+                    </div>
+                    <h3 class="feature-title">Veg Thali</h3>
+                    <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--primary); margin-bottom: var(--spacing-md);">₹120/day</div>
+                    <p class="feature-description" style="margin-bottom: var(--spacing-lg);">
+                        Complete vegetarian meal with rice, dal, sabzi, roti, and fresh salad. Perfect balance of nutrition and taste.
+                    </p>
+                    <ul style="list-style: none; padding: 0; margin-bottom: var(--spacing-lg);">
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Basmati Rice</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Dal Tadka</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Mixed Vegetable Curry</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>2 Fresh Rotis</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Fresh Salad & Pickle</span>
+                        </li>
+                    </ul>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline btn-full">Choose Plan</a>
+                </div>
+                
+                <div class="feature-card" style="border: 3px solid var(--primary); transform: scale(1.05); position: relative;">
+                    <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: var(--primary); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: 50px; font-size: var(--font-size-sm); font-weight: 600;">
+                        Most Popular
+                    </div>
+                    <div style="text-align: center; margin-bottom: var(--spacing-lg);">
+                        <img src="{{ url_for('static', filename='images/diet-bowl.jpg') }}" 
+                             alt="Diet Special Bowl" 
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-lg);">
+                    </div>
+                    <h3 class="feature-title">Diet Special</h3>
+                    <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--primary); margin-bottom: var(--spacing-md);">₹150/day</div>
+                    <p class="feature-description" style="margin-bottom: var(--spacing-lg);">
+                        Low calorie, high protein meal for fitness enthusiasts. Carefully portioned for optimal nutrition and weight management.
+                    </p>
+                    <ul style="list-style: none; padding: 0; margin-bottom: var(--spacing-lg);">
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Brown Rice</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Protein-Rich Moong Dal</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Steamed Vegetables</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Multigrain Roti</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Fresh Sprouts Salad</span>
+                        </li>
+                    </ul>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary btn-full">Choose Plan</a>
+                </div>
+                
+                <div class="feature-card">
+                    <div style="text-align: center; margin-bottom: var(--spacing-lg);">
+                        <img src="{{ url_for('static', filename='images/chicken-combo.jpg') }}" 
+                             alt="Non-Veg Thali" 
+                             style="width: 100%; height: 200px; object-fit: cover; border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-lg);">
+                    </div>
+                    <h3 class="feature-title">Non-Veg Thali</h3>
+                    <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--primary); margin-bottom: var(--spacing-md);">₹180/day</div>
+                    <p class="feature-description" style="margin-bottom: var(--spacing-lg);">
+                        Delicious non-vegetarian meal with tender chicken curry, perfectly spiced and cooked to perfection.
+                    </p>
+                    <ul style="list-style: none; padding: 0; margin-bottom: var(--spacing-lg);">
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Basmati Rice</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Dal Tadka</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Chicken Curry</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>2 Fresh Rotis</span>
+                        </li>
+                        <li style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <i class="fas fa-check" style="color: var(--success);"></i>
+                            <span>Raita & Pickle</span>
+                        </li>
+                    </ul>
+                    <a href="{{ url_for('register') }}" class="btn btn-outline btn-full">Choose Plan</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials" id="testimonials" style="padding: var(--spacing-4xl) var(--spacing-lg); background: var(--bg-primary);">
+        <div class="features-container">
+            <div class="section-header">
+                <div class="section-badge">Customer Reviews</div>
+                <h2 class="section-title">What Our Customers Say</h2>
+                <p class="section-subtitle">
+                    Join thousands of satisfied customers who have transformed their daily meals with TiffinTrack.
+                </p>
+            </div>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div style="margin-bottom: var(--spacing-lg);">
+                        <div style="display: flex; gap: 4px; margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                        </div>
+                        <p style="font-style: italic; color: var(--text-secondary); line-height: var(--leading-relaxed);">
+                            "The pause feature is a game-changer! I travel frequently for work, and TiffinTrack automatically adjusts my bill for the days I'm away. The food quality is consistently excellent, and the delivery is always on time."
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                        <div style="width: 50px; height: 50px; background: var(--primary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--primary);">
+                            RS
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">Riya Sharma</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Software Engineer, Vashi</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div style="margin-bottom: var(--spacing-lg);">
+                        <div style="display: flex; gap: 4px; margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                        </div>
+                        <p style="font-style: italic; color: var(--text-secondary); line-height: var(--leading-relaxed);">
+                            "Fresh, healthy meals delivered on time every day. The transparent billing system shows exactly what I'm paying for. The diet special plan has helped me maintain my fitness goals perfectly."
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                        <div style="width: 50px; height: 50px; background: var(--secondary-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--secondary);">
+                            AP
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">Aman Patil</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Marketing Manager, Nerul</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="feature-card">
+                    <div style="margin-bottom: var(--spacing-lg);">
+                        <div style="display: flex; gap: 4px; margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                            <i class="fas fa-star" style="color: #fbbf24;"></i>
+                        </div>
+                        <p style="font-style: italic; color: var(--text-secondary); line-height: var(--leading-relaxed);">
+                            "Best tiffin service in Mumbai! The food quality is excellent, and the digital platform makes managing my subscription so easy. The zero waste approach shows they really care about the environment."
+                        </p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                        <div style="width: 50px; height: 50px; background: var(--success-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--success);">
+                            SK
+                        </div>
+                        <div>
+                            <div style="font-weight: 600;">Sneha Kulkarni</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Doctor, Kharghar</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section style="padding: var(--spacing-4xl) var(--spacing-lg); background: var(--primary-gradient); color: white; text-align: center;">
+        <div style="max-width: 800px; margin: 0 auto;">
+            <h2 style="font-family: var(--font-family-display); font-size: var(--font-size-4xl); font-weight: 700; margin-bottom: var(--spacing-lg);">
+                Ready to Transform Your Meals?
+            </h2>
+            <p style="font-size: var(--font-size-xl); margin-bottom: var(--spacing-2xl); opacity: 0.9; line-height: var(--leading-relaxed);">
+                Join thousands of satisfied customers who have made the smart choice for healthy, convenient dining. Start your journey to better meals today.
+            </p>
+            <div style="display: flex; gap: var(--spacing-lg); justify-content: center; flex-wrap: wrap;">
+                <a href="{{ url_for('register') }}" class="btn btn-lg" style="background: white; color: var(--primary); font-size: var(--font-size-lg); padding: var(--spacing-lg) var(--spacing-2xl);">
+                    <i class="fas fa-rocket"></i>
+                    Start Your Free Trial
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-outline btn-lg" style="border-color: white; color: white; font-size: var(--font-size-lg); padding: var(--spacing-lg) var(--spacing-2xl);">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </a>
+            </div>
+            
+            <div style="margin-top: var(--spacing-2xl); display: flex; justify-content: center; gap: var(--spacing-2xl); flex-wrap: wrap; opacity: 0.8;">
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                    <i class="fas fa-check-circle"></i>
+                    <span>No Setup Fees</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Cancel Anytime</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                    <i class="fas fa-check-circle"></i>
+                    <span>24/7 Support</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: var(--bg-dark); color: var(--gray-300); padding: var(--spacing-4xl) var(--spacing-lg) var(--spacing-2xl);">
+        <div style="max-width: 1400px; margin: 0 auto;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-2xl); margin-bottom: var(--spacing-2xl);">
+                
+                <div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg);">
+                        <span style="font-size: var(--font-size-2xl);">🍱</span>
+                        <span style="font-size: var(--font-size-xl); font-weight: 700; color: white;">TiffinTrack</span>
+                    </div>
+                    <p style="margin-bottom: var(--spacing-lg); line-height: var(--leading-relaxed);">
+                        Revolutionizing meal delivery with smart technology and fresh, healthy food. Your partner in healthy living.
+                    </p>
+                    <div style="display: flex; gap: var(--spacing-md);">
+                        <a href="#" style="color: var(--primary); font-size: var(--font-size-lg); transition: color var(--transition-base);">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" style="color: var(--primary); font-size: var(--font-size-lg); transition: color var(--transition-base);">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" style="color: var(--primary); font-size: var(--font-size-lg); transition: color var(--transition-base);">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                        <a href="#" style="color: var(--primary); font-size: var(--font-size-lg); transition: color var(--transition-base);">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: white; font-weight: 600; margin-bottom: var(--spacing-lg);">Contact Us</h4>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                        <i class="fas fa-envelope" style="color: var(--primary);"></i>
+                        <span>support@tiffintrack.com</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                        <i class="fas fa-phone" style="color: var(--primary);"></i>
+                        <span>+91 90000 00000</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                        <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                        <span>Navi Mumbai, Maharashtra</span>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: white; font-weight: 600; margin-bottom: var(--spacing-lg);">Quick Links</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                        <a href="{{ url_for('login') }}" style="color: var(--gray-300); text-decoration: none; transition: color var(--transition-base);">Login</a>
+                        <a href="{{ url_for('register') }}" style="color: var(--gray-300); text-decoration: none; transition: color var(--transition-base);">Register</a>
+                        <a href="{{ url_for('terms') }}" style="color: var(--gray-300); text-decoration: none; transition: color var(--transition-base);">Terms & Conditions</a>
+                        <a href="#" style="color: var(--gray-300); text-decoration: none; transition: color var(--transition-base);">Privacy Policy</a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color: white; font-weight: 600; margin-bottom: var(--spacing-lg);">Service Areas</h4>
+                    <div style="display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                        <span>Vashi • Nerul • Belapur</span>
+                        <span>Kharghar • Panvel • Kamothe</span>
+                        <span>Ghansoli • Kopar Khairane</span>
+                        <span>Airoli • Sanpada • Seawoods</span>
+                    </div>
+                </div>
+
+            </div>
+            
+            <div style="border-top: 1px solid var(--gray-700); padding-top: var(--spacing-lg); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md);">
+                <p style="font-size: var(--font-size-sm); opacity: 0.8;">
+                    © 2026 TiffinTrack. All rights reserved.
+                </p>
+                <p style="font-size: var(--font-size-sm); opacity: 0.6;">
+                    Made with ❤️ for healthy living
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script>
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 100) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.animation = 'fadeIn 0.8s ease-out forwards';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all feature cards
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(30px)';
+            observer.observe(card);
+        });
+
+        // Add loading states
+        document.addEventListener('DOMContentLoaded', function() {
+            // Remove loading class from images when they load
+            document.querySelectorAll('img').forEach(img => {
+                img.addEventListener('load', function() {
+                    this.classList.remove('loading');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

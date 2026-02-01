@@ -317,7 +317,7 @@ def seed_initial_data():
 
 @app.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index_professional.html")
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -341,9 +341,9 @@ def login():
                 return redirect(url_for("customer_dashboard"))
 
         flash("Invalid email or password", "error")
-        return render_template("login.html")
+        return render_template("login_professional.html")
 
-    return render_template("login.html")
+    return render_template("login_professional.html")
 
 
 # ---------- Register ----------
@@ -362,10 +362,10 @@ def register():
         pincode = request.form.get("pincode", "").strip()
 
         if password != confirm_password:
-            return render_template("register.html", error="Passwords do not match")
+            return render_template("register_professional.html", error="Passwords do not match")
 
         if User.query.filter_by(email=email).first():
-            return render_template("register.html", error="Email already registered")
+            return render_template("register_professional.html", error="Email already registered")
 
         user = User(
             fullname=fullname,
@@ -385,7 +385,7 @@ def register():
         flash("Account created successfully!", "success")
         return redirect(url_for("login"))
 
-    return render_template("register.html")
+    return render_template("register_professional.html")
 
 
 # ---------- Logout ----------
@@ -417,7 +417,7 @@ def admin_dashboard():
         'pending_bills': pending_bills
     }
     
-    return render_template("admin_dashboard.html", stats=stats)
+    return render_template("admin_dashboard_professional.html", stats=stats)
 
 # ---------- Admin Plan Management ----------
 @app.route("/admin/plans")
@@ -902,7 +902,7 @@ def customer_dashboard():
         'total_days': total_days
     }
     
-    return render_template("customer_dashboard.html", **dashboard_data)
+    return render_template("customer_dashboard_professional.html", **dashboard_data)
 
 
 @app.route("/pause")

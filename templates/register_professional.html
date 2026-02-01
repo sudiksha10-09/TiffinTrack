@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - TiffinTrack</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--secondary-light) 100%); min-height: 100vh;">
+    
+    <!-- Navigation -->
+    <nav class="navbar" style="position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-sticky);">
+        <div class="nav-container">
+            <a href="{{ url_for('home') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+            </a>
+            
+            <div class="nav-actions">
+                <a href="{{ url_for('home') }}" class="btn btn-ghost">
+                    <i class="fas fa-home"></i>
+                    Home
+                </a>
+                <a href="{{ url_for('login') }}" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Registration Container -->
+    <div style="padding-top: 100px; padding-bottom: var(--spacing-2xl);">
+        <div style="max-width: 1200px; margin: 0 auto; padding: var(--spacing-lg); display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4xl); align-items: start;">
+            
+            <!-- Left Side - Branding -->
+            <div style="position: sticky; top: 120px;">
+                <div style="text-align: center; margin-bottom: var(--spacing-2xl);">
+                    <div style="font-size: 4rem; margin-bottom: var(--spacing-lg);">🍱</div>
+                    <h1 style="font-family: var(--font-family-display); font-size: var(--font-size-4xl); font-weight: 800; margin-bottom: var(--spacing-md); background: linear-gradient(135deg, var(--text-primary) 0%, var(--secondary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        Join TiffinTrack Today!
+                    </h1>
+                    <p style="font-size: var(--font-size-lg); color: var(--text-secondary); margin-bottom: var(--spacing-2xl);">
+                        Start your journey to healthy, convenient meals delivered fresh to your doorstep in Navi Mumbai
+                    </p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr; gap: var(--spacing-lg); margin-bottom: var(--spacing-2xl);">
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-lg); background: rgba(255, 255, 255, 0.9); border-radius: var(--border-radius-lg); backdrop-filter: blur(10px);">
+                        <div style="width: 60px; height: 60px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-pause-circle" style="color: white; font-size: var(--font-size-xl);"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: var(--spacing-xs);">Smart Pause System</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Skip meals when away, save money automatically</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-lg); background: rgba(255, 255, 255, 0.9); border-radius: var(--border-radius-lg); backdrop-filter: blur(10px);">
+                        <div style="width: 60px; height: 60px; background: var(--secondary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-leaf" style="color: white; font-size: var(--font-size-xl);"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: var(--spacing-xs);">Fresh & Healthy</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Farm-fresh ingredients, prepared daily</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-lg); background: rgba(255, 255, 255, 0.9); border-radius: var(--border-radius-lg); backdrop-filter: blur(10px);">
+                        <div style="width: 60px; height: 60px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-truck-fast" style="color: white; font-size: var(--font-size-xl);"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 700; margin-bottom: var(--spacing-xs);">On-Time Delivery</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Reliable delivery across Navi Mumbai</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; padding: var(--spacing-lg); background: rgba(255, 255, 255, 0.8); border-radius: var(--border-radius-lg); backdrop-filter: blur(10px);">
+                    <div style="display: flex; justify-content: center; gap: var(--spacing-lg); margin-bottom: var(--spacing-md);">
+                        <div style="text-align: center;">
+                            <div style="font-weight: 700; font-size: var(--font-size-lg); color: var(--primary);">500+</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Happy Customers</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 700; font-size: var(--font-size-lg); color: var(--secondary);">4.9★</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Average Rating</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-weight: 700; font-size: var(--font-size-lg); color: var(--success);">98%</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">On-Time Delivery</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Registration Form -->
+            <div class="card" style="max-width: 600px; margin: 0 auto; width: 100%;">
+                <div class="card-header" style="text-align: center;">
+                    <h2 class="card-title">Create Your Account</h2>
+                    <p class="card-subtitle">Join the TiffinTrack family and start enjoying fresh, healthy meals</p>
+                </div>
+                
+                <div class="card-body">
+                    <!-- Flash Messages -->
+                    {% if error %}
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); padding: var(--spacing-md); margin-bottom: var(--spacing-lg); border-radius: var(--border-radius); background: var(--danger-light); color: var(--danger-dark); border-left: 4px solid var(--danger);">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <span>{{ error }}</span>
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('register') }}">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                            <div class="form-group">
+                                <label for="fullname" class="form-label">
+                                    <i class="fas fa-user" style="margin-right: var(--spacing-xs);"></i>
+                                    Full Name
+                                </label>
+                                <input type="text" 
+                                       id="fullname" 
+                                       name="fullname" 
+                                       class="form-input" 
+                                       placeholder="Enter your full name"
+                                       required
+                                       autocomplete="name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope" style="margin-right: var(--spacing-xs);"></i>
+                                    Email Address
+                                </label>
+                                <input type="email" 
+                                       id="email" 
+                                       name="email" 
+                                       class="form-input" 
+                                       placeholder="Enter your email"
+                                       required
+                                       autocomplete="email">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone" style="margin-right: var(--spacing-xs);"></i>
+                                Phone Number
+                            </label>
+                            <input type="tel" 
+                                   id="phone" 
+                                   name="phone" 
+                                   class="form-input" 
+                                   placeholder="Enter your phone number"
+                                   required
+                                   autocomplete="tel">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                            <div class="form-group">
+                                <label for="password" class="form-label">
+                                    <i class="fas fa-lock" style="margin-right: var(--spacing-xs);"></i>
+                                    Password
+                                </label>
+                                <div style="position: relative;">
+                                    <input type="password" 
+                                           id="password" 
+                                           name="password" 
+                                           class="form-input" 
+                                           placeholder="Create a password"
+                                           required
+                                           autocomplete="new-password">
+                                    <button type="button" 
+                                            onclick="togglePassword('password', 'passwordToggle')" 
+                                            style="position: absolute; right: var(--spacing-md); top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-eye" id="passwordToggle"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirm_password" class="form-label">
+                                    <i class="fas fa-lock" style="margin-right: var(--spacing-xs);"></i>
+                                    Confirm Password
+                                </label>
+                                <div style="position: relative;">
+                                    <input type="password" 
+                                           id="confirm_password" 
+                                           name="confirm_password" 
+                                           class="form-input" 
+                                           placeholder="Confirm your password"
+                                           required
+                                           autocomplete="new-password">
+                                    <button type="button" 
+                                            onclick="togglePassword('confirm_password', 'confirmPasswordToggle')" 
+                                            style="position: absolute; right: var(--spacing-md); top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer;">
+                                        <i class="fas fa-eye" id="confirmPasswordToggle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addr1" class="form-label">
+                                <i class="fas fa-home" style="margin-right: var(--spacing-xs);"></i>
+                                Address Line 1
+                            </label>
+                            <input type="text" 
+                                   id="addr1" 
+                                   name="addr1" 
+                                   class="form-input" 
+                                   placeholder="Enter your address"
+                                   required
+                                   autocomplete="address-line1">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addr2" class="form-label">
+                                <i class="fas fa-building" style="margin-right: var(--spacing-xs);"></i>
+                                Address Line 2 (Optional)
+                            </label>
+                            <input type="text" 
+                                   id="addr2" 
+                                   name="addr2" 
+                                   class="form-input" 
+                                   placeholder="Apartment, suite, etc."
+                                   autocomplete="address-line2">
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                            <div class="form-group">
+                                <label for="area" class="form-label">
+                                    <i class="fas fa-map-marker-alt" style="margin-right: var(--spacing-xs);"></i>
+                                    Area (Navi Mumbai)
+                                </label>
+                                <select id="area" name="area" class="form-input form-select" required>
+                                    <option value="">Select your area</option>
+                                    <option value="Vashi">Vashi</option>
+                                    <option value="Nerul">Nerul</option>
+                                    <option value="Belapur">Belapur</option>
+                                    <option value="Kharghar">Kharghar</option>
+                                    <option value="Panvel">Panvel</option>
+                                    <option value="Kamothe">Kamothe</option>
+                                    <option value="Ghansoli">Ghansoli</option>
+                                    <option value="Kopar Khairane">Kopar Khairane</option>
+                                    <option value="Airoli">Airoli</option>
+                                    <option value="Sanpada">Sanpada</option>
+                                    <option value="Juinagar">Juinagar</option>
+                                    <option value="Seawoods">Seawoods</option>
+                                    <option value="Darave">Darave</option>
+                                    <option value="Digha">Digha</option>
+                                    <option value="Karave">Karave</option>
+                                    <option value="Ulwe">Ulwe</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pincode" class="form-label">
+                                    <i class="fas fa-mail-bulk" style="margin-right: var(--spacing-xs);"></i>
+                                    Pincode
+                                </label>
+                                <input type="text" 
+                                       id="pincode" 
+                                       name="pincode" 
+                                       class="form-input" 
+                                       placeholder="Enter pincode"
+                                       required
+                                       autocomplete="postal-code">
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: var(--spacing-lg);">
+                            <label style="display: flex; align-items: flex-start; gap: var(--spacing-md); cursor: pointer;">
+                                <input type="checkbox" required style="margin-top: 4px;">
+                                <span style="font-size: var(--font-size-sm); color: var(--text-secondary); line-height: var(--leading-relaxed);">
+                                    I agree to the <a href="{{ url_for('terms') }}" style="color: var(--primary); text-decoration: none;">Terms & Conditions</a> and <a href="#" style="color: var(--primary); text-decoration: none;">Privacy Policy</a>. I understand that TiffinTrack delivers only in Navi Mumbai areas.
+                                </span>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full btn-lg">
+                            <i class="fas fa-rocket"></i>
+                            Create My Account
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="card-footer" style="text-align: center;">
+                    <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">
+                        Already have an account?
+                    </p>
+                    <a href="{{ url_for('login') }}" class="btn btn-outline btn-full">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Sign In Instead
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(inputId, toggleId) {
+            const passwordInput = document.getElementById(inputId);
+            const passwordToggle = document.getElementById(toggleId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordToggle.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                passwordToggle.className = 'fas fa-eye';
+            }
+        }
+
+        // Password strength indicator
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthIndicator = document.getElementById('passwordStrength');
+            
+            if (!strengthIndicator) {
+                const indicator = document.createElement('div');
+                indicator.id = 'passwordStrength';
+                indicator.style.cssText = 'margin-top: var(--spacing-xs); font-size: var(--font-size-xs);';
+                this.parentNode.appendChild(indicator);
+            }
+            
+            const strength = getPasswordStrength(password);
+            const indicator = document.getElementById('passwordStrength');
+            
+            if (password.length === 0) {
+                indicator.innerHTML = '';
+                return;
+            }
+            
+            const colors = {
+                weak: 'var(--danger)',
+                medium: 'var(--warning)',
+                strong: 'var(--success)'
+            };
+            
+            indicator.innerHTML = `<span style="color: ${colors[strength.level]};">Password strength: ${strength.level}</span>`;
+        });
+
+        function getPasswordStrength(password) {
+            let score = 0;
+            
+            if (password.length >= 8) score++;
+            if (/[a-z]/.test(password)) score++;
+            if (/[A-Z]/.test(password)) score++;
+            if (/[0-9]/.test(password)) score++;
+            if (/[^A-Za-z0-9]/.test(password)) score++;
+            
+            if (score < 3) return { level: 'weak' };
+            if (score < 5) return { level: 'medium' };
+            return { level: 'strong' };
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('Password must be at least 6 characters long!');
+                return;
+            }
+        });
+
+        // Auto-format phone number
+        document.getElementById('phone').addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 10) value = value.slice(0, 10);
+            this.value = value;
+        });
+
+        // Auto-format pincode
+        document.getElementById('pincode').addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 6) value = value.slice(0, 6);
+            this.value = value;
+        });
+    </script>
+
+    <style>
+        @media (max-width: 768px) {
+            body > div > div {
+                grid-template-columns: 1fr !important;
+                gap: var(--spacing-lg) !important;
+            }
+            
+            body > div > div > div:first-child {
+                position: static !important;
+                order: 2;
+            }
+            
+            body > div > div > div:last-child {
+                order: 1;
+            }
+            
+            .form-group {
+                grid-column: 1 / -1 !important;
+            }
+            
+            body > div > div > div:first-child > div:first-child {
+                margin-bottom: var(--spacing-lg) !important;
+            }
+        }
+    </style>
+</body>
+</html>
