@@ -22,6 +22,20 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     DATABASE_URL = "sqlite:///tiffintrack.db"
 
+# Force SQLite for development if PostgreSQL connection fails
+if "postgresql" in DATABASE_URL:
+    try:
+        import psycopg2
+        # Test if we can resolve the hostname
+        import socket
+        hostname = DATABASE_URL.split('@')[1].split('/')[0].split(':')[0]
+        socket.gethostbyname(hostname)
+        print(f"🔗 Using PostgreSQL database: {hostname}")
+    except (ImportError, socket.gaierror, IndexError) as e:
+        print(f"⚠️ PostgreSQL connection issue: {e}")
+        print("🔄 Falling back to SQLite for development")
+        DATABASE_URL = "sqlite:///tiffintrack.db"
+
 app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "tiffintrack-secret-key-2026")
@@ -38,6 +52,28 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Initialize extensions
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+# Database connection verification
+def verify_database_connection():
+    """Verify database connection and fallback if needed"""
+    try:
+        with app.app_context():
+            db.engine.connect()
+        return True
+    except Exception as e:
+        print(f"❌ Database connection failed: {e}")
+        if "postgresql" in app.config["SQLALCHEMY_DATABASE_URI"]:
+            print("🔄 Switching to SQLite fallback...")
+            app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///tiffintrack.db"
+            try:
+                with app.app_context():
+                    db.engine.connect()
+                print("✅ SQLite fallback successful")
+                return True
+            except Exception as fallback_error:
+                print(f"❌ SQLite fallback also failed: {fallback_error}")
+                return False
+        return False
 
 if "mysql" in DATABASE_URL:
     print(f"🔗 Connected to MySQL database")
@@ -1101,6 +1137,12 @@ def reset_db():
 
 if __name__ == "__main__":
     print("🚀 Starting TiffinTrack server...")
+    
+    # Verify database connection before starting
+    if not verify_database_connection():
+        print("❌ Cannot establish database connection. Exiting.")
+        exit(1)
+    
     if "mysql" in DATABASE_URL:
         print("🔗 Connected to MySQL database")
     elif "postgresql" in DATABASE_URL:
