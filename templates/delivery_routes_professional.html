@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delivery Routes - TiffinTrack</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('admin_dashboard') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+                <span class="badge badge-secondary" style="margin-left: var(--spacing-sm); font-size: var(--font-size-xs);">Delivery</span>
+            </a>
+            
+            <div class="nav-actions">
+                <a href="/admin" class="btn btn-ghost">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <button onclick="optimizeRoutes()" class="btn btn-outline">
+                    <i class="fas fa-route"></i>
+                    Optimize Routes
+                </button>
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="fas fa-print"></i>
+                    Print Routes
+                </button>
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Delivery Routes -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Delivery Routes</h1>
+                <p class="dashboard-subtitle">
+                    Optimized delivery schedule for {{ delivery_date.strftime('%B %d, %Y') }} across Navi Mumbai
+                </p>
+            </div>
+            
+            <div class="dashboard-actions">
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: var(--secondary-light); border-radius: var(--border-radius); color: var(--secondary-dark);">
+                    <i class="fas fa-truck"></i>
+                    <span style="font-weight: 600; font-size: var(--font-size-sm);">{{ delivery_date.strftime('%A') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Summary -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-truck"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Total Deliveries</h3>
+                    <p>{{ total_deliveries }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Delivery Areas</h3>
+                    <p>{{ routes|length }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Est. Duration</h3>
+                    <p>{{ estimated_duration }} hrs</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <i class="fas fa-route"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Total Distance</h3>
+                    <p>{{ estimated_distance }} km</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Route Optimization Panel -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-route" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                    Route Optimization
+                </h3>
+                <p class="card-subtitle">Efficient delivery planning for Navi Mumbai areas</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--success);">
+                        <h4 style="font-weight: 700; color: var(--success-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-map"></i> Route 1: Central Areas
+                        </h4>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                            Vashi → Nerul → Belapur
+                        </div>
+                        <div style="display: flex; justify-content: between; gap: var(--spacing-md);">
+                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                <i class="fas fa-clock" style="margin-right: var(--spacing-xs);"></i>
+                                2.5 hrs
+                            </span>
+                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                <i class="fas fa-truck" style="margin-right: var(--spacing-xs);"></i>
+                                {{ route_stats.route1.deliveries }} deliveries
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--info);">
+                        <h4 style="font-weight: 700; color: var(--info-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-map"></i> Route 2: Eastern Areas
+                        </h4>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                            Kharghar → Panvel → Kamothe
+                        </div>
+                        <div style="display: flex; justify-content: between; gap: var(--spacing-md);">
+                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                <i class="fas fa-clock" style="margin-right: var(--spacing-xs);"></i>
+                                3.0 hrs
+                            </span>
+                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                <i class="fas fa-truck" style="margin-right: var(--spacing-xs);"></i>
+                                {{ route_stats.route2.deliveries }} deliveries
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--warning);">
+                        <h4 style="font-weight: 700; color: var(--warning-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-map"></i> Route 3: Northern Areas
+                        </h4>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                            Ghansoli → Airoli → Kopar Khairane
+                        </div>
+                        <div style="display: flex; justify-content: between; gap: var(--spacing-md);">
+                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                <i class="fas fa-clock" style="margin-right: var(--spacing-xs);"></i>
+                                2.0 hrs
+                            </span>
+                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                <i class="fas fa-truck" style="margin-right: var(--spacing-xs);"></i>
+                                {{ route_stats.route3.deliveries }} deliveries
+                            </span>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Area-wise Delivery Routes -->
+        {% if routes %}
+            {% for area, customers in routes.items() %}
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-map-marker-alt" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
+                        {{ area }}
+                    </h3>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                        <span class="badge badge-success">{{ customers|length }} deliveries</span>
+                        <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                            <i class="fas fa-clock" style="margin-right: var(--spacing-xs);"></i>
+                            Est. {{ (customers|length * 8) }} mins
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">#</th>
+                                    <th style="width: 25%;">Customer</th>
+                                    <th style="width: 15%;">Phone</th>
+                                    <th style="width: 35%;">Address</th>
+                                    <th style="width: 15%;">Plan</th>
+                                    <th style="width: 5%;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customers %}
+                                <tr>
+                                    <td>
+                                        <div style="width: 24px; height: 24px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); font-weight: 600;">
+                                            {{ loop.index }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 600;">{{ customer.name }}</div>
+                                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">ID: #{{ customer.id }}</div>
+                                    </td>
+                                    <td>
+                                        <a href="tel:{{ customer.phone }}" style="color: var(--primary); text-decoration: none;">
+                                            <i class="fas fa-phone" style="margin-right: var(--spacing-xs);"></i>
+                                            {{ customer.phone }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <div style="font-size: var(--font-size-sm);">{{ customer.address }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-primary">{{ customer.plan }}</span>
+                                    </td>
+                                    <td>
+                                        <button onclick="toggleDeliveryStatus({{ customer.id }})" class="btn btn-sm" style="padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-xs);" id="status-{{ customer.id }}">
+                                            <i class="fas fa-clock"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="card">
+                <div class="card-body">
+                    <div style="text-align: center; padding: var(--spacing-4xl); color: var(--text-secondary);">
+                        <i class="fas fa-truck" style="font-size: 4rem; margin-bottom: var(--spacing-lg); opacity: 0.3;"></i>
+                        <h4 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">No Deliveries Scheduled</h4>
+                        <p>There are no active deliveries for today.</p>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        <!-- Delivery Instructions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clipboard-check" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
+                    Delivery Instructions & Guidelines
+                </h3>
+                <p class="card-subtitle">Important protocols for delivery team</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--success);">
+                        <h4 style="font-weight: 700; color: var(--success-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-route"></i> Route Guidelines
+                        </h4>
+                        <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-check" style="color: var(--success); margin-right: var(--spacing-sm);"></i>Follow area-wise grouping for efficiency</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-check" style="color: var(--success); margin-right: var(--spacing-sm);"></i>Start with farthest area first</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-check" style="color: var(--success); margin-right: var(--spacing-sm);"></i>Use GPS navigation for optimal routes</li>
+                            <li><i class="fas fa-check" style="color: var(--success); margin-right: var(--spacing-sm);"></i>Update delivery status in real-time</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--warning);">
+                        <h4 style="font-weight: 700; color: var(--warning-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-phone"></i> Customer Communication
+                        </h4>
+                        <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-phone" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>Call if customer not available</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-clock" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>Inform about delivery time</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-map-marker-alt" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>Confirm delivery address</li>
+                            <li><i class="fas fa-smile" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>Maintain professional courtesy</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--info);">
+                        <h4 style="font-weight: 700; color: var(--info-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-thermometer-half"></i> Food Safety
+                        </h4>
+                        <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-fire" style="color: var(--info); margin-right: var(--spacing-sm);"></i>Ensure meals are delivered hot</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-box" style="color: var(--info); margin-right: var(--spacing-sm);"></i>Check container sealing</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-clock" style="color: var(--info); margin-right: var(--spacing-sm);"></i>Complete delivery within 2 hours</li>
+                            <li><i class="fas fa-shield-alt" style="color: var(--info); margin-right: var(--spacing-sm);"></i>Maintain hygiene standards</li>
+                        </ul>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Delivery Timeline -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clock" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                    Delivery Timeline
+                </h3>
+                <p class="card-subtitle">Recommended schedule for timely deliveries</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; gap: var(--spacing-md);">
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div style="width: 60px; height: 60px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            11:30
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Pickup from Kitchen</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Collect all packed meals and verify orders</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div style="width: 60px; height: 60px; background: var(--secondary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            12:00
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Start Route 1</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Central areas: Vashi, Nerul, Belapur</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div style="width: 60px; height: 60px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            12:30
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Start Route 2 & 3</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Eastern and Northern areas simultaneously</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div style="width: 60px; height: 60px; background: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            14:30
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">All Deliveries Complete</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Return to base and update delivery status</div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function optimizeRoutes() {
+            // Simulate route optimization
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Optimizing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Routes Optimized';
+                btn.style.background = 'var(--success)';
+                btn.style.borderColor = 'var(--success)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.style.background = '';
+                    btn.style.borderColor = '';
+                }, 2000);
+            }, 3000);
+        }
+
+        function toggleDeliveryStatus(customerId) {
+            const btn = document.getElementById(`status-${customerId}`);
+            const currentStatus = btn.innerHTML;
+            
+            if (currentStatus.includes('clock')) {
+                btn.innerHTML = '<i class="fas fa-truck"></i>';
+                btn.style.background = 'var(--warning)';
+                btn.style.color = 'white';
+                btn.title = 'Out for delivery';
+            } else if (currentStatus.includes('truck')) {
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.style.background = 'var(--success)';
+                btn.style.color = 'white';
+                btn.title = 'Delivered';
+            } else {
+                btn.innerHTML = '<i class="fas fa-clock"></i>';
+                btn.style.background = '';
+                btn.style.color = '';
+                btn.title = 'Pending';
+            }
+        }
+
+        // Auto-update delivery times
+        setInterval(() => {
+            const timeElements = document.querySelectorAll('[data-delivery-time]');
+            timeElements.forEach(el => {
+                const currentTime = new Date();
+                const deliveryTime = new Date(el.dataset.deliveryTime);
+                const diff = Math.max(0, deliveryTime - currentTime);
+                const minutes = Math.floor(diff / 60000);
+                
+                if (minutes > 0) {
+                    el.textContent = `${minutes} mins`;
+                } else {
+                    el.textContent = 'Now';
+                    el.style.color = 'var(--danger)';
+                }
+            });
+        }, 60000);
+    </script>
+
+    <style>
+        @media print {
+            .navbar, .btn, .dashboard-actions { 
+                display: none !important; 
+            }
+            .dashboard { 
+                margin: 0; 
+                padding: 20px; 
+            }
+            .card {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            .table {
+                font-size: 12px;
+            }
+        }
+    </style>
+</body>
+</html>

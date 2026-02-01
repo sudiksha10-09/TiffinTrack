@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Report - TiffinTrack</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('admin_dashboard') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+                <span class="badge badge-primary" style="margin-left: var(--spacing-sm); font-size: var(--font-size-xs);">Kitchen</span>
+            </a>
+            
+            <div class="nav-actions">
+                <a href="/admin" class="btn btn-ghost">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <button onclick="window.print()" class="btn btn-primary">
+                    <i class="fas fa-print"></i>
+                    Print Report
+                </button>
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Kitchen Report -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Kitchen Production Report</h1>
+                <p class="dashboard-subtitle">
+                    Daily meal preparation requirements for {{ report_date.strftime('%B %d, %Y') }}
+                </p>
+            </div>
+            
+            <div class="dashboard-actions">
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius); color: var(--info-dark);">
+                    <i class="fas fa-clock"></i>
+                    <span style="font-weight: 600; font-size: var(--font-size-sm);">{{ report_date.strftime('%A') }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Production Summary -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Total Meals</h3>
+                    <p>{{ total_meals }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                    <i class="fas fa-list-ul"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Plan Types</h3>
+                    <p>{{ production_data|length }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Active Customers</h3>
+                    <p>{{ active_customers }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <i class="fas fa-pause-circle"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Paused Today</h3>
+                    <p>{{ paused_today }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Production Requirements -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clipboard-list" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                    Production Requirements
+                </h3>
+                <p class="card-subtitle">Detailed breakdown of meals to prepare</p>
+            </div>
+            
+            <div class="card-body">
+                {% if production_data %}
+                    <div style="display: grid; gap: var(--spacing-lg);">
+                        {% for plan_name, data in production_data.items() %}
+                        <div style="padding: var(--spacing-xl); background: var(--bg-secondary); border-radius: var(--border-radius-lg); border-left: 4px solid var(--primary);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-lg);">
+                                <div>
+                                    <h4 style="font-size: var(--font-size-xl); font-weight: 700; margin-bottom: var(--spacing-sm);">{{ plan_name }}</h4>
+                                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                                        <span class="badge badge-success">{{ data.count }} meals</span>
+                                        <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                                            <i class="fas fa-rupee-sign" style="margin-right: var(--spacing-xs);"></i>
+                                            {{ data.daily_rate }}/meal
+                                        </span>
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--primary);">{{ data.count }}</div>
+                                    <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">portions</div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h5 style="font-weight: 600; margin-bottom: var(--spacing-md); color: var(--text-primary);">
+                                    <i class="fas fa-list" style="margin-right: var(--spacing-xs);"></i>
+                                    Menu Items:
+                                </h5>
+                                <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
+                                    {% set menu_items = data.get('items', []) %}
+                                    {% if menu_items %}
+                                        {% for menu_item in menu_items %}
+                                            <span style="padding: var(--spacing-xs) var(--spacing-md); background: var(--surface); border: 1px solid var(--border); border-radius: var(--border-radius); font-size: var(--font-size-sm); color: var(--text-primary);">
+                                                {{ menu_item }}
+                                            </span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span style="color: var(--text-secondary); font-style: italic;">No items specified</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div style="text-align: center; padding: var(--spacing-4xl); color: var(--text-secondary);">
+                        <i class="fas fa-utensils" style="font-size: 4rem; margin-bottom: var(--spacing-lg); opacity: 0.3;"></i>
+                        <h4 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">No Meals to Prepare</h4>
+                        <p>There are no active meal orders for today.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Ingredient Summary -->
+        {% if ingredient_summary %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-shopping-cart" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
+                    Ingredient Requirements
+                </h3>
+                <p class="card-subtitle">Estimated ingredients needed for today's production</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg);">
+                    {% for ingredient, quantity in ingredient_summary.items() %}
+                    <div style="padding: var(--spacing-lg); background: var(--secondary-light); border-radius: var(--border-radius); text-align: center;">
+                        <div style="font-size: var(--font-size-lg); font-weight: 700; color: var(--secondary-dark); margin-bottom: var(--spacing-xs);">{{ quantity }}</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ ingredient }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Kitchen Instructions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clipboard-check" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
+                    Kitchen Instructions
+                </h3>
+                <p class="card-subtitle">Important guidelines for today's preparation</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg);">
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--success);">
+                        <h4 style="font-weight: 700; color: var(--success-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-check-circle"></i> Preparation Checklist
+                        </h4>
+                        <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-check" style="color: var(--success); margin-right: var(--spacing-sm);"></i>Verify ingredient quantities</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-check" style="color: var(--success); margin-right: var(--spacing-sm);"></i>Check meal plan requirements</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-check" style="color: var(--success); margin-right: var(--spacing-sm);"></i>Prepare containers for packaging</li>
+                            <li><i class="fas fa-check" style="color: var(--success); margin-right: var(--spacing-sm);"></i>Coordinate with delivery team</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--warning);">
+                        <h4 style="font-weight: 700; color: var(--warning-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-exclamation-triangle"></i> Quality Standards
+                        </h4>
+                        <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-thermometer-half" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>Maintain proper cooking temperature</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-leaf" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>Use only fresh ingredients</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-clock" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>Follow cooking time guidelines</li>
+                            <li><i class="fas fa-shield-alt" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>Maintain hygiene standards</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--info);">
+                        <h4 style="font-weight: 700; color: var(--info-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-box"></i> Packaging Guidelines
+                        </h4>
+                        <ul style="list-style: none; padding: 0; color: var(--text-secondary);">
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-tag" style="color: var(--info); margin-right: var(--spacing-sm);"></i>Label containers with plan types</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-user" style="color: var(--info); margin-right: var(--spacing-sm);"></i>Include customer names</li>
+                            <li style="margin-bottom: var(--spacing-sm);"><i class="fas fa-map-marker-alt" style="color: var(--info); margin-right: var(--spacing-sm);"></i>Sort by delivery areas</li>
+                            <li><i class="fas fa-clock" style="color: var(--info); margin-right: var(--spacing-sm);"></i>Ready by 11:30 AM</li>
+                        </ul>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Production Timeline -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-clock" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                    Production Timeline
+                </h3>
+                <p class="card-subtitle">Recommended schedule for efficient preparation</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; gap: var(--spacing-md);">
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div style="width: 60px; height: 60px; background: var(--primary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            7:00
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Start Preparation</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Begin with rice and dal preparation</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div style="width: 60px; height: 60px; background: var(--secondary-gradient); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            9:00
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Main Courses</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Prepare curries and vegetables</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div style="width: 60px; height: 60px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            10:30
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Final Items</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Rotis, salads, and accompaniments</div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div style="width: 60px; height: 60px; background: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                            11:30
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">Packaging Complete</div>
+                            <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Ready for delivery pickup</div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <style>
+        @media print {
+            .navbar, .btn, .dashboard-actions { 
+                display: none !important; 
+            }
+            .dashboard { 
+                margin: 0; 
+                padding: 20px; 
+            }
+            .card {
+                page-break-inside: avoid;
+                margin-bottom: 20px;
+            }
+            .kpi-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</body>
+</html>

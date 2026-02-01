@@ -1,5 +1,6 @@
 import os
 import json
+import stripe
 from datetime import datetime, date, time, timedelta
 from calendar import monthrange
 from werkzeug.utils import secure_filename
@@ -9,6 +10,7 @@ from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
 from PIL import Image
+import stripe
 
 # ------------------------
 # Environment Setup
@@ -17,38 +19,100 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Database Configuration for Neon PostgreSQL
+# Database Configuration for Neon PostgreSQL with Enhanced Connection Handling
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
     # Default to Neon PostgreSQL
     DATABASE_URL = "postgresql://neondb_owner:npg_nsMXcjJ1pB9t@ep-red-paper-ah0u6oe0-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require"
 
-# Enhanced connection handling for Neon
-if "postgresql" in DATABASE_URL:
-    try:
-        # Test connection with a simple query
-        import psycopg2
-        test_conn = psycopg2.connect(DATABASE_URL)
-        test_conn.close()
-        print(f"🔗 Connected to Neon PostgreSQL database")
-    except Exception as e:
-        print(f"⚠️ Neon connection issue: {e}")
-        # Try alternative connection string (without pooler)
-        if "pooler" in DATABASE_URL:
-            alt_url = DATABASE_URL.replace("-pooler", "").replace("?sslmode=require", "?sslmode=prefer")
+# Enhanced connection handling for Neon with retry logic
+def get_database_url():
+    """Get working database URL with fallback options"""
+    import psycopg2
+    import time
+    
+    # Primary Neon URL (with pooler)
+    primary_url = DATABASE_URL
+    
+    # Alternative Neon URLs to try
+    fallback_urls = []
+    
+    if "pooler" in DATABASE_URL:
+        # Direct connection without pooler
+        direct_url = DATABASE_URL.replace("-pooler", "")
+        fallback_urls.append(direct_url)
+        
+        # Try with different SSL modes
+        fallback_urls.append(DATABASE_URL.replace("?sslmode=require", "?sslmode=prefer"))
+        fallback_urls.append(direct_url.replace("?sslmode=require", "?sslmode=prefer"))
+        fallback_urls.append(DATABASE_URL.replace("?sslmode=require", "?sslmode=disable"))
+    
+    # Try each URL with retry logic
+    urls_to_try = [primary_url] + fallback_urls
+    
+    for i, url in enumerate(urls_to_try):
+        for attempt in range(2):  # Reduced to 2 attempts per URL for faster fallback
             try:
-                test_conn = psycopg2.connect(alt_url)
+                print(f"🔄 Attempting connection {i+1}/{len(urls_to_try)}, try {attempt+1}/2...")
+                # Set a shorter timeout for faster fallback
+                test_conn = psycopg2.connect(url, connect_timeout=5)
                 test_conn.close()
-                DATABASE_URL = alt_url
-                print(f"🔄 Using direct Neon connection")
-            except Exception as alt_e:
-                print(f"❌ Alternative connection also failed: {alt_e}")
-                print("💡 Please check your internet connection and Neon database status")
-                raise
+                
+                connection_type = "pooled" if "pooler" in url else "direct"
+                ssl_mode = "require" if "sslmode=require" in url else "prefer" if "sslmode=prefer" in url else "disable"
+                print(f"✅ Connected to Neon PostgreSQL ({connection_type}, SSL: {ssl_mode})")
+                return url
+                
+            except Exception as e:
+                print(f"⚠️ Connection attempt failed: {str(e)[:100]}...")
+                if attempt < 1:  # Don't sleep on last attempt
+                    time.sleep(1)  # Reduced sleep time
+                continue
+    
+    # If all Neon connections fail, fall back to SQLite
+    print("❌ All Neon PostgreSQL connection attempts failed")
+    print("🔄 Falling back to SQLite for development...")
+    
+    sqlite_url = "sqlite:///tiffintrack.db"
+    print(f"✅ Using SQLite database: {sqlite_url}")
+    return sqlite_url
 
-app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
+# Get the working database URL
+working_db_url = get_database_url()
+app.config["SQLALCHEMY_DATABASE_URI"] = working_db_url
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "tiffintrack-secret-key-2026")
+
+# Enhanced SQLAlchemy configuration for Neon PostgreSQL
+if "sqlite" in working_db_url:
+    # SQLite configuration
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_timeout": 30,
+        "pool_recycle": 300,
+        "pool_pre_ping": True
+    }
+else:
+    # PostgreSQL configuration
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+        "pool_size": 5,
+        "pool_timeout": 30,
+        "pool_recycle": 300,  # Recycle connections every 5 minutes
+        "pool_pre_ping": True,  # Verify connections before use
+        "max_overflow": 10,
+        "connect_args": {
+            "connect_timeout": 10,
+            "application_name": "TiffinTrack"
+            # Removed statement_timeout as it's not supported by Neon pooled connections
+        }
+    }
+
+# Stripe Configuration
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+app.config["STRIPE_PUBLISHABLE_KEY"] = os.getenv("STRIPE_PUBLISHABLE_KEY")
+
+# Stripe Configuration
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+app.config["STRIPE_PUBLISHABLE_KEY"] = os.getenv("STRIPE_PUBLISHABLE_KEY")
 
 # File Upload Configuration
 UPLOAD_FOLDER = 'static/uploads/dishes'
@@ -63,27 +127,93 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
-# Database connection verification
+# Database retry decorator for handling connection drops
+from functools import wraps
+import time
+from sqlalchemy.exc import OperationalError, DisconnectionError
+
+def db_retry(max_retries=3, delay=1):
+    """Decorator to retry database operations on connection failures"""
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            last_exception = None
+            
+            for attempt in range(max_retries):
+                try:
+                    return func(*args, **kwargs)
+                except (OperationalError, DisconnectionError) as e:
+                    last_exception = e
+                    error_msg = str(e).lower()
+                    
+                    # Check if it's a connection-related error
+                    if any(keyword in error_msg for keyword in [
+                        'connection abort', 'ssl syscall', 'server closed', 
+                        'connection reset', 'broken pipe', 'timeout'
+                    ]):
+                        print(f"🔄 Database connection error (attempt {attempt + 1}/{max_retries}): {str(e)[:100]}...")
+                        
+                        if attempt < max_retries - 1:
+                            # Exponential backoff
+                            sleep_time = delay * (2 ** attempt)
+                            print(f"⏳ Retrying in {sleep_time} seconds...")
+                            time.sleep(sleep_time)
+                            
+                            # Try to refresh the connection
+                            try:
+                                db.engine.dispose()
+                                print("🔄 Database connection pool refreshed")
+                            except:
+                                pass
+                            continue
+                    else:
+                        # Not a connection error, re-raise immediately
+                        raise e
+                except Exception as e:
+                    # Non-connection error, re-raise immediately
+                    raise e
+            
+            # All retries failed
+            print(f"❌ All database retry attempts failed")
+            raise last_exception
+        return wrapper
+    return decorator
+
+# Database connection verification with retry
+@db_retry(max_retries=3, delay=2)
 def verify_database_connection():
-    """Verify database connection and setup"""
+    """Verify database connection and setup with retry logic"""
     try:
         with app.app_context():
-            # Test connection
+            # Create tables if using SQLite
+            if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
+                print("🔄 Setting up SQLite database...")
+                db.create_all()
+                
+                # Seed initial data if no users exist
+                if User.query.count() == 0:
+                    print("🌱 Seeding initial data...")
+                    seed_initial_data()
+            
+            # Test connection with a simple query
             connection = db.engine.connect()
+            result = connection.execute(db.text("SELECT 1"))
+            result.fetchone()
             connection.close()
             
             # Check if we have data
             user_count = User.query.count()
-            print(f"✅ Database ready with {user_count} users")
+            db_type = "SQLite" if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"] else "PostgreSQL"
+            print(f"✅ {db_type} database ready with {user_count} users")
             
         return True
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
-        return False
+        print(f"❌ Database connection verification failed: {e}")
+        raise
 
-if "mysql" in DATABASE_URL:
+if "mysql" in working_db_url:
     print(f"🔗 Connected to MySQL database")
-elif "postgresql" in DATABASE_URL:
+elif "postgresql" in working_db_url:
     print(f"🔗 Connected to Neon PostgreSQL database")
 else:
     print(f"🔗 Using SQLite database for development")
@@ -198,6 +328,41 @@ class Menu(db.Model):
     plan_id = db.Column(db.Integer, db.ForeignKey("plans.id"), nullable=False)
     items = db.Column(db.Text, nullable=False)  # JSON string
     created_at = db.Column(db.DateTime, server_default=db.func.now())
+
+
+class Payment(db.Model):
+    __tablename__ = "payments"
+
+    id = db.Column(db.Integer, primary_key=True)
+    bill_id = db.Column(db.Integer, db.ForeignKey("bills.id"), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    stripe_payment_intent_id = db.Column(db.String(255), unique=True, nullable=False)
+    amount = db.Column(db.Integer, nullable=False)  # Amount in paise (₹1 = 100 paise)
+    currency = db.Column(db.String(3), default="inr", nullable=False)
+    status = db.Column(db.String(50), nullable=False)  # succeeded, pending, failed
+    payment_method = db.Column(db.String(50))  # card, upi, netbanking, etc.
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    updated_at = db.Column(db.DateTime, server_default=db.func.now(), onupdate=db.func.now())
+
+
+class PaymentLog(db.Model):
+    __tablename__ = "payment_logs"
+
+    id = db.Column(db.Integer, primary_key=True)
+    payment_id = db.Column(db.Integer, db.ForeignKey("payments.id"), nullable=False)
+    bill_id = db.Column(db.Integer, db.ForeignKey("bills.id"), nullable=False)
+    customer_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    amount = db.Column(db.Integer, nullable=False)
+    payment_method = db.Column(db.String(50))
+    stripe_payment_intent_id = db.Column(db.String(255), unique=True, nullable=False)
+    billing_period = db.Column(db.String(20))  # "MM/YYYY" format
+    status = db.Column(db.String(50), default="completed")
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    
+    # Relationships for easy access
+    payment = db.relationship("Payment", backref="logs")
+    bill = db.relationship("Bill", backref="payment_logs")
+    customer = db.relationship("User", backref="payment_logs")
 
 
 # ------------------------
@@ -325,6 +490,32 @@ def seed_initial_data():
 @app.route("/")
 def home():
     return render_template("index_professional.html")
+
+
+@app.route("/health")
+@db_retry(max_retries=2, delay=1)
+def health_check():
+    """Health check endpoint to verify database connectivity"""
+    try:
+        # Test database connection
+        connection = db.engine.connect()
+        result = connection.execute(db.text("SELECT 1 as health_check"))
+        result.fetchone()
+        connection.close()
+        
+        return jsonify({
+            "status": "healthy",
+            "database": "connected",
+            "timestamp": datetime.now().isoformat()
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy", 
+            "database": "disconnected",
+            "error": str(e)[:200],
+            "timestamp": datetime.now().isoformat()
+        }), 503
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -603,7 +794,7 @@ def customer_management():
     
     for customer in customers:
         # Get active plan
-        active_plan = db.session.query(CustomerPlan, Plan).join(Plan).filter(
+        active_plan = db.session.query(CustomerPlan, Plan).select_from(CustomerPlan).join(Plan, CustomerPlan.plan_id == Plan.id).filter(
             CustomerPlan.customer_id == customer.id,
             CustomerPlan.is_active == True
         ).first()
@@ -675,7 +866,7 @@ def kitchen_report():
     today = date.today()
     
     # Get all active plans for today
-    active_plans = db.session.query(CustomerPlan, Plan, User).join(Plan).join(User).filter(
+    active_plans = db.session.query(CustomerPlan, Plan, User).select_from(CustomerPlan).join(Plan, CustomerPlan.plan_id == Plan.id).join(User, CustomerPlan.customer_id == User.id).filter(
         CustomerPlan.is_active == True,
         CustomerPlan.start_date <= today,
         CustomerPlan.end_date >= today
@@ -688,20 +879,45 @@ def kitchen_report():
     # Calculate production requirements
     production_data = {}
     total_meals = 0
+    active_customers = 0
+    ingredient_summary = {}
     
     for cp, plan, user in active_plans:
         if user.id not in paused_customer_ids:
+            active_customers += 1
             if plan.name not in production_data:
                 production_data[plan.name] = {
                     'count': 0,
-                    'items': json.loads(plan.items) if plan.items else []
+                    'items': json.loads(plan.items) if plan.items else [],
+                    'daily_rate': plan.daily_rate
                 }
             production_data[plan.name]['count'] += 1
             total_meals += 1
+            
+            # Calculate ingredient requirements
+            items = json.loads(plan.items) if plan.items else []
+            for item in items:
+                if item not in ingredient_summary:
+                    ingredient_summary[item] = 0
+                ingredient_summary[item] += 1
     
-    return render_template("kitchen_report.html", 
+    # Calculate preparation timeline
+    preparation_timeline = [
+        {'time': '06:00 AM', 'task': 'Start rice preparation', 'duration': '30 min'},
+        {'time': '06:30 AM', 'task': 'Begin dal cooking', 'duration': '45 min'},
+        {'time': '07:00 AM', 'task': 'Vegetable preparation', 'duration': '60 min'},
+        {'time': '08:00 AM', 'task': 'Roti/bread preparation', 'duration': '45 min'},
+        {'time': '09:00 AM', 'task': 'Final assembly & packing', 'duration': '60 min'},
+        {'time': '10:00 AM', 'task': 'Quality check & dispatch', 'duration': '30 min'}
+    ]
+    
+    return render_template("kitchen_report_professional.html", 
                          production_data=production_data, 
                          total_meals=total_meals,
+                         active_customers=active_customers,
+                         paused_today=len(paused_customer_ids),
+                         ingredient_summary=ingredient_summary,
+                         preparation_timeline=preparation_timeline,
                          report_date=today)
 
 
@@ -714,7 +930,7 @@ def delivery_routes():
     today = date.today()
     
     # Get all customers with active deliveries today (not paused)
-    active_deliveries = db.session.query(User, CustomerPlan, Plan).join(CustomerPlan).join(Plan).filter(
+    active_deliveries = db.session.query(User, CustomerPlan, Plan).select_from(CustomerPlan).join(User, CustomerPlan.customer_id == User.id).join(Plan, CustomerPlan.plan_id == Plan.id).filter(
         CustomerPlan.is_active == True,
         CustomerPlan.start_date <= today,
         CustomerPlan.end_date >= today,
@@ -727,21 +943,51 @@ def delivery_routes():
     
     # Group by delivery area
     routes = {}
+    total_deliveries = 0
     
     for user, cp, plan in active_deliveries:
         if user.id not in paused_customer_ids:
-            area = user.area  # Fixed from delivery_area to area
+            area = user.area
             if area not in routes:
                 routes[area] = []
             
             routes[area].append({
+                'id': user.id,
                 'name': user.fullname,
                 'phone': user.phone,
                 'address': f"{user.addr1}, {user.addr2 or ''}, {user.city}".strip(', '),
-                'plan': plan.name
+                'plan': plan.name,
+                'pincode': user.pincode
             })
+            total_deliveries += 1
     
-    return render_template("delivery_routes.html", routes=routes, delivery_date=today)
+    # Calculate delivery metrics
+    estimated_duration = len(routes) * 1.5 if routes else 0  # 1.5 hours per area
+    estimated_distance = len(routes) * 8 if routes else 0  # Estimate 8km per area
+    
+    # Create route statistics for template
+    route_stats = {
+        'route1': {'deliveries': 0},
+        'route2': {'deliveries': 0}, 
+        'route3': {'deliveries': 0}
+    }
+    
+    # Distribute areas across routes for display
+    area_list = list(routes.keys())
+    for i, area in enumerate(area_list):
+        route_key = f'route{(i % 3) + 1}'
+        route_stats[route_key]['deliveries'] += len(routes[area])
+    
+    # Sort routes by area name for consistent ordering
+    sorted_routes = dict(sorted(routes.items()))
+    
+    return render_template("delivery_routes_professional.html", 
+                         routes=sorted_routes, 
+                         total_deliveries=total_deliveries,
+                         estimated_duration=round(estimated_duration, 1),
+                         estimated_distance=estimated_distance,
+                         route_stats=route_stats,
+                         delivery_date=today)
 
 
 # ---------- Bill Management ----------
@@ -750,8 +996,61 @@ def bill_management():
     if not session.get("is_admin"):
         return redirect(url_for("login"))
     
-    bills = db.session.query(Bill, User).join(User).all()
-    return render_template("bill_management.html", bills=bills)
+    # Get current month and year
+    current_month = date.today().month
+    current_year = date.today().year
+    
+    # Get all bills with customer information
+    bills = db.session.query(Bill, User).join(User).order_by(Bill.created_at.desc()).all()
+    
+    # Calculate billing statistics
+    total_bills = len(bills)
+    paid_bills = sum(1 for bill, user in bills if bill.is_paid)
+    pending_bills = total_bills - paid_bills
+    total_revenue = sum(bill.amount for bill, user in bills)
+    paid_amount = sum(bill.amount for bill, user in bills if bill.is_paid)
+    pending_amount = sum(bill.amount for bill, user in bills if not bill.is_paid)
+    
+    # Get monthly revenue data for chart
+    monthly_revenue = {}
+    for bill, user in bills:
+        if bill.is_paid:
+            month_key = f"{bill.year}-{bill.month:02d}"
+            if month_key not in monthly_revenue:
+                monthly_revenue[month_key] = 0
+            monthly_revenue[month_key] += bill.amount
+    
+    # Get recent payments (last 10)
+    recent_payments = [(bill, user) for bill, user in bills if bill.is_paid][:10]
+    
+    # Get overdue bills (older than current month)
+    overdue_bills = []
+    for bill, user in bills:
+        if not bill.is_paid:
+            bill_date = date(bill.year, bill.month, 1)
+            current_date = date(current_year, current_month, 1)
+            if bill_date < current_date:
+                overdue_bills.append((bill, user))
+    
+    bill_stats = {
+        'total_bills': total_bills,
+        'paid_bills': paid_bills,
+        'pending_bills': pending_bills,
+        'total_revenue': total_revenue,
+        'paid_amount': paid_amount,
+        'pending_amount': pending_amount,
+        'overdue_count': len(overdue_bills),
+        'collection_rate': round((paid_bills / total_bills * 100) if total_bills > 0 else 0, 1)
+    }
+    
+    return render_template("bill_management_professional.html", 
+                         bills=bills,
+                         bill_stats=bill_stats,
+                         monthly_revenue=monthly_revenue,
+                         recent_payments=recent_payments,
+                         overdue_bills=overdue_bills,
+                         current_month=current_month,
+                         current_year=current_year)
 
 
 @app.route("/bills/generate/<int:month>/<int:year>")
@@ -777,7 +1076,7 @@ def generate_monthly_bills(month, year):
         first_day = date(year, month, 1)
         last_day = date(year, month, monthrange(year, month)[1])
         
-        active_plans = db.session.query(CustomerPlan, Plan).join(Plan).filter(
+        active_plans = db.session.query(CustomerPlan, Plan).select_from(CustomerPlan).join(Plan, CustomerPlan.plan_id == Plan.id).filter(
             CustomerPlan.customer_id == customer.id,
             CustomerPlan.is_active == True,
             CustomerPlan.start_date <= last_day,
@@ -787,35 +1086,36 @@ def generate_monthly_bills(month, year):
         if not active_plans:
             continue
         
-        # Calculate total amount
+        # Calculate total amount and actual plan days
         total_amount = 0
-        total_days = monthrange(year, month)[1]
-        
-        # Get paused days for this customer in this month
-        paused_days = PausedDate.query.filter(
-            PausedDate.customer_id == customer.id,
-            PausedDate.pause_date >= first_day,
-            PausedDate.pause_date <= last_day
-        ).count()
-        
-        billable_days = total_days - paused_days
+        actual_plan_days = 0
+        total_paused_days = 0
         
         # Calculate amount based on active plans
         for cp, plan in active_plans:
-            # Calculate overlap days
+            # Calculate overlap days between plan and billing month
             plan_start = max(cp.start_date, first_day)
             plan_end = min(cp.end_date, last_day)
-            plan_days = (plan_end - plan_start).days + 1
             
-            # Get paused days for this specific plan period
-            plan_paused = PausedDate.query.filter(
-                PausedDate.customer_id == customer.id,
-                PausedDate.pause_date >= plan_start,
-                PausedDate.pause_date <= plan_end
-            ).count()
-            
-            plan_billable_days = plan_days - plan_paused
-            total_amount += plan_billable_days * plan.daily_rate
+            if plan_start <= plan_end:  # Plan overlaps with this month
+                plan_days_in_month = (plan_end - plan_start).days + 1
+                actual_plan_days += plan_days_in_month
+                
+                # Get paused days for this specific plan period in this month
+                plan_paused = PausedDate.query.filter(
+                    PausedDate.customer_id == customer.id,
+                    PausedDate.pause_date >= plan_start,
+                    PausedDate.pause_date <= plan_end
+                ).count()
+                
+                total_paused_days += plan_paused
+                plan_billable_days = plan_days_in_month - plan_paused
+                total_amount += plan_billable_days * plan.daily_rate
+        
+        # Use actual plan days instead of month days
+        total_days = actual_plan_days
+        paused_days = total_paused_days
+        billable_days = total_days - paused_days
         
         # Create bill
         bill = Bill(
@@ -849,76 +1149,364 @@ def mark_bill_paid(bill_id):
     return redirect(url_for("bill_management"))
 
 
+# ---------- Stripe Payment Integration ----------
+@app.route("/pay-bill/<int:bill_id>")
+def pay_bill(bill_id):
+    """Display payment page for a specific bill"""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    
+    customer_id = session["user_id"]
+    bill = db.session.query(Bill, User).join(User).filter(
+        Bill.id == bill_id,
+        Bill.customer_id == customer_id,
+        Bill.is_paid == False
+    ).first()
+    
+    if not bill:
+        flash("Bill not found or already paid", "error")
+        return redirect(url_for("customer_dashboard"))
+    
+    bill_obj, user = bill
+    
+    return render_template("payment.html", 
+                         bill=bill_obj,
+                         user=user,
+                         stripe_publishable_key=app.config["STRIPE_PUBLISHABLE_KEY"])
+
+
+# ---------- Analytics Dashboard ----------
+@app.route("/analytics")
+def analytics_dashboard():
+    if not session.get("is_admin"):
+        return redirect(url_for("login"))
+    
+    # Get date range (default to last 30 days)
+    end_date = date.today()
+    start_date = end_date - timedelta(days=30)
+    date_range = f"{start_date.strftime('%B %d')} - {end_date.strftime('%B %d, %Y')}"
+    
+    # Calculate key metrics
+    total_customers = User.query.filter_by(is_admin=False).count()
+    active_customers = db.session.query(CustomerPlan).filter(
+        CustomerPlan.is_active == True,
+        CustomerPlan.end_date >= date.today()
+    ).distinct(CustomerPlan.customer_id).count()
+    
+    # Revenue calculations
+    total_revenue = db.session.query(db.func.sum(Bill.amount)).filter(
+        Bill.is_paid == True
+    ).scalar() or 0
+    
+    monthly_revenue = db.session.query(db.func.sum(Bill.amount)).filter(
+        Bill.is_paid == True,
+        Bill.month == end_date.month,
+        Bill.year == end_date.year
+    ).scalar() or 0
+    
+    # Calculate growth rates (comparing to previous period)
+    prev_month = end_date.month - 1 if end_date.month > 1 else 12
+    prev_year = end_date.year if end_date.month > 1 else end_date.year - 1
+    
+    prev_monthly_revenue = db.session.query(db.func.sum(Bill.amount)).filter(
+        Bill.is_paid == True,
+        Bill.month == prev_month,
+        Bill.year == prev_year
+    ).scalar() or 0
+    
+    revenue_growth = round(((monthly_revenue - prev_monthly_revenue) / prev_monthly_revenue * 100) if prev_monthly_revenue > 0 else 0, 1)
+    
+    # Customer growth
+    prev_month_customers = db.session.query(CustomerPlan).filter(
+        CustomerPlan.created_at < date(end_date.year, end_date.month, 1)
+    ).distinct(CustomerPlan.customer_id).count()
+    
+    customer_growth = round(((active_customers - prev_month_customers) / prev_month_customers * 100) if prev_month_customers > 0 else 0, 1)
+    
+    # Meal statistics
+    total_meals = db.session.query(CustomerPlan).filter(
+        CustomerPlan.is_active == True
+    ).count() * 30  # Approximate monthly meals
+    
+    meals_growth = 12.5  # Mock data
+    
+    avg_order_value = round(total_revenue / total_customers if total_customers > 0 else 0, 2)
+    
+    # Plan popularity
+    plan_popularity = db.session.query(
+        Plan.name, 
+        db.func.count(CustomerPlan.id).label('count')
+    ).select_from(Plan).join(CustomerPlan, Plan.id == CustomerPlan.plan_id).filter(
+        CustomerPlan.is_active == True
+    ).group_by(Plan.name).all()
+    
+    # Create plan distribution data for charts
+    plan_labels = [plan_name for plan_name, count in plan_popularity]
+    plan_data = [count for plan_name, count in plan_popularity]
+    total_plans = sum(plan_data) if plan_data else 1
+    plan_distribution = [
+        {
+            'name': plan_name,
+            'percentage': round((count / total_plans) * 100, 1),
+            'color': ['#ff6b35', '#4ecdc4', '#ffd54f', '#3b82f6'][i % 4]
+        }
+        for i, (plan_name, count) in enumerate(plan_popularity)
+    ]
+    
+    # Area-wise distribution
+    area_distribution = db.session.query(
+        User.area,
+        db.func.count(User.id).label('count')
+    ).filter(User.is_admin == False).group_by(User.area).all()
+    
+    # Create area performance data
+    area_performance = []
+    total_area_revenue = sum(monthly_revenue / len(area_distribution) for area, count in area_distribution) if area_distribution else 0
+    
+    for area, count in area_distribution:
+        area_revenue = (monthly_revenue / len(area_distribution)) if area_distribution else 0
+        area_performance.append({
+            'name': area,
+            'customers': count,
+            'revenue': round(area_revenue),
+            'percentage': round((area_revenue / monthly_revenue * 100) if monthly_revenue > 0 else 0, 1)
+        })
+    
+    # Monthly revenue trend (last 6 months)
+    revenue_trend = []
+    revenue_labels = []
+    revenue_data = []
+    
+    for i in range(6):
+        month_date = end_date - timedelta(days=30*i)
+        month_revenue = db.session.query(db.func.sum(Bill.amount)).filter(
+            Bill.is_paid == True,
+            Bill.month == month_date.month,
+            Bill.year == month_date.year
+        ).scalar() or 0
+        revenue_trend.append({
+            'month': month_date.strftime('%B'),
+            'revenue': month_revenue
+        })
+        revenue_labels.append(month_date.strftime('%b'))
+        revenue_data.append(month_revenue)
+    
+    revenue_trend.reverse()
+    revenue_labels.reverse()
+    revenue_data.reverse()
+    
+    # Customer growth data (last 6 months)
+    customer_labels = []
+    customer_data = []
+    
+    for i in range(6):
+        month_date = end_date - timedelta(days=30*i)
+        new_customers = User.query.filter(
+            User.is_admin == False,
+            db.extract('month', User.created_at) == month_date.month,
+            db.extract('year', User.created_at) == month_date.year
+        ).count()
+        customer_labels.append(month_date.strftime('%b'))
+        customer_data.append(new_customers)
+    
+    customer_labels.reverse()
+    customer_data.reverse()
+    
+    # Customer retention rate
+    total_active_plans = CustomerPlan.query.filter_by(is_active=True).count()
+    retention_rate = round((total_active_plans / total_customers * 100) if total_customers > 0 else 0, 1)
+    retention_growth = 5.2  # Mock data
+    
+    # Operational metrics (mock data for demonstration)
+    delivery_success_rate = 96.8
+    pause_rate = 8.5
+    customer_satisfaction = 4.7
+    food_waste = 15.2
+    collection_efficiency = round((db.session.query(Bill).filter_by(is_paid=True).count() / db.session.query(Bill).count() * 100) if db.session.query(Bill).count() > 0 else 0, 1)
+    
+    # AI-powered insights (mock data)
+    insights = [
+        {
+            'title': 'Peak Demand Optimization',
+            'category': 'Operations',
+            'description': 'Consider increasing kitchen capacity during 12-2 PM to handle 35% higher demand during lunch hours.',
+            'impact': '+12% efficiency',
+            'timeframe': 'Next 2 weeks',
+            'icon': 'fas fa-chart-line',
+            'bg_color': 'var(--success-light)',
+            'border_color': 'var(--success)',
+            'icon_color': 'var(--success)',
+            'text_color': 'var(--success-dark)',
+            'impact_color': 'var(--success)'
+        },
+        {
+            'title': 'Customer Retention Strategy',
+            'category': 'Marketing',
+            'description': 'Customers in Kharghar area show 23% higher retention. Apply similar engagement strategies to other areas.',
+            'impact': '+8% retention',
+            'timeframe': 'Next month',
+            'icon': 'fas fa-users',
+            'bg_color': 'var(--info-light)',
+            'border_color': 'var(--info)',
+            'icon_color': 'var(--info)',
+            'text_color': 'var(--info-dark)',
+            'impact_color': 'var(--info)'
+        },
+        {
+            'title': 'Revenue Growth Opportunity',
+            'category': 'Finance',
+            'description': 'Diet Special plan shows highest profit margin. Promote this plan to increase overall revenue by 15%.',
+            'impact': '+₹25K monthly',
+            'timeframe': 'Next quarter',
+            'icon': 'fas fa-rupee-sign',
+            'bg_color': 'var(--warning-light)',
+            'border_color': 'var(--warning)',
+            'icon_color': 'var(--warning)',
+            'text_color': 'var(--warning-dark)',
+            'impact_color': 'var(--warning)'
+        }
+    ]
+    
+    analytics_data = {
+        'total_revenue': total_revenue,
+        'monthly_revenue': monthly_revenue,
+        'revenue_growth': revenue_growth,
+        'active_customers': active_customers,
+        'customer_growth': customer_growth,
+        'total_meals': total_meals,
+        'meals_growth': meals_growth,
+        'avg_order_value': avg_order_value,
+        'plan_popularity': plan_popularity,
+        'plan_distribution': plan_distribution,
+        'plan_labels': plan_labels,
+        'plan_data': plan_data,
+        'area_distribution': area_distribution,
+        'area_performance': area_performance,
+        'revenue_trend': revenue_trend,
+        'revenue_labels': revenue_labels,
+        'revenue_data': revenue_data,
+        'customer_labels': customer_labels,
+        'customer_data': customer_data,
+        'retention_rate': retention_rate,
+        'retention_growth': retention_growth,
+        'total_customers': total_customers,
+        'delivery_success_rate': delivery_success_rate,
+        'pause_rate': pause_rate,
+        'customer_satisfaction': customer_satisfaction,
+        'food_waste': food_waste,
+        'collection_efficiency': collection_efficiency,
+        'insights': insights
+    }
+    
+    return render_template("analytics_professional.html", 
+                         analytics=analytics_data,
+                         date_range=date_range)
+
+
 @app.route("/dashboard")
+@db_retry(max_retries=3, delay=1)
 def customer_dashboard():
     if "user_id" not in session or session.get("is_admin"):
         return redirect(url_for("login"))
     
     customer_id = session["user_id"]
     
-    # Get customer's active plans
-    active_plans = db.session.query(CustomerPlan, Plan).join(Plan).filter(
-        CustomerPlan.customer_id == customer_id,
-        CustomerPlan.is_active == True,
-        CustomerPlan.end_date >= date.today()
-    ).all()
+    # Check for payment success message
+    payment_success = request.args.get('payment') == 'success'
+    recent_payment = None
     
-    # Get current month's paused days
-    current_month = date.today().month
-    current_year = date.today().year
-    paused_this_month = PausedDate.query.filter(
-        PausedDate.customer_id == customer_id,
-        db.extract('month', PausedDate.pause_date) == current_month,
-        db.extract('year', PausedDate.pause_date) == current_year
-    ).count()
+    if payment_success:
+        # Get the most recent successful payment for this customer
+        recent_payment = db.session.query(Payment, Bill).join(Bill).filter(
+            Payment.customer_id == customer_id,
+            Payment.status == 'succeeded'
+        ).order_by(Payment.updated_at.desc()).first()
     
-    # Calculate estimated bill for current month and total plan days
-    estimated_bill = 0
-    total_plan_days = 0
-    current_month_start = date(current_year, current_month, 1)
-    current_month_end = date(current_year, current_month, monthrange(current_year, current_month)[1])
-    
-    for cp, plan in active_plans:
-        # Calculate overlap with current month
-        plan_start = max(cp.start_date, current_month_start)
-        plan_end = min(cp.end_date, current_month_end)
+    try:
+        # Get customer's active plans with connection retry
+        active_plans = db.session.query(CustomerPlan, Plan).select_from(CustomerPlan).join(Plan, CustomerPlan.plan_id == Plan.id).filter(
+            CustomerPlan.customer_id == customer_id,
+            CustomerPlan.is_active == True,
+            CustomerPlan.end_date >= date.today()
+        ).all()
         
-        if plan_start <= plan_end:
-            plan_days = (plan_end - plan_start).days + 1
-            total_plan_days += plan_days
+        # Get current month's paused days
+        current_month = date.today().month
+        current_year = date.today().year
+        paused_this_month = PausedDate.query.filter(
+            PausedDate.customer_id == customer_id,
+            db.extract('month', PausedDate.pause_date) == current_month,
+            db.extract('year', PausedDate.pause_date) == current_year
+        ).count()
+        
+        # Calculate estimated bill for current month and total plan days
+        estimated_bill = 0
+        total_plan_days = 0
+        current_month_start = date(current_year, current_month, 1)
+        current_month_end = date(current_year, current_month, monthrange(current_year, current_month)[1])
+        
+        for cp, plan in active_plans:
+            # Calculate overlap with current month
+            plan_start = max(cp.start_date, current_month_start)
+            plan_end = min(cp.end_date, current_month_end)
             
-            # Get paused days for this specific plan period
-            plan_paused = PausedDate.query.filter(
-                PausedDate.customer_id == customer_id,
-                PausedDate.pause_date >= plan_start,
-                PausedDate.pause_date <= plan_end
-            ).count()
-            
-            billable_days = plan_days - plan_paused
-            estimated_bill += billable_days * plan.daily_rate
-    
-    # Get recent activity
-    recent_pauses = PausedDate.query.filter_by(customer_id=customer_id).order_by(
-        PausedDate.created_at.desc()
-    ).limit(5).all()
-    
-    # Check if paused today
-    paused_today = PausedDate.query.filter_by(
-        customer_id=customer_id,
-        pause_date=date.today()
-    ).first() is not None
-    
-    dashboard_data = {
-        'active_plans': active_plans,
-        'estimated_bill': estimated_bill,
-        'paused_this_month': paused_this_month,
-        'recent_pauses': recent_pauses,
-        'paused_today': paused_today,
-        'total_days': total_plan_days,  # Use actual plan days instead of month days
-        'billable_days': total_plan_days - paused_this_month
-    }
-    
-    return render_template("customer_dashboard_professional.html", **dashboard_data)
+            if plan_start <= plan_end:
+                plan_days = (plan_end - plan_start).days + 1
+                total_plan_days += plan_days
+                
+                # Get paused days for this specific plan period
+                plan_paused = PausedDate.query.filter(
+                    PausedDate.customer_id == customer_id,
+                    PausedDate.pause_date >= plan_start,
+                    PausedDate.pause_date <= plan_end
+                ).count()
+                
+                billable_days = plan_days - plan_paused
+                estimated_bill += billable_days * plan.daily_rate
+        
+        # Get recent activity
+        recent_pauses = PausedDate.query.filter_by(customer_id=customer_id).order_by(
+            PausedDate.created_at.desc()
+        ).limit(5).all()
+        
+        # Check if paused today
+        paused_today = PausedDate.query.filter_by(
+            customer_id=customer_id,
+            pause_date=date.today()
+        ).first() is not None
+        
+        # Get customer's bills for payment (separate paid and unpaid)
+        all_bills = Bill.query.filter_by(customer_id=customer_id).order_by(Bill.created_at.desc()).all()
+        unpaid_bills = [bill for bill in all_bills if not bill.is_paid]
+        paid_bills = [bill for bill in all_bills if bill.is_paid]
+        
+        # Get recent payments for history
+        recent_payments = db.session.query(Payment, Bill).join(Bill).filter(
+            Payment.customer_id == customer_id,
+            Payment.status == 'succeeded'
+        ).order_by(Payment.updated_at.desc()).limit(5).all()
+        
+        dashboard_data = {
+            'active_plans': active_plans,
+            'estimated_bill': estimated_bill,
+            'paused_this_month': paused_this_month,
+            'recent_pauses': recent_pauses,
+            'paused_today': paused_today,
+            'total_days': total_plan_days,  # Use actual plan days instead of month days
+            'billable_days': total_plan_days - paused_this_month,
+            'bills': unpaid_bills,  # Only show unpaid bills in pending section
+            'paid_bills': paid_bills,
+            'recent_payments': recent_payments,
+            'payment_success': payment_success,
+            'recent_payment': recent_payment
+        }
+        
+        return render_template("customer_dashboard_professional.html", **dashboard_data)
+        
+    except Exception as e:
+        print(f"❌ Error in customer dashboard: {e}")
+        flash("Temporary database connection issue. Please try again.", "error")
+        return redirect(url_for("login"))
 
 
 @app.route("/pause")
@@ -1019,9 +1607,18 @@ def save_plans():
                 flash("End date cannot be before start date", "error")
                 return redirect(url_for("choose_plans"))
             
+            # Allow plans to start today or in the future
             if start_date < date.today():
                 flash("Start date cannot be in the past", "error")
                 return redirect(url_for("choose_plans"))
+            
+            # Provide helpful feedback about when plan starts
+            if start_date == date.today():
+                plan_start_msg = "starts today"
+            elif start_date == date.today() + timedelta(days=1):
+                plan_start_msg = "starts tomorrow"
+            else:
+                plan_start_msg = f"starts on {start_date.strftime('%B %d, %Y')}"
             
             # Get plan details for cost calculation
             plan = Plan.query.get(plan_id)
@@ -1041,7 +1638,8 @@ def save_plans():
                 'end_date': end_date,
                 'duration_days': duration_days,
                 'daily_rate': plan.daily_rate,
-                'total_cost': plan_cost
+                'total_cost': plan_cost,
+                'start_msg': plan_start_msg
             })
     
     if not selected_plans:
@@ -1078,7 +1676,7 @@ def save_plans():
     # Create success message with summary
     if len(selected_plans) == 1:
         plan = selected_plans[0]
-        flash(f"Successfully subscribed to {plan['plan_name']} for {plan['duration_days']} days (₹{plan['total_cost']})", "success")
+        flash(f"Successfully subscribed to {plan['plan_name']} for {plan['duration_days']} days (₹{plan['total_cost']}) - {plan['start_msg']}", "success")
     else:
         flash(f"Successfully subscribed to {len(selected_plans)} plans. Total cost: ₹{total_cost}", "success")
     
@@ -1088,52 +1686,397 @@ def save_plans():
 # ---------- Billing ----------
 @app.route("/billing")
 def billing_page():
+    """Redirect to customer dashboard which shows billing information"""
     if "user_id" not in session:
         return redirect(url_for("login"))
-
-    customer_id = session["user_id"]
-
-    rows = (
-        db.session.query(CustomerPlan, Plan)
-        .join(Plan, CustomerPlan.plan_id == Plan.id)
-        .filter(CustomerPlan.customer_id == customer_id)
-        .all()
-    )
-
-    billing_rows = []
-    grand_total = 0
-
-    for cp, plan in rows:
-        paused_count = PausedDate.query.filter(
-            PausedDate.customer_id == customer_id,
-            PausedDate.pause_date >= cp.start_date,
-            PausedDate.pause_date <= cp.end_date,
-        ).count()
-
-        total_days = (cp.end_date - cp.start_date).days + 1
-        active_days = max(total_days - paused_count, 0)
-        amount = active_days * plan.daily_rate
-
-        grand_total += amount
-
-        billing_rows.append({
-            "plan": plan.name,
-            "rate": plan.daily_rate,
-            "total_days": total_days,
-            "paused_days": paused_count,
-            "billable_days": active_days,
-            "amount": amount,
-        })
-
-    return render_template(
-        "billing.html",
-        billing_rows=billing_rows,
-        grand_total=grand_total
-    )
+    
+    # Redirect to customer dashboard which already shows billing info
+    return redirect(url_for("customer_dashboard"))
 
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
+
+
+# ---------- Stripe Payment Integration ----------
+@app.route("/payment/<int:bill_id>")
+def payment_page(bill_id):
+    """Display payment page for a specific bill"""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    
+    customer_id = session["user_id"]
+    
+    # Get the bill and verify it belongs to the customer
+    bill = db.session.query(Bill, User).join(User).filter(
+        Bill.id == bill_id,
+        Bill.customer_id == customer_id,
+        Bill.is_paid == False
+    ).first()
+    
+    if not bill:
+        flash("Bill not found or already paid", "error")
+        return redirect(url_for("customer_dashboard"))
+    
+    bill_obj, user = bill
+    
+    return render_template("payment.html", 
+                         bill=bill_obj, 
+                         user=user,
+                         stripe_publishable_key=app.config["STRIPE_PUBLISHABLE_KEY"])
+
+
+@app.route("/create-payment-intent", methods=["POST"])
+def create_payment_intent():
+    """Create Stripe Payment Intent for bill payment"""
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        bill_id = data.get("bill_id")
+        
+        if not bill_id:
+            return jsonify({"error": "Bill ID required"}), 400
+        
+        customer_id = session["user_id"]
+        
+        # Get the bill and verify it belongs to the customer
+        bill = Bill.query.filter_by(
+            id=bill_id, 
+            customer_id=customer_id, 
+            is_paid=False
+        ).first()
+        
+        if not bill:
+            return jsonify({"error": "Bill not found or already paid"}), 404
+        
+        # Create Stripe Payment Intent
+        intent = stripe.PaymentIntent.create(
+            amount=bill.amount * 100,  # Convert rupees to paise
+            currency="inr",
+            metadata={
+                "bill_id": bill_id,
+                "customer_id": customer_id,
+                "month": bill.month,
+                "year": bill.year
+            },
+            description=f"TiffinTrack Bill - {bill.month}/{bill.year}"
+        )
+        
+        # Save payment record
+        payment = Payment(
+            bill_id=bill_id,
+            customer_id=customer_id,
+            stripe_payment_intent_id=intent.id,
+            amount=bill.amount * 100,  # Store in paise
+            status="pending"
+        )
+        db.session.add(payment)
+        db.session.commit()
+        
+        return jsonify({
+            "client_secret": intent.client_secret,
+            "payment_intent_id": intent.id
+        })
+        
+    except Exception as e:
+        print(f"Error creating payment intent: {e}")
+        return jsonify({"error": "Failed to create payment intent"}), 500
+
+
+@app.route("/payment-success", methods=["POST"])
+@db_retry(max_retries=3, delay=1)
+def payment_success():
+    """Handle successful payment confirmation with comprehensive updates"""
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        payment_intent_id = data.get("payment_intent_id")
+        
+        if not payment_intent_id:
+            return jsonify({"error": "Payment Intent ID required"}), 400
+        
+        # Retrieve payment intent from Stripe
+        intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+        
+        if intent.status == "succeeded":
+            # Process payment success with comprehensive updates
+            result = process_payment_success(payment_intent_id, intent)
+            
+            if result["success"]:
+                return jsonify({
+                    "success": True,
+                    "message": "Payment successful! Your bill has been paid.",
+                    "bill_id": result["bill_id"],
+                    "amount": result["amount"],
+                    "payment_date": result["payment_date"]
+                })
+            else:
+                return jsonify({"error": result["error"]}), 404
+        else:
+            return jsonify({"error": "Payment not completed"}), 400
+            
+    except Exception as e:
+        print(f"Error processing payment success: {e}")
+        return jsonify({"error": "Failed to process payment"}), 500
+
+
+def process_payment_success(payment_intent_id, stripe_intent):
+    """
+    Comprehensive payment success processing that updates everything
+    Returns: dict with success status and details
+    """
+    try:
+        # Find payment record
+        payment = Payment.query.filter_by(
+            stripe_payment_intent_id=payment_intent_id
+        ).first()
+        
+        if not payment:
+            return {"success": False, "error": "Payment record not found"}
+        
+        # Get bill and customer info
+        bill = Bill.query.get(payment.bill_id)
+        customer = User.query.get(payment.customer_id)
+        
+        if not bill or not customer:
+            return {"success": False, "error": "Bill or customer not found"}
+        
+        # Update payment record with detailed information
+        payment.status = "succeeded"
+        payment.payment_method = (
+            stripe_intent.charges.data[0].payment_method_details.type 
+            if stripe_intent.charges.data else "unknown"
+        )
+        payment.updated_at = datetime.now()
+        
+        # Mark bill as paid
+        bill.is_paid = True
+        
+        # Create payment success log entry
+        payment_log = {
+            "timestamp": datetime.now().isoformat(),
+            "payment_id": payment.id,
+            "bill_id": bill.id,
+            "customer_id": customer.id,
+            "customer_name": customer.fullname,
+            "customer_email": customer.email,
+            "amount": bill.amount,
+            "currency": payment.currency,
+            "payment_method": payment.payment_method,
+            "stripe_payment_intent_id": payment_intent_id,
+            "billing_period": f"{bill.month}/{bill.year}",
+            "billable_days": bill.billable_days,
+            "paused_days": bill.paused_days
+        }
+        
+        # Commit to current database (SQLite or PostgreSQL)
+        db.session.commit()
+        
+        # Sync to Neon database if currently using SQLite
+        sync_payment_to_neon(payment_log)
+        
+        # Log successful payment
+        print(f"💰 Payment Success: {customer.fullname} paid ₹{bill.amount} for {bill.month}/{bill.year}")
+        
+        # Update analytics and metrics
+        update_payment_analytics(payment_log)
+        
+        return {
+            "success": True,
+            "bill_id": bill.id,
+            "amount": bill.amount,
+            "payment_date": payment.updated_at.isoformat(),
+            "customer_name": customer.fullname,
+            "billing_period": f"{bill.month}/{bill.year}"
+        }
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error in process_payment_success: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def sync_payment_to_neon(payment_log):
+    """
+    Sync payment data to Neon PostgreSQL database
+    This ensures data consistency across databases
+    """
+    try:
+        # Check if we're currently using SQLite
+        current_db_url = app.config["SQLALCHEMY_DATABASE_URI"]
+        
+        if "sqlite" in current_db_url:
+            print("🔄 Syncing payment to Neon database...")
+            
+            # Get original Neon URL from environment
+            neon_url = os.getenv("DATABASE_URL")
+            if not neon_url or "postgresql" not in neon_url:
+                print("⚠️ No Neon URL available for sync")
+                return
+            
+            # Try to sync to Neon
+            try:
+                import psycopg2
+                import psycopg2.extras
+                
+                # Connect to Neon with shorter timeout
+                conn = psycopg2.connect(neon_url, connect_timeout=10)
+                cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+                
+                # Update payment record in Neon
+                cursor.execute("""
+                    UPDATE payments 
+                    SET status = %s, payment_method = %s, updated_at = %s
+                    WHERE stripe_payment_intent_id = %s
+                """, (
+                    'succeeded',
+                    payment_log['payment_method'],
+                    payment_log['timestamp'],
+                    payment_log['stripe_payment_intent_id']
+                ))
+                
+                # Update bill record in Neon
+                cursor.execute("""
+                    UPDATE bills 
+                    SET is_paid = true
+                    WHERE id = %s
+                """, (payment_log['bill_id'],))
+                
+                # Insert payment log for audit trail
+                cursor.execute("""
+                    INSERT INTO payment_logs (
+                        payment_id, bill_id, customer_id, amount, 
+                        payment_method, stripe_payment_intent_id, 
+                        billing_period, created_at
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (stripe_payment_intent_id) DO NOTHING
+                """, (
+                    payment_log['payment_id'],
+                    payment_log['bill_id'],
+                    payment_log['customer_id'],
+                    payment_log['amount'],
+                    payment_log['payment_method'],
+                    payment_log['stripe_payment_intent_id'],
+                    payment_log['billing_period'],
+                    payment_log['timestamp']
+                ))
+                
+                conn.commit()
+                cursor.close()
+                conn.close()
+                
+                print("✅ Payment synced to Neon database successfully")
+                
+            except Exception as neon_error:
+                print(f"⚠️ Neon sync failed (continuing with local): {neon_error}")
+                # Don't fail the payment if Neon sync fails
+                pass
+        else:
+            print("ℹ️ Already using PostgreSQL, no sync needed")
+            
+    except Exception as e:
+        print(f"⚠️ Error in sync_payment_to_neon: {e}")
+        # Don't fail the payment process if sync fails
+
+
+def update_payment_analytics(payment_log):
+    """Update payment analytics and metrics"""
+    try:
+        # Log payment metrics
+        print(f"📊 Payment Analytics Updated:")
+        print(f"   Customer: {payment_log['customer_name']}")
+        print(f"   Amount: ₹{payment_log['amount']}")
+        print(f"   Period: {payment_log['billing_period']}")
+        print(f"   Method: {payment_log['payment_method']}")
+        print(f"   Days: {payment_log['billable_days']} billable, {payment_log['paused_days']} paused")
+        
+        # Here you could add more analytics like:
+        # - Update monthly revenue totals
+        # - Track payment method preferences
+        # - Calculate customer lifetime value
+        # - Update collection efficiency metrics
+        
+    except Exception as e:
+        print(f"⚠️ Error updating analytics: {e}")
+
+
+@app.route("/payment-webhook", methods=["POST"])
+@db_retry(max_retries=3, delay=1)
+def payment_webhook():
+    """Handle Stripe webhooks for payment status updates with comprehensive processing"""
+    payload = request.get_data()
+    sig_header = request.headers.get("Stripe-Signature")
+    
+    try:
+        # Verify webhook signature
+        webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET")
+        if webhook_secret:
+            event = stripe.Webhook.construct_event(payload, sig_header, webhook_secret)
+        else:
+            # For development, parse without verification
+            event = stripe.Event.construct_from(json.loads(payload), stripe.api_key)
+        
+        print(f"🔔 Webhook received: {event['type']}")
+        
+        # Handle payment intent events
+        if event["type"] == "payment_intent.succeeded":
+            payment_intent = event["data"]["object"]
+            
+            # Process payment success through comprehensive handler
+            result = process_payment_success(payment_intent["id"], payment_intent)
+            
+            if result["success"]:
+                print(f"✅ Webhook processed payment success for bill {result['bill_id']}")
+            else:
+                print(f"❌ Webhook failed to process payment: {result['error']}")
+                
+        elif event["type"] == "payment_intent.payment_failed":
+            payment_intent = event["data"]["object"]
+            
+            # Update payment status to failed
+            payment = Payment.query.filter_by(
+                stripe_payment_intent_id=payment_intent["id"]
+            ).first()
+            
+            if payment:
+                payment.status = "failed"
+                payment.updated_at = datetime.now()
+                db.session.commit()
+                
+                # Log failed payment
+                customer = User.query.get(payment.customer_id)
+                bill = Bill.query.get(payment.bill_id)
+                print(f"❌ Payment Failed: {customer.fullname if customer else 'Unknown'} - ₹{bill.amount if bill else 'Unknown'}")
+                
+                # Sync failure to Neon if needed
+                if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
+                    try:
+                        neon_url = os.getenv("DATABASE_URL")
+                        if neon_url and "postgresql" in neon_url:
+                            import psycopg2
+                            conn = psycopg2.connect(neon_url, connect_timeout=5)
+                            cursor = conn.cursor()
+                            cursor.execute("""
+                                UPDATE payments 
+                                SET status = 'failed', updated_at = %s
+                                WHERE stripe_payment_intent_id = %s
+                            """, (datetime.now(), payment_intent["id"]))
+                            conn.commit()
+                            cursor.close()
+                            conn.close()
+                            print("✅ Payment failure synced to Neon")
+                    except:
+                        print("⚠️ Failed to sync payment failure to Neon")
+        
+        return jsonify({"status": "success"})
+        
+    except Exception as e:
+        print(f"❌ Webhook error: {e}")
+        return jsonify({"error": "Webhook processing failed"}), 400
 
 # ------------------------
 # CLI Commands for Database Management

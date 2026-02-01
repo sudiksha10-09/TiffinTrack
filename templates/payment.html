@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment - TiffinTrack</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('customer_dashboard') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+                <span class="badge badge-success" style="margin-left: var(--spacing-sm); font-size: var(--font-size-xs);">Payment</span>
+            </a>
+            
+            <div class="nav-actions">
+                <a href="{{ url_for('customer_dashboard') }}" class="btn btn-ghost">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Dashboard
+                </a>
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Payment Page -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Pay Your Bill</h1>
+                <p class="dashboard-subtitle">
+                    Secure payment powered by Stripe
+                </p>
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-2xl); max-width: 1200px; margin: 0 auto;">
+            
+            <!-- Bill Summary -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-file-invoice" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                        Bill Summary
+                    </h3>
+                    <p class="card-subtitle">{{ bill.month }}/{{ bill.year }} - {{ user.fullname }}</p>
+                </div>
+                
+                <div class="card-body">
+                    <div style="display: grid; gap: var(--spacing-lg);">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                            <span style="color: var(--text-secondary);">Billing Period</span>
+                            <span style="font-weight: 600;">{{ bill.month }}/{{ bill.year }}</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                            <span style="color: var(--text-secondary);">Total Days</span>
+                            <span style="font-weight: 600;">{{ bill.total_days }}</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); background: var(--warning-light); border-radius: var(--border-radius);">
+                            <span style="color: var(--warning-dark);">Paused Days</span>
+                            <span style="font-weight: 600; color: var(--warning-dark);">{{ bill.paused_days }}</span>
+                        </div>
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); background: var(--success-light); border-radius: var(--border-radius);">
+                            <span style="color: var(--success-dark);">Billable Days</span>
+                            <span style="font-weight: 600; color: var(--success-dark);">{{ bill.billable_days }}</span>
+                        </div>
+                        
+                        <hr style="border: none; border-top: 2px solid var(--border); margin: var(--spacing-md) 0;">
+                        
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-lg); background: var(--primary-light); border-radius: var(--border-radius-lg); border: 2px solid var(--primary);">
+                            <span style="font-size: var(--font-size-xl); font-weight: 700; color: var(--primary-dark);">Total Amount</span>
+                            <span style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--primary-dark);">₹{{ bill.amount }}</span>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-credit-card" style="color: var(--success); margin-right: var(--spacing-sm);"></i>
+                        Payment Details
+                    </h3>
+                    <p class="card-subtitle">Enter your payment information</p>
+                </div>
+                
+                <div class="card-body">
+                    <form id="payment-form">
+                        <div style="margin-bottom: var(--spacing-lg);">
+                            <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600; color: var(--text-primary);">
+                                Card Information
+                            </label>
+                            <div id="card-element" style="padding: var(--spacing-md); border: 2px solid var(--border); border-radius: var(--border-radius); background: var(--surface);">
+                                <!-- Stripe Elements will create form elements here -->
+                            </div>
+                            <div id="card-errors" role="alert" style="color: var(--danger); font-size: var(--font-size-sm); margin-top: var(--spacing-sm);"></div>
+                        </div>
+
+                        <div style="margin-bottom: var(--spacing-lg);">
+                            <label style="display: block; margin-bottom: var(--spacing-sm); font-weight: 600; color: var(--text-primary);">
+                                Cardholder Name
+                            </label>
+                            <input type="text" id="cardholder-name" class="form-input" placeholder="Enter cardholder name" required>
+                        </div>
+
+                        <div style="margin-bottom: var(--spacing-xl);">
+                            <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md); background: var(--info-light); border-radius: var(--border-radius); border-left: 4px solid var(--info);">
+                                <i class="fas fa-shield-alt" style="color: var(--info);"></i>
+                                <span style="font-size: var(--font-size-sm); color: var(--info-dark);">
+                                    Your payment is secured by Stripe's industry-leading encryption
+                                </span>
+                            </div>
+                        </div>
+
+                        <button type="submit" id="submit-payment" class="btn btn-primary" style="width: 100%; padding: var(--spacing-lg); font-size: var(--font-size-lg); font-weight: 700;">
+                            <i class="fas fa-lock" style="margin-right: var(--spacing-sm);"></i>
+                            Pay ₹{{ bill.amount }} Securely
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Payment Methods Info -->
+        <div class="card" style="max-width: 1200px; margin: var(--spacing-2xl) auto 0;">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle" style="color: var(--info); margin-right: var(--spacing-sm);"></i>
+                    Accepted Payment Methods
+                </h3>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg);">
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg);">
+                        <i class="fas fa-credit-card" style="font-size: 2rem; color: var(--primary); margin-bottom: var(--spacing-md);"></i>
+                        <h4 style="margin-bottom: var(--spacing-sm);">Credit Cards</h4>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">Visa, Mastercard, American Express</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg);">
+                        <i class="fas fa-university" style="font-size: 2rem; color: var(--success); margin-bottom: var(--spacing-md);"></i>
+                        <h4 style="margin-bottom: var(--spacing-sm);">Net Banking</h4>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">All major Indian banks</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg);">
+                        <i class="fas fa-mobile-alt" style="font-size: 2rem; color: var(--warning); margin-bottom: var(--spacing-md);"></i>
+                        <h4 style="margin-bottom: var(--spacing-sm);">UPI</h4>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">Google Pay, PhonePe, Paytm</p>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg);">
+                        <i class="fas fa-wallet" style="font-size: 2rem; color: var(--secondary); margin-bottom: var(--spacing-md);"></i>
+                        <h4 style="margin-bottom: var(--spacing-sm);">Wallets</h4>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm);">Digital wallets supported</p>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Initialize Stripe
+        const stripe = Stripe('{{ stripe_publishable_key }}');
+        const elements = stripe.elements();
+
+        // Create card element
+        const cardElement = elements.create('card', {
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#424770',
+                    '::placeholder': {
+                        color: '#aab7c4',
+                    },
+                },
+                invalid: {
+                    color: '#9e2146',
+                },
+            },
+        });
+
+        cardElement.mount('#card-element');
+
+        // Handle real-time validation errors from the card Element
+        cardElement.on('change', ({error}) => {
+            const displayError = document.getElementById('card-errors');
+            if (error) {
+                displayError.textContent = error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+
+        // Handle form submission
+        const form = document.getElementById('payment-form');
+        const submitButton = document.getElementById('submit-payment');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            // Disable submit button to prevent multiple submissions
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin" style="margin-right: var(--spacing-sm);"></i>Processing...';
+
+            try {
+                // Create payment intent
+                const response = await fetch('/create-payment-intent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        bill_id: {{ bill.id }}
+                    }),
+                });
+
+                const {client_secret, payment_intent_id} = await response.json();
+
+                if (!client_secret) {
+                    throw new Error('Failed to create payment intent');
+                }
+
+                // Confirm payment with Stripe
+                const {error, paymentIntent} = await stripe.confirmCardPayment(client_secret, {
+                    payment_method: {
+                        card: cardElement,
+                        billing_details: {
+                            name: document.getElementById('cardholder-name').value,
+                        },
+                    }
+                });
+
+                if (error) {
+                    // Show error to customer
+                    const errorElement = document.getElementById('card-errors');
+                    errorElement.textContent = error.message;
+                    
+                    // Re-enable submit button
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = '<i class="fas fa-lock" style="margin-right: var(--spacing-sm);"></i>Pay ₹{{ bill.amount }} Securely';
+                } else {
+                    // Payment succeeded
+                    if (paymentIntent.status === 'succeeded') {
+                        // Notify server of successful payment
+                        await fetch('/payment-success', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                payment_intent_id: paymentIntent.id
+                            }),
+                        });
+
+                        // Show success message and redirect
+                        submitButton.innerHTML = '<i class="fas fa-check" style="margin-right: var(--spacing-sm);"></i>Payment Successful!';
+                        submitButton.style.background = 'var(--success)';
+                        
+                        setTimeout(() => {
+                            window.location.href = '/dashboard?payment=success';
+                        }, 2000);
+                    }
+                }
+            } catch (err) {
+                console.error('Payment error:', err);
+                const errorElement = document.getElementById('card-errors');
+                errorElement.textContent = 'An unexpected error occurred. Please try again.';
+                
+                // Re-enable submit button
+                submitButton.disabled = false;
+                submitButton.innerHTML = '<i class="fas fa-lock" style="margin-right: var(--spacing-sm);"></i>Pay ₹{{ bill.amount }} Securely';
+            }
+        });
+
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                msg.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+    </script>
+
+    <style>
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* Stripe Elements styling */
+        .StripeElement {
+            box-sizing: border-box;
+            height: 40px;
+            padding: 10px 12px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            background-color: white;
+            box-shadow: 0 1px 3px 0 #e6ebf1;
+            -webkit-transition: box-shadow 150ms ease;
+            transition: box-shadow 150ms ease;
+        }
+
+        .StripeElement--focus {
+            box-shadow: 0 1px 3px 0 #cfd7df;
+        }
+
+        .StripeElement--invalid {
+            border-color: #fa755a;
+        }
+
+        .StripeElement--webkit-autofill {
+            background-color: #fefde5 !important;
+        }
+    </style>
+</body>
+</html>

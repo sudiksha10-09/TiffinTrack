@@ -2,6 +2,34 @@
 
 ## 🗄️ Database Connection Issues
 
+### **Enhanced Connection Handling (NEW)**
+
+The application now includes robust connection handling with:
+
+- **Automatic Retry Logic**: Failed queries retry up to 3 times
+- **Connection Pool Management**: Optimized for Neon PostgreSQL
+- **Health Monitoring**: `/health` endpoint for connectivity checks
+- **Fallback Connections**: Multiple connection methods attempted automatically
+
+**Health Check Endpoint:**
+```bash
+# Check database connectivity
+curl http://127.0.0.1:5000/health
+
+# Expected response:
+{
+  "status": "healthy",
+  "database": "connected", 
+  "timestamp": "2026-02-01T..."
+}
+```
+
+**Monitor Database Connectivity:**
+```bash
+# Run the monitoring script
+python monitor_db.py
+```
+
 ### **Neon PostgreSQL Connection Error**
 
 **Error**: `could not translate host name "ep-xxx.us-east-1.aws.neon.tech" to address: Name or service not known`

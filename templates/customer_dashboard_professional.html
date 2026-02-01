@@ -48,6 +48,30 @@
         {% endwith %}
     </div>
 
+    <!-- Payment Success Message -->
+    {% if payment_success and recent_payment %}
+    <div class="payment-success-banner">
+        <div class="container">
+            <div class="success-content">
+                <div class="success-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="success-details">
+                    <h3>🎉 Payment Successful!</h3>
+                    <p>Your payment of <strong>₹{{ recent_payment[1].amount }}</strong> for {{ recent_payment[1].month }}/{{ recent_payment[1].year }} has been processed successfully.</p>
+                    <div class="payment-meta">
+                        <span><i class="fas fa-credit-card"></i> {{ recent_payment[0].payment_method|title }}</span>
+                        <span><i class="fas fa-calendar"></i> {{ recent_payment[0].updated_at.strftime('%B %d, %Y at %I:%M %p') }}</span>
+                    </div>
+                </div>
+                <button onclick="this.parentElement.parentElement.parentElement.style.display='none'" class="close-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Dashboard -->
     <div class="dashboard">
         <div class="dashboard-header">
@@ -117,6 +141,108 @@
                 </div>
             </div>
         </div>
+
+        <!-- Pending Bills Section -->
+        {% set pending_bills = [] %}
+        {% for bill in bills if not bill.is_paid %}
+            {% set _ = pending_bills.append(bill) %}
+        {% endfor %}
+        
+        {% if pending_bills %}
+        <div class="card" style="margin-bottom: var(--spacing-2xl);">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>
+                    Pending Bills
+                </h3>
+                <p class="card-subtitle">Bills awaiting payment</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; gap: var(--spacing-lg);">
+                    {% for bill in pending_bills %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--warning);">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-lg);">
+                            <div style="width: 50px; height: 50px; background: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-file-invoice" style="color: white; font-size: var(--font-size-lg);"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; font-size: var(--font-size-lg); margin-bottom: var(--spacing-xs);">
+                                    Bill for {{ bill.month }}/{{ bill.year }}
+                                </div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                                    {{ bill.billable_days }} billable days • Generated {{ bill.created_at.strftime('%b %d, %Y') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-lg);">
+                            <div style="text-align: right;">
+                                <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--warning-dark);">₹{{ bill.amount }}</div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Amount Due</div>
+                            </div>
+                            <a href="{{ url_for('payment_page', bill_id=bill.id) }}" class="btn btn-primary">
+                                <i class="fas fa-credit-card" style="margin-right: var(--spacing-sm);"></i>
+                                Pay Now
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Payment History Section -->
+        {% if recent_payments %}
+        <div class="card" style="margin-bottom: var(--spacing-2xl);">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-history" style="color: var(--success); margin-right: var(--spacing-sm);"></i>
+                    Recent Payments
+                </h3>
+                <p class="card-subtitle">Your payment history</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; gap: var(--spacing-md);">
+                    {% for payment, bill in recent_payments %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius); border-left: 4px solid var(--success);">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-lg);">
+                            <div style="width: 40px; height: 40px; background: var(--success); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-check" style="color: white;"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 600; margin-bottom: var(--spacing-xs);">
+                                    Payment for {{ bill.month }}/{{ bill.year }}
+                                </div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                                    <i class="fas fa-credit-card" style="margin-right: var(--spacing-xs);"></i>
+                                    {{ payment.payment_method|title }} • {{ payment.updated_at.strftime('%b %d, %Y at %I:%M %p') }}
+                                </div>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-size: var(--font-size-lg); font-weight: 700; color: var(--success-dark);">₹{{ bill.amount }}</div>
+                            <div style="color: var(--success-dark); font-size: var(--font-size-sm);">
+                                <i class="fas fa-check-circle" style="margin-right: var(--spacing-xs);"></i>
+                                Paid
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                {% if paid_bills|length > recent_payments|length %}
+                <div style="text-align: center; margin-top: var(--spacing-lg);">
+                    <button onclick="togglePaymentHistory()" class="btn btn-outline" id="view-more-payments">
+                        <i class="fas fa-eye"></i>
+                        View All Payments ({{ paid_bills|length }} total)
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
 
         <!-- Quick Actions -->
         <div style="margin-bottom: var(--spacing-2xl);">
@@ -480,6 +606,127 @@
             color: var(--danger);
             background: var(--danger-light);
         }
+
+        /* Payment Success Banner Styles */
+        .payment-success-banner {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+            color: white;
+            padding: var(--spacing-xl) 0;
+            margin-bottom: var(--spacing-2xl);
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .success-content {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xl);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-lg);
+            position: relative;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+            color: white;
+            animation: successPulse 2s ease-in-out infinite;
+        }
+
+        .success-details h3 {
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+            color: white;
+        }
+
+        .success-details p {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-md);
+            opacity: 0.95;
+        }
+
+        .payment-meta {
+            display: flex;
+            gap: var(--spacing-lg);
+            font-size: var(--font-size-sm);
+            opacity: 0.9;
+        }
+
+        .payment-meta span {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        @keyframes successPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .success-content {
+                flex-direction: column;
+                text-align: center;
+                gap: var(--spacing-lg);
+            }
+
+            .payment-meta {
+                flex-direction: column;
+                gap: var(--spacing-sm);
+            }
+        }
     </style>
+
+    <script>
+        // Auto-hide payment success banner after 10 seconds
+        setTimeout(() => {
+            const banner = document.querySelector('.payment-success-banner');
+            if (banner) {
+                banner.style.animation = 'slideUp 0.5s ease-out forwards';
+                setTimeout(() => banner.remove(), 500);
+            }
+        }, 10000);
+
+        // Payment history toggle function
+        function togglePaymentHistory() {
+            // This could expand to show all payments in a modal or expanded view
+            alert('Full payment history feature coming soon!');
+        }
+
+        // Add slide up animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideUp {
+                to {
+                    opacity: 0;
+                    transform: translateY(-100%);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
 </body>
 </html>

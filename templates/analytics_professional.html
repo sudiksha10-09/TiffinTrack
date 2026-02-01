@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - TiffinTrack</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('admin_dashboard') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+                <span class="badge badge-info" style="margin-left: var(--spacing-sm); font-size: var(--font-size-xs);">Analytics</span>
+            </a>
+            
+            <div class="nav-actions">
+                <a href="/admin" class="btn btn-ghost">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <button onclick="refreshData()" class="btn btn-outline">
+                    <i class="fas fa-sync-alt"></i>
+                    Refresh
+                </button>
+                <button onclick="exportReport()" class="btn btn-primary">
+                    <i class="fas fa-download"></i>
+                    Export Report
+                </button>
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Analytics Dashboard -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Business Analytics</h1>
+                <p class="dashboard-subtitle">
+                    Comprehensive insights into your tiffin service performance and growth metrics
+                </p>
+            </div>
+            
+            <div class="dashboard-actions">
+                <select id="periodSelect" class="form-input" style="width: auto; margin-right: var(--spacing-md);">
+                    <option value="7">Last 7 Days</option>
+                    <option value="30" selected>Last 30 Days</option>
+                    <option value="90">Last 3 Months</option>
+                    <option value="365">Last Year</option>
+                </select>
+                
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius); color: var(--info-dark);">
+                    <i class="fas fa-calendar"></i>
+                    <span style="font-weight: 600; font-size: var(--font-size-sm);" id="dateRange">{{ date_range }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Performance Indicators -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Total Revenue</h3>
+                    <p>₹{{ analytics.total_revenue }}</p>
+                </div>
+                <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); font-size: var(--font-size-sm); color: var(--success);">
+                    <i class="fas fa-arrow-up"></i> +{{ analytics.revenue_growth }}%
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Active Customers</h3>
+                    <p>{{ analytics.active_customers }}</p>
+                </div>
+                <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); font-size: var(--font-size-sm); color: var(--success);">
+                    <i class="fas fa-arrow-up"></i> +{{ analytics.customer_growth }}%
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Meals Delivered</h3>
+                    <p>{{ analytics.total_meals }}</p>
+                </div>
+                <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); font-size: var(--font-size-sm); color: var(--success);">
+                    <i class="fas fa-arrow-up"></i> +{{ analytics.meals_growth }}%
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Customer Retention</h3>
+                    <p>{{ analytics.retention_rate }}%</p>
+                </div>
+                <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); font-size: var(--font-size-sm); color: var(--success);">
+                    <i class="fas fa-arrow-up"></i> +{{ analytics.retention_growth }}%
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-2xl); margin-bottom: var(--spacing-2xl);">
+            
+            <!-- Revenue Trend Chart -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-line" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                        Revenue Trend
+                    </h3>
+                    <p class="card-subtitle">Daily revenue over the selected period</p>
+                </div>
+                
+                <div class="card-body">
+                    <canvas id="revenueChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Plan Distribution -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-pie" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
+                        Plan Distribution
+                    </h3>
+                    <p class="card-subtitle">Popular meal plans</p>
+                </div>
+                
+                <div class="card-body">
+                    <canvas id="planChart" width="300" height="300"></canvas>
+                    
+                    <div style="margin-top: var(--spacing-lg);">
+                        {% for plan in analytics.plan_distribution %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                            <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                                <div style="width: 12px; height: 12px; background: {{ plan.color }}; border-radius: 50%;"></div>
+                                <span style="font-size: var(--font-size-sm);">{{ plan.name }}</span>
+                            </div>
+                            <span style="font-weight: 600;">{{ plan.percentage }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Customer Analytics -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-2xl); margin-bottom: var(--spacing-2xl);">
+            
+            <!-- Customer Growth -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user-plus" style="color: var(--success); margin-right: var(--spacing-sm);"></i>
+                        Customer Growth
+                    </h3>
+                    <p class="card-subtitle">New customer acquisition over time</p>
+                </div>
+                
+                <div class="card-body">
+                    <canvas id="customerGrowthChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Area Performance -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-map-marker-alt" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>
+                        Area Performance
+                    </h3>
+                    <p class="card-subtitle">Revenue by delivery areas</p>
+                </div>
+                
+                <div class="card-body">
+                    <div style="display: grid; gap: var(--spacing-md);">
+                        {% for area in analytics.area_performance %}
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                            <div>
+                                <div style="font-weight: 600;">{{ area.name }}</div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ area.customers }} customers</div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: 700; color: var(--primary);">₹{{ area.revenue }}</div>
+                                <div style="width: 100px; height: 4px; background: var(--border); border-radius: 2px; margin-top: var(--spacing-xs);">
+                                    <div style="width: {{ area.percentage }}%; height: 100%; background: var(--primary); border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Operational Metrics -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-cogs" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
+                    Operational Metrics
+                </h3>
+                <p class="card-subtitle">Key operational performance indicators</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg);">
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--success-dark); margin-bottom: var(--spacing-sm);">
+                            {{ analytics.delivery_success_rate }}%
+                        </div>
+                        <div style="font-weight: 600; color: var(--success-dark);">Delivery Success</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">On-time deliveries</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--info-dark); margin-bottom: var(--spacing-sm);">
+                            {{ analytics.avg_order_value }}
+                        </div>
+                        <div style="font-weight: 600; color: var(--info-dark);">Avg Order Value</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Per customer</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--warning-dark); margin-bottom: var(--spacing-sm);">
+                            {{ analytics.pause_rate }}%
+                        </div>
+                        <div style="font-weight: 600; color: var(--warning-dark);">Pause Rate</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Monthly average</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--primary-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--primary-dark); margin-bottom: var(--spacing-sm);">
+                            {{ analytics.customer_satisfaction }}
+                        </div>
+                        <div style="font-weight: 600; color: var(--primary-dark);">Customer Rating</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Out of 5.0</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--secondary-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--secondary-dark); margin-bottom: var(--spacing-sm);">
+                            {{ analytics.food_waste }}%
+                        </div>
+                        <div style="font-weight: 600; color: var(--secondary-dark);">Food Waste</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Reduction achieved</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--danger-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--danger-dark); margin-bottom: var(--spacing-sm);">
+                            {{ analytics.collection_efficiency }}%
+                        </div>
+                        <div style="font-weight: 600; color: var(--danger-dark);">Collection Rate</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Payment efficiency</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Insights and Recommendations -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-lightbulb" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
+                    AI-Powered Insights & Recommendations
+                </h3>
+                <p class="card-subtitle">Data-driven suggestions to improve your business</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; gap: var(--spacing-lg);">
+                    
+                    {% for insight in analytics.insights %}
+                    <div style="padding: var(--spacing-lg); background: {{ insight.bg_color }}; border-radius: var(--border-radius-lg); border-left: 4px solid {{ insight.border_color }};">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
+                            <div style="width: 40px; height: 40px; background: {{ insight.icon_color }}; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                                <i class="{{ insight.icon }}" style="color: white; font-size: var(--font-size-lg);"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-weight: 700; color: {{ insight.text_color }}; margin-bottom: var(--spacing-xs);">{{ insight.title }}</h4>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ insight.category }}</div>
+                            </div>
+                        </div>
+                        <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">{{ insight.description }}</p>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                            <span style="font-size: var(--font-size-sm); color: {{ insight.impact_color }}; font-weight: 600;">
+                                <i class="fas fa-arrow-up"></i> {{ insight.impact }}
+                            </span>
+                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">{{ insight.timeframe }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Revenue Trend Chart
+        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+        new Chart(revenueCtx, {
+            type: 'line',
+            data: {
+                labels: {{ analytics.revenue_labels | tojson }},
+                datasets: [{
+                    label: 'Daily Revenue',
+                    data: {{ analytics.revenue_data | tojson }},
+                    borderColor: 'rgb(255, 107, 53)',
+                    backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Plan Distribution Chart
+        const planCtx = document.getElementById('planChart').getContext('2d');
+        new Chart(planCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ analytics.plan_labels | tojson }},
+                datasets: [{
+                    data: {{ analytics.plan_data | tojson }},
+                    backgroundColor: [
+                        'rgb(255, 107, 53)',
+                        'rgb(78, 205, 196)',
+                        'rgb(255, 213, 79)',
+                        'rgb(59, 130, 246)'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+        // Customer Growth Chart
+        const customerCtx = document.getElementById('customerGrowthChart').getContext('2d');
+        new Chart(customerCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ analytics.customer_labels | tojson }},
+                datasets: [{
+                    label: 'New Customers',
+                    data: {{ analytics.customer_data | tojson }},
+                    backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                    borderColor: 'rgb(16, 185, 129)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        function refreshData() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                location.reload();
+            }, 2000);
+        }
+
+        function exportReport() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Downloaded';
+                btn.style.background = 'var(--success)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.style.background = '';
+                }, 2000);
+            }, 3000);
+        }
+
+        // Period selector
+        document.getElementById('periodSelect').addEventListener('change', function() {
+            const period = this.value;
+            const dateRange = document.getElementById('dateRange');
+            
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(endDate.getDate() - parseInt(period));
+            
+            dateRange.textContent = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
+            
+            // Simulate data refresh
+            setTimeout(() => {
+                location.reload();
+            }, 500);
+        });
+    </script>
+</body>
+</html>

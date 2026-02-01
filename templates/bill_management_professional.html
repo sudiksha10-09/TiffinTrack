@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Management - TiffinTrack</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('admin_dashboard') }}" class="logo">
+                <span class="logo-icon">🍱</span>
+                <span>TiffinTrack</span>
+                <span class="badge badge-warning" style="margin-left: var(--spacing-sm); font-size: var(--font-size-xs);">Billing</span>
+            </a>
+            
+            <div class="nav-actions">
+                <a href="/admin" class="btn btn-ghost">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <button onclick="exportBills()" class="btn btn-outline">
+                    <i class="fas fa-download"></i>
+                    Export
+                </button>
+                <a href="/logout" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    <div class="flash-messages">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">
+                        <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Bill Management -->
+    <div class="dashboard">
+        <div class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">Bill Management</h1>
+                <p class="dashboard-subtitle">
+                    Generate, track, and manage customer billing and payments
+                </p>
+            </div>
+            
+            <div class="dashboard-actions">
+                <select id="monthSelect" class="form-input" style="width: auto; margin-right: var(--spacing-md);">
+                    <option value="1">January</option>
+                    <option value="2" {% if current_month == 2 %}selected{% endif %}>February</option>
+                    <option value="3">March</option>
+                    <option value="4">April</option>
+                    <option value="5">May</option>
+                    <option value="6">June</option>
+                    <option value="7">July</option>
+                    <option value="8">August</option>
+                    <option value="9">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                </select>
+                
+                <select id="yearSelect" class="form-input" style="width: auto; margin-right: var(--spacing-md);">
+                    <option value="2024">2024</option>
+                    <option value="2025">2025</option>
+                    <option value="2026" {% if current_year == 2026 %}selected{% endif %}>2026</option>
+                    <option value="2027">2027</option>
+                </select>
+                
+                <button onclick="generateBills()" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Generate Bills
+                </button>
+            </div>
+        </div>
+
+        <!-- Billing Statistics -->
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                    <i class="fas fa-file-invoice"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Total Bills</h3>
+                    <p>{{ bill_stats.total_bills }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Paid Bills</h3>
+                    <p>{{ bill_stats.paid_bills }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Pending Bills</h3>
+                    <p>{{ bill_stats.pending_bills }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Total Revenue</h3>
+                    <p>₹{{ bill_stats.total_revenue }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Revenue Analytics -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                    Revenue Analytics
+                </h3>
+                <p class="card-subtitle">Monthly revenue breakdown and payment status</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--success-dark); margin-bottom: var(--spacing-sm);">
+                            ₹{{ bill_stats.paid_amount }}
+                        </div>
+                        <div style="font-weight: 600; color: var(--success-dark);">Collected</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                            {% if bill_stats.total_revenue > 0 %}
+                                {{ ((bill_stats.paid_amount / bill_stats.total_revenue) * 100) | round(1) }}% of total
+                            {% else %}
+                                0% of total
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--danger-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--danger-dark); margin-bottom: var(--spacing-sm);">
+                            ₹{{ bill_stats.pending_amount }}
+                        </div>
+                        <div style="font-weight: 600; color: var(--danger-dark);">Outstanding</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                            {% if bill_stats.total_revenue > 0 %}
+                                {{ ((bill_stats.pending_amount / bill_stats.total_revenue) * 100) | round(1) }}% of total
+                            {% else %}
+                                0% of total
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--info-dark); margin-bottom: var(--spacing-sm);">
+                            {% if bill_stats.total_bills > 0 %}
+                                ₹{{ (bill_stats.total_revenue / bill_stats.total_bills) | round(0) }}
+                            {% else %}
+                                ₹0
+                            {% endif %}
+                        </div>
+                        <div style="font-weight: 600; color: var(--info-dark);">Avg Bill</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Per customer</div>
+                    </div>
+                    
+                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius-lg);">
+                        <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--warning-dark); margin-bottom: var(--spacing-sm);">
+                            {{ bill_stats.collection_rate }}%
+                        </div>
+                        <div style="font-weight: 600; color: var(--warning-dark);">Collection Rate</div>
+                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Payment efficiency</div>
+                    </div>
+                    
+                </div>
+                
+                <!-- Payment Status Chart -->
+                <div style="display: flex; align-items: center; gap: var(--spacing-xl); padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                    <div style="flex: 1;">
+                        <h4 style="margin-bottom: var(--spacing-md);">Payment Status Distribution</h4>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-lg);">
+                            <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                                <div style="width: 16px; height: 16px; background: var(--success); border-radius: 50%;"></div>
+                                <span style="font-size: var(--font-size-sm);">Paid ({{ bill_stats.paid_bills }})</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+                                <div style="width: 16px; height: 16px; background: var(--danger); border-radius: 50%;"></div>
+                                <span style="font-size: var(--font-size-sm);">Pending ({{ bill_stats.pending_bills }})</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width: 100px; height: 100px; border-radius: 50%; background: {% if bill_stats.total_bills > 0 %}conic-gradient(var(--success) 0deg {{ (bill_stats.paid_bills / bill_stats.total_bills) * 360 }}deg, var(--danger) {{ (bill_stats.paid_bills / bill_stats.total_bills) * 360 }}deg 360deg){% else %}var(--border){% endif %}; display: flex; align-items: center; justify-content: center;">
+                        <div style="width: 60px; height: 60px; background: var(--surface); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--text-primary);">
+                            {{ bill_stats.collection_rate }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bills Table -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-table" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
+                    Customer Bills
+                </h3>
+                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                    <input type="text" id="searchBills" placeholder="Search customers..." class="form-input" style="width: 200px;">
+                    <select id="statusFilter" class="form-input" style="width: auto;">
+                        <option value="">All Status</option>
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="card-body" style="padding: 0;">
+                {% if bills %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">#</th>
+                                <th style="width: 20%;">Customer</th>
+                                <th style="width: 10%;">Period</th>
+                                <th style="width: 8%;">Total Days</th>
+                                <th style="width: 8%;">Paused</th>
+                                <th style="width: 8%;">Billable</th>
+                                <th style="width: 12%;">Amount</th>
+                                <th style="width: 10%;">Status</th>
+                                <th style="width: 10%;">Generated</th>
+                                <th style="width: 9%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="billsTableBody">
+                            {% for bill, user in bills %}
+                            <tr data-customer="{{ user.fullname.lower() }}" data-status="{{ 'paid' if bill.is_paid else 'pending' }}">
+                                <td>
+                                    <div style="width: 24px; height: 24px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: var(--font-size-xs); font-weight: 600;">
+                                        {{ loop.index }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 600;">{{ user.fullname }}</div>
+                                    <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ user.area }}</div>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 600;">{{ bill.month }}/{{ bill.year }}</div>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 600;">{{ bill.total_days }}</span>
+                                </td>
+                                <td>
+                                    <span style="color: var(--warning); font-weight: 600;">{{ bill.paused_days }}</span>
+                                </td>
+                                <td>
+                                    <span style="color: var(--success); font-weight: 600;">{{ bill.billable_days }}</span>
+                                </td>
+                                <td>
+                                    <div style="font-weight: 700; font-size: var(--font-size-lg);">₹{{ bill.amount }}</div>
+                                </td>
+                                <td>
+                                    {% if bill.is_paid %}
+                                        <span class="badge badge-success">
+                                            <i class="fas fa-check"></i> Paid
+                                        </span>
+                                    {% else %}
+                                        <span class="badge badge-danger">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="font-size: var(--font-size-sm); color: var(--text-secondary);">
+                                        {{ bill.created_at.strftime('%b %d') }}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: var(--spacing-xs);">
+                                        {% if not bill.is_paid %}
+                                            <button onclick="markPaid({{ bill.id }}, '{{ user.fullname }}')" class="btn btn-sm btn-outline" title="Mark as Paid">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        {% endif %}
+                                        <button onclick="viewBillDetails({{ bill.id }})" class="btn btn-sm btn-ghost" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button onclick="downloadBill({{ bill.id }})" class="btn btn-sm btn-ghost" title="Download">
+                                            <i class="fas fa-download"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div style="text-align: center; padding: var(--spacing-4xl); color: var(--text-secondary);">
+                    <i class="fas fa-file-invoice" style="font-size: 4rem; margin-bottom: var(--spacing-lg); opacity: 0.3;"></i>
+                    <h4 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">No Bills Generated</h4>
+                    <p style="margin-bottom: var(--spacing-lg);">Use the "Generate Bills" button to create monthly bills for customers.</p>
+                    <button onclick="generateBills()" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Generate Bills Now
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Billing Actions -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-cogs" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
+                    Billing Actions
+                </h3>
+                <p class="card-subtitle">Bulk operations and automated billing features</p>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--primary-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--primary);">
+                        <h4 style="font-weight: 700; color: var(--primary-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-plus"></i> Generate Bills
+                        </h4>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                            Create monthly bills for all active customers based on their meal plans and pause history.
+                        </p>
+                        <button onclick="generateBills()" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus"></i> Generate
+                        </button>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--success);">
+                        <h4 style="font-weight: 700; color: var(--success-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-envelope"></i> Send Reminders
+                        </h4>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                            Send payment reminders to customers with pending bills via email or SMS.
+                        </p>
+                        <button onclick="sendReminders()" class="btn btn-success btn-sm">
+                            <i class="fas fa-envelope"></i> Send
+                        </button>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--info);">
+                        <h4 style="font-weight: 700; color: var(--info-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-download"></i> Export Data
+                        </h4>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                            Export billing data to Excel or PDF for accounting and record-keeping purposes.
+                        </p>
+                        <button onclick="exportBills()" class="btn btn-info btn-sm">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--warning);">
+                        <h4 style="font-weight: 700; color: var(--warning-dark); margin-bottom: var(--spacing-md);">
+                            <i class="fas fa-chart-bar"></i> Analytics
+                        </h4>
+                        <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-bottom: var(--spacing-md);">
+                            View detailed billing analytics, payment trends, and revenue forecasting.
+                        </p>
+                        <button onclick="viewAnalytics()" class="btn btn-warning btn-sm">
+                            <i class="fas fa-chart-bar"></i> View
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function generateBills() {
+            const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearSelect').value;
+            
+            if (confirm(`Generate bills for ${getMonthName(month)} ${year}?\n\nThis will create bills for all active customers based on their meal plans and pause history.`)) {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+                btn.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    window.location.href = `/bills/generate/${month}/${year}`;
+                }, 1000);
+            }
+        }
+
+        function markPaid(billId, customerName) {
+            if (confirm(`Mark bill as paid for ${customerName}?`)) {
+                const btn = event.target.closest('button');
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+                
+                // Simulate API call
+                setTimeout(() => {
+                    window.location.href = `/bills/mark-paid/${billId}`;
+                }, 500);
+            }
+        }
+
+        function viewBillDetails(billId) {
+            // Simulate bill details modal
+            alert(`Bill details for ID: ${billId}\n\nThis would open a detailed view of the bill with breakdown of charges, pause days, and payment history.`);
+        }
+
+        function downloadBill(billId) {
+            // Simulate bill download
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, 1000);
+            }, 2000);
+        }
+
+        function sendReminders() {
+            if (confirm('Send payment reminders to all customers with pending bills?')) {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                btn.disabled = true;
+                
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-check"></i> Sent';
+                    btn.style.background = 'var(--success)';
+                    
+                    setTimeout(() => {
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                        btn.style.background = '';
+                    }, 2000);
+                }, 3000);
+            }
+        }
+
+        function exportBills() {
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-check"></i> Downloaded';
+                btn.style.background = 'var(--success)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    btn.style.background = '';
+                }, 2000);
+            }, 2000);
+        }
+
+        function viewAnalytics() {
+            alert('Advanced Analytics\n\nThis would open a comprehensive analytics dashboard with:\n\n• Revenue trends\n• Payment patterns\n• Customer billing analysis\n• Forecasting reports\n• Collection efficiency metrics');
+        }
+
+        function getMonthName(month) {
+            const months = ['', 'January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            return months[parseInt(month)];
+        }
+
+        // Search and filter functionality
+        document.getElementById('searchBills').addEventListener('input', filterBills);
+        document.getElementById('statusFilter').addEventListener('change', filterBills);
+
+        function filterBills() {
+            const searchTerm = document.getElementById('searchBills').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const rows = document.querySelectorAll('#billsTableBody tr');
+
+            rows.forEach(row => {
+                const customerName = row.dataset.customer;
+                const status = row.dataset.status;
+                
+                const matchesSearch = customerName.includes(searchTerm);
+                const matchesStatus = !statusFilter || status === statusFilter;
+                
+                row.style.display = matchesSearch && matchesStatus ? '' : 'none';
+            });
+        }
+
+        // Set current month/year as default
+        const now = new Date();
+        document.getElementById('monthSelect').value = now.getMonth() + 1;
+        document.getElementById('yearSelect').value = now.getFullYear();
+
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                msg.style.animation = 'slideOut 0.3s ease-out forwards';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+    </script>
+
+    <style>
+        @keyframes slideOut {
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+    </style>
+</body>
+</html>
