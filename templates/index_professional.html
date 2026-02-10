@@ -2,12 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>TiffinTrack - Premium Meal Delivery Service | Fresh, Healthy, Delivered Daily</title>
     <meta name="description" content="Experience premium tiffin delivery in Navi Mumbai. Fresh, healthy meals prepared by expert chefs and delivered to your doorstep. Smart pause system, transparent billing, zero waste promise.">
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="TiffinTrack">
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="{{ url_for('static', filename='css/professional.css') }}" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='images/logo.svg') }}" as="image">
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
@@ -16,7 +29,7 @@
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="TiffinTrack - Premium Meal Delivery Service">
     <meta property="og:description" content="Fresh, healthy meals delivered daily in Navi Mumbai. Smart pause system and transparent billing.">
-    <meta property="og:image" content="{{ url_for('static', filename='images/og-image.jpg') }}">
+    <meta property="og:image" content="{{ url_for('static', filename='images/hero-meal.jpg') }}">
     <meta property="og:url" content="{{ request.url }}">
     <meta property="og:type" content="website">
     
@@ -24,19 +37,19 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="TiffinTrack - Premium Meal Delivery Service">
     <meta name="twitter:description" content="Fresh, healthy meals delivered daily in Navi Mumbai.">
-    <meta name="twitter:image" content="{{ url_for('static', filename='images/twitter-card.jpg') }}">
+    <meta name="twitter:image" content="{{ url_for('static', filename='images/hero-meal.jpg') }}">
 </head>
 
 <body>
     <!-- Navigation -->
     <nav class="navbar" id="navbar">
         <div class="nav-container">
-            <a href="{{ url_for('home') }}" class="logo">
-                <span class="logo-icon">🍱</span>
-                <span>TiffinTrack</span>
+            <a href="{{ url_for('index') }}" class="logo">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
             </a>
             
-            <ul class="nav-menu">
+            <!-- Desktop Menu -->
+            <ul class="nav-menu d-none d-md-flex">
                 <li><a href="#features">Features</a></li>
                 <li><a href="#how-it-works">How It Works</a></li>
                 <li><a href="#plans">Plans</a></li>
@@ -44,13 +57,51 @@
                 <li><a href="#contact">Contact</a></li>
             </ul>
             
-            <div class="nav-actions">
+            <!-- Desktop Actions -->
+            <div class="nav-actions d-none d-md-flex">
                 <a href="{{ url_for('login') }}" class="btn btn-ghost">
                     <i class="fas fa-sign-in-alt"></i>
                     Sign In
                 </a>
                 <a href="{{ url_for('register') }}" class="btn btn-primary">
                     <i class="fas fa-rocket"></i>
+                    Get Started
+                </a>
+            </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle d-md-none" id="mobileMenuToggle" aria-label="Toggle mobile menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu d-md-none" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="#features" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">✨</span>
+                    Features
+                </a>
+                <a href="#how-it-works" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">⚡</span>
+                    How It Works
+                </a>
+                <a href="#plans" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">🍽️</span>
+                    Plans
+                </a>
+                <a href="#testimonials" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">⭐</span>
+                    Reviews
+                </a>
+                <a href="{{ url_for('login') }}" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">🔑</span>
+                    Sign In
+                </a>
+                <a href="{{ url_for('register') }}" class="mobile-nav-link primary">
+                    <span class="mobile-nav-icon">🚀</span>
                     Get Started
                 </a>
             </div>
@@ -599,6 +650,37 @@
 
     <!-- Scripts -->
     <script>
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+                
+                // Close mobile menu when clicking on a link
+                const mobileNavLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+            }
+        });
+
         // Navbar scroll effect
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');
@@ -653,6 +735,27 @@
                 });
             });
         });
+        
+        // Touch-friendly interactions
+        document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // Prevent zoom on double tap for better mobile experience
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function (event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // Optimize for mobile performance
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                // Register service worker for better mobile performance (optional)
+                console.log('Mobile optimizations loaded');
+            });
+        }
     </script>
 </body>
 </html>

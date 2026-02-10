@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>My Dashboard - TiffinTrack</title>
+    <meta name="description" content="Manage your TiffinTrack meal delivery service - view plans, track orders, and manage billing.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -14,13 +24,13 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="{{ url_for('customer_dashboard') }}" class="logo">
-                <span class="logo-icon">🍱</span>
-                <span>TiffinTrack</span>
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
             </a>
             
-            <div class="nav-actions">
+            <!-- Desktop Navigation -->
+            <div class="nav-actions d-none d-md-flex">
                 <div style="display: flex; align-items: center; gap: var(--spacing-lg); margin-right: var(--spacing-lg);">
-                    <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                    <span style="color: var(--text-secondary); font-size: var(--text-sm);">
                         <i class="fas fa-user-circle" style="margin-right: var(--spacing-xs); color: var(--primary);"></i>
                         {{ session.get('user_name', 'Customer') }}
                     </span>
@@ -28,6 +38,43 @@
                 
                 <a href="/logout" class="btn btn-secondary">
                     <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle d-md-none" id="mobileMenuToggle" aria-label="Toggle mobile menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu d-md-none" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <div class="mobile-user-info">
+                    <span class="mobile-nav-icon">👤</span>
+                    {{ session.get('user_name', 'Customer') }}
+                </div>
+                <a href="{{ url_for('customer_dashboard') }}" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">🏠</span>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('choose_plans') }}" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">🍽️</span>
+                    Plans
+                </a>
+                <a href="{{ url_for('pause_calendar') }}" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">📅</span>
+                    Calendar
+                </a>
+                <a href="{{ url_for('payment') }}" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">💳</span>
+                    Payment
+                </a>
+                <a href="/logout" class="mobile-nav-link logout">
+                    <span class="mobile-nav-icon">🚪</span>
                     Logout
                 </a>
             </div>
@@ -727,6 +774,62 @@
             }
         `;
         document.head.appendChild(style);
+    </script>
+    
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav d-md-none">
+        <a href="{{ url_for('customer_dashboard') }}" class="mobile-nav-item active">
+            <span class="mobile-nav-icon">🏠</span>
+            Home
+        </a>
+        <a href="{{ url_for('choose_plans') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">🍽️</span>
+            Plans
+        </a>
+        <a href="{{ url_for('pause_calendar') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">📅</span>
+            Calendar
+        </a>
+        <a href="{{ url_for('payment') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">💳</span>
+            Payment
+        </a>
+    </nav>
+
+    <script>
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+                
+                // Close mobile menu when clicking on a link
+                const mobileNavLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+            }
+        });
+        
+        // Touch-friendly interactions
+        document.addEventListener('touchstart', function() {}, {passive: true});
     </script>
 </body>
 </html>

@@ -2,8 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
     <title>Sign In - TiffinTrack</title>
+    <meta name="description" content="Sign in to your TiffinTrack account to manage your meal delivery service.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#ff6b35">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -12,15 +22,15 @@
 <body style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--primary-light) 100%); min-height: 100vh; display: flex; align-items: center; justify-content: center;">
     
     <!-- Navigation -->
-    <nav class="navbar" style="position: fixed; top: 0; left: 0; right: 0;">
+    <nav class="navbar" style="position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-sticky);">
         <div class="nav-container">
-            <a href="{{ url_for('home') }}" class="logo">
-                <span class="logo-icon">🍱</span>
-                <span>TiffinTrack</span>
+            <a href="{{ url_for('index') }}" class="logo">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
             </a>
             
-            <div class="nav-actions">
-                <a href="{{ url_for('home') }}" class="btn btn-ghost">
+            <!-- Desktop Actions -->
+            <div class="nav-actions d-none d-md-flex">
+                <a href="{{ url_for('index') }}" class="btn btn-ghost">
                     <i class="fas fa-home"></i>
                     Home
                 </a>
@@ -29,20 +39,41 @@
                     Sign Up
                 </a>
             </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <button class="mobile-menu-toggle d-md-none" id="mobileMenuToggle" aria-label="Toggle mobile menu">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+        
+        <!-- Mobile Menu -->
+        <div class="mobile-menu d-md-none" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="{{ url_for('index') }}" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">🏠</span>
+                    Home
+                </a>
+                <a href="{{ url_for('register') }}" class="mobile-nav-link primary">
+                    <span class="mobile-nav-icon">✨</span>
+                    Sign Up
+                </a>
+            </div>
         </div>
     </nav>
 
     <!-- Login Container -->
-    <div style="width: 100%; max-width: 1200px; margin: 0 auto; padding: var(--spacing-lg); display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-4xl); align-items: center; min-height: 100vh;">
+    <div class="login-container">
         
-        <!-- Left Side - Branding -->
-        <div style="text-align: center;">
+        <!-- Left Side - Branding (Desktop Only) -->
+        <div class="login-branding d-none d-lg-block">
             <div style="margin-bottom: var(--spacing-2xl);">
-                <div style="font-size: 4rem; margin-bottom: var(--spacing-lg);">🍱</div>
-                <h1 style="font-family: var(--font-family-display); font-size: var(--font-size-4xl); font-weight: 800; margin-bottom: var(--spacing-md); background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" style="height: 80px; margin-bottom: var(--spacing-lg);">
+                <h1 style="font-family: var(--font-family-display); font-size: var(--text-4xl); font-weight: 800; margin-bottom: var(--spacing-md); background: linear-gradient(135deg, var(--text-primary) 0%, var(--primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
                     Welcome Back!
                 </h1>
-                <p style="font-size: var(--font-size-lg); color: var(--text-secondary); margin-bottom: var(--spacing-2xl);">
+                <p style="font-size: var(--text-lg); color: var(--text-secondary); margin-bottom: var(--spacing-2xl);">
                     Sign in to manage your healthy meal delivery service
                 </p>
             </div>
@@ -183,6 +214,37 @@
     </div>
 
     <script>
+        // Mobile Menu Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (mobileMenuToggle && mobileMenu) {
+                mobileMenuToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    mobileMenu.classList.toggle('active');
+                    mobileMenuToggle.classList.toggle('active');
+                });
+                
+                // Close mobile menu when clicking outside
+                document.addEventListener('click', function(event) {
+                    if (!mobileMenuToggle.contains(event.target) && !mobileMenu.contains(event.target)) {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    }
+                });
+                
+                // Close mobile menu when clicking on a link
+                const mobileNavLinks = mobileMenu.querySelectorAll('.mobile-nav-link');
+                mobileNavLinks.forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenu.classList.remove('active');
+                        mobileMenuToggle.classList.remove('active');
+                    });
+                });
+            }
+        });
+
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const passwordToggle = document.getElementById('passwordToggle');
@@ -215,6 +277,9 @@
         if (demoBox) {
             demoBox.style.animation = 'float 3s ease-in-out infinite';
         }
+        
+        // Touch-friendly interactions
+        document.addEventListener('touchstart', function() {}, {passive: true});
     </script>
 
     <style>
