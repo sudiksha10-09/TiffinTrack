@@ -1785,10 +1785,45 @@ def create_payment_intent():
         return jsonify({"error": "Failed to create payment intent"}), 500
 
 
-@app.route("/payment-success", methods=["POST"])
+@app.route("/payment-success", methods=["POST", "GET"])
 @db_retry(max_retries=3, delay=1)
 def payment_success():
     """Handle successful payment confirmation with comprehensive updates"""
+    
+    # Handle GET request (redirect from payment page)
+    if request.method == "GET":
+        if "user_id" not in session:
+            return redirect(url_for("login"))
+        
+        # Get payment details from query params or session
+        payment_intent_id = request.args.get("payment_intent_id")
+        
+        if payment_intent_id:
+            try:
+                # Retrieve payment details
+                payment = Payment.query.filter_by(
+                    stripe_payment_intent_id=payment_intent_id
+                ).first()
+                
+                if payment and payment.status == "succeeded":
+                    bill = Bill.query.get(payment.bill_id)
+                    
+                    payment_details = {
+                        "transaction_id": payment_intent_id,
+                        "amount": payment.amount // 100,  # Convert from paise to rupees
+                        "billing_period": f"{bill.month}/{bill.year}" if bill else "N/A",
+                        "date": payment.updated_at.strftime("%d %b %Y, %I:%M %p") if payment.updated_at else datetime.now().strftime("%d %b %Y, %I:%M %p"),
+                        "payment_method": payment.payment_method or "card"
+                    }
+                    
+                    return render_template("payment_success.html", payment_details=payment_details)
+            except Exception as e:
+                print(f"Error loading payment success page: {e}")
+        
+        # Fallback if no payment details
+        return render_template("payment_success.html", payment_details=None)
+    
+    # Handle POST request (from payment form)
     if "user_id" not in session:
         return jsonify({"error": "Unauthorized"}), 401
     
@@ -1812,7 +1847,8 @@ def payment_success():
                     "message": "Payment successful! Your bill has been paid.",
                     "bill_id": result["bill_id"],
                     "amount": result["amount"],
-                    "payment_date": result["payment_date"]
+                    "payment_date": result["payment_date"],
+                    "redirect_url": url_for("payment_success", payment_intent_id=payment_intent_id, _external=False)
                 })
             else:
                 return jsonify({"error": result["error"]}), 404
@@ -1822,6 +1858,20 @@ def payment_success():
     except Exception as e:
         print(f"Error processing payment success: {e}")
         return jsonify({"error": "Failed to process payment"}), 500
+
+
+@app.route("/payment-failed")
+def payment_failed():
+    """Display payment failed page"""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    
+    error_message = request.args.get("error", "Payment could not be processed")
+    bill_id = request.args.get("bill_id")
+    
+    return render_template("payment_failed.html", 
+                         error_message=error_message,
+                         bill_id=bill_id)
 
 
 def process_payment_success(payment_intent_id, stripe_intent):

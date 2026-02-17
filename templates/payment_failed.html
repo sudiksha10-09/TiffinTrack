@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>Payment Failed - TiffinTrack</title>
+    
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('customer_dashboard') }}" class="logo">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
+            </a>
+        </div>
+    </nav>
+
+    <!-- Failed Content -->
+    <div class="dashboard" style="min-height: 80vh; display: flex; align-items: center; justify-content: center;">
+        <div class="card" style="max-width: 600px; text-align: center; padding: var(--spacing-3xl);">
+            
+            <!-- Error Icon -->
+            <div style="margin-bottom: var(--spacing-2xl);">
+                <div style="width: 120px; height: 120px; margin: 0 auto; background: var(--danger-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: shake 0.5s ease-out;">
+                    <i class="fas fa-times-circle" style="font-size: 4rem; color: var(--danger);"></i>
+                </div>
+            </div>
+
+            <!-- Error Message -->
+            <h1 style="font-size: var(--text-4xl); font-weight: 800; color: var(--danger); margin-bottom: var(--spacing-md); animation: fadeIn 0.6s ease-out 0.2s both;">
+                Payment Failed
+            </h1>
+            
+            <p style="font-size: var(--text-xl); color: var(--text-secondary); margin-bottom: var(--spacing-2xl); animation: fadeIn 0.6s ease-out 0.4s both;">
+                We couldn't process your payment. Please try again or use a different payment method.
+            </p>
+
+            <!-- Error Details -->
+            {% if error_message %}
+            <div style="background: var(--danger-light); padding: var(--spacing-lg); border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-2xl); border-left: 4px solid var(--danger); animation: fadeIn 0.6s ease-out 0.6s both;">
+                <div style="display: flex; align-items: center; gap: var(--spacing-md); text-align: left;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 1.5rem; color: var(--danger);"></i>
+                    <div>
+                        <h4 style="font-weight: 600; margin-bottom: 4px; color: var(--danger-dark);">Error Details</h4>
+                        <p style="font-size: var(--text-sm); color: var(--danger-dark);">{{ error_message }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Common Reasons -->
+            <div style="background: var(--bg-secondary); padding: var(--spacing-xl); border-radius: var(--border-radius-lg); margin-bottom: var(--spacing-2xl); text-align: left; animation: fadeIn 0.6s ease-out 0.8s both;">
+                <h3 style="font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--spacing-lg); color: var(--text-primary);">
+                    <i class="fas fa-info-circle" style="color: var(--info); margin-right: 8px;"></i>
+                    Common Reasons for Payment Failure
+                </h3>
+                
+                <ul style="list-style: none; padding: 0; margin: 0; display: grid; gap: var(--spacing-md);">
+                    <li style="display: flex; align-items: start; gap: var(--spacing-sm);">
+                        <i class="fas fa-circle" style="font-size: 6px; color: var(--text-muted); margin-top: 8px;"></i>
+                        <span style="color: var(--text-secondary);">Insufficient funds in your account</span>
+                    </li>
+                    <li style="display: flex; align-items: start; gap: var(--spacing-sm);">
+                        <i class="fas fa-circle" style="font-size: 6px; color: var(--text-muted); margin-top: 8px;"></i>
+                        <span style="color: var(--text-secondary);">Incorrect card details or CVV</span>
+                    </li>
+                    <li style="display: flex; align-items: start; gap: var(--spacing-sm);">
+                        <i class="fas fa-circle" style="font-size: 6px; color: var(--text-muted); margin-top: 8px;"></i>
+                        <span style="color: var(--text-secondary);">Card expired or blocked</span>
+                    </li>
+                    <li style="display: flex; align-items: start; gap: var(--spacing-sm);">
+                        <i class="fas fa-circle" style="font-size: 6px; color: var(--text-muted); margin-top: 8px;"></i>
+                        <span style="color: var(--text-secondary);">Transaction limit exceeded</span>
+                    </li>
+                    <li style="display: flex; align-items: start; gap: var(--spacing-sm);">
+                        <i class="fas fa-circle" style="font-size: 6px; color: var(--text-muted); margin-top: 8px;"></i>
+                        <span style="color: var(--text-secondary);">Network or connectivity issues</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap; animation: fadeIn 0.6s ease-out 1s both;">
+                {% if bill_id %}
+                <a href="{{ url_for('payment_page', bill_id=bill_id) }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-redo"></i>
+                    Try Again
+                </a>
+                {% endif %}
+                
+                <a href="{{ url_for('customer_dashboard') }}" class="btn btn-outline btn-lg">
+                    <i class="fas fa-home"></i>
+                    Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Support Info -->
+            <div style="margin-top: var(--spacing-2xl); padding-top: var(--spacing-2xl); border-top: 1px solid var(--border); animation: fadeIn 0.6s ease-out 1.2s both;">
+                <p style="color: var(--text-secondary); font-size: var(--text-sm); margin-bottom: var(--spacing-sm);">
+                    Need help? Contact our support team
+                </p>
+                <div style="display: flex; gap: var(--spacing-lg); justify-content: center; flex-wrap: wrap;">
+                    <a href="mailto:support@tiffintrack.com" style="color: var(--primary); text-decoration: none; font-weight: 500; font-size: var(--text-sm);">
+                        <i class="fas fa-envelope"></i>
+                        support@tiffintrack.com
+                    </a>
+                    <a href="tel:+919876543210" style="color: var(--primary); text-decoration: none; font-weight: 500; font-size: var(--text-sm);">
+                        <i class="fas fa-phone"></i>
+                        +91 98765 43210
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <style>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</body>
+</html>

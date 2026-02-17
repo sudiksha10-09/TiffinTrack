@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="color-scheme" content="light">
   <title>Select Plans – TiffinTrack</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
@@ -260,10 +261,12 @@
 
 <nav class="navbar">
   <div class="nav-container">
-    <div class="logo">🍱 TiffinTrack</div>
+    <a href="{{ url_for('customer_dashboard') }}" class="logo">
+      <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
+    </a>
     <div>
-      <a href="/dashboard" class="btn-outline">Dashboard</a>
-      <a href="/logout" class="btn-secondary">Logout</a>
+      <a href="{{ url_for('customer_dashboard') }}" class="btn-outline">Dashboard</a>
+      <a href="{{ url_for('logout') }}" class="btn-secondary">Logout</a>
     </div>
   </div>
 </nav>

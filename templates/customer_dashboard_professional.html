@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="color-scheme" content="light">
     <title>My Dashboard - TiffinTrack</title>
     <meta name="description" content="Manage your TiffinTrack meal delivery service - view plans, track orders, and manage billing.">
     
@@ -36,7 +37,7 @@
                     </span>
                 </div>
                 
-                <a href="/logout" class="btn btn-secondary">
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
                 </a>
@@ -65,15 +66,15 @@
                     <span class="mobile-nav-icon">🍽️</span>
                     Plans
                 </a>
-                <a href="{{ url_for('pause_calendar') }}" class="mobile-nav-link">
+                <a href="{{ url_for('pause_page') }}" class="mobile-nav-link">
                     <span class="mobile-nav-icon">📅</span>
                     Calendar
                 </a>
-                <a href="{{ url_for('payment') }}" class="mobile-nav-link">
+                <a href="{{ url_for('billing_page') }}" class="mobile-nav-link">
                     <span class="mobile-nav-icon">💳</span>
                     Payment
                 </a>
-                <a href="/logout" class="mobile-nav-link logout">
+                <a href="{{ url_for('logout') }}" class="mobile-nav-link logout">
                     <span class="mobile-nav-icon">🚪</span>
                     Logout
                 </a>
@@ -390,7 +391,7 @@
                             <i class="fas fa-clipboard-list" style="font-size: 4rem; margin-bottom: var(--spacing-lg); opacity: 0.3;"></i>
                             <h4 style="margin-bottom: var(--spacing-md); color: var(--text-primary);">No Active Plans</h4>
                             <p style="margin-bottom: var(--spacing-lg);">You don't have any active meal plans. Choose from our delicious options to get started!</p>
-                            <a href="/plans" class="btn btn-primary">
+                            <a href="{{ url_for('choose_plans') }}" class="btn btn-primary">
                                 <i class="fas fa-plus"></i>
                                 Select Plans
                             </a>
@@ -786,11 +787,11 @@
             <span class="mobile-nav-icon">🍽️</span>
             Plans
         </a>
-        <a href="{{ url_for('pause_calendar') }}" class="mobile-nav-item">
+        <a href="{{ url_for('pause_page') }}" class="mobile-nav-item">
             <span class="mobile-nav-icon">📅</span>
             Calendar
         </a>
-        <a href="{{ url_for('payment') }}" class="mobile-nav-item">
+        <a href="{{ url_for('billing_page') }}" class="mobile-nav-item">
             <span class="mobile-nav-icon">💳</span>
             Payment
         </a>

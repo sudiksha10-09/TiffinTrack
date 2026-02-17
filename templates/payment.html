@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
     <title>Payment - TiffinTrack</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/favicon.svg') }}">
     
     <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -15,9 +20,7 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="{{ url_for('customer_dashboard') }}" class="logo">
-                <span class="logo-icon">🍱</span>
-                <span>TiffinTrack</span>
-                <span class="badge badge-success" style="margin-left: var(--spacing-sm); font-size: var(--font-size-xs);">Payment</span>
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
             </a>
             
             <div class="nav-actions">
@@ -25,7 +28,7 @@
                     <i class="fas fa-arrow-left"></i>
                     Back to Dashboard
                 </a>
-                <a href="/logout" class="btn btn-secondary">
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
                 </a>
@@ -278,7 +281,7 @@
                     // Payment succeeded
                     if (paymentIntent.status === 'succeeded') {
                         // Notify server of successful payment
-                        await fetch('/payment-success', {
+                        const successResponse = await fetch('/payment-success', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -288,23 +291,22 @@
                             }),
                         });
 
-                        // Show success message and redirect
-                        submitButton.innerHTML = '<i class="fas fa-check" style="margin-right: var(--spacing-sm);"></i>Payment Successful!';
-                        submitButton.style.background = 'var(--success)';
-                        
-                        setTimeout(() => {
-                            window.location.href = '/dashboard?payment=success';
-                        }, 2000);
+                        const successData = await successResponse.json();
+
+                        if (successData.success) {
+                            // Redirect to success page
+                            window.location.href = successData.redirect_url || `/payment-success?payment_intent_id=${paymentIntent.id}`;
+                        } else {
+                            throw new Error(successData.error || 'Payment processing failed');
+                        }
                     }
                 }
             } catch (err) {
                 console.error('Payment error:', err);
-                const errorElement = document.getElementById('card-errors');
-                errorElement.textContent = 'An unexpected error occurred. Please try again.';
                 
-                // Re-enable submit button
-                submitButton.disabled = false;
-                submitButton.innerHTML = '<i class="fas fa-lock" style="margin-right: var(--spacing-sm);"></i>Pay ₹{{ bill.amount }} Securely';
+                // Redirect to failed page with error
+                const errorMessage = err.message || 'An unexpected error occurred';
+                window.location.href = `/payment-failed?error=${encodeURIComponent(errorMessage)}&bill_id={{ bill.id }}`;
             }
         });
 

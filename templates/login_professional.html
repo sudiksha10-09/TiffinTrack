@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, maximum-scale=5.0">
+    <meta name="color-scheme" content="light">
     <title>Sign In - TiffinTrack</title>
     <meta name="description" content="Sign in to your TiffinTrack account to manage your meal delivery service.">
     
@@ -24,13 +25,13 @@
     <!-- Navigation -->
     <nav class="navbar" style="position: fixed; top: 0; left: 0; right: 0; z-index: var(--z-sticky);">
         <div class="nav-container">
-            <a href="{{ url_for('index') }}" class="logo">
+            <a href="{{ url_for('home') }}" class="logo">
                 <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
             </a>
             
             <!-- Desktop Actions -->
             <div class="nav-actions d-none d-md-flex">
-                <a href="{{ url_for('index') }}" class="btn btn-ghost">
+                <a href="{{ url_for('home') }}" class="btn btn-ghost">
                     <i class="fas fa-home"></i>
                     Home
                 </a>
@@ -51,7 +52,7 @@
         <!-- Mobile Menu -->
         <div class="mobile-menu d-md-none" id="mobileMenu">
             <div class="mobile-menu-content">
-                <a href="{{ url_for('index') }}" class="mobile-nav-link">
+                <a href="{{ url_for('home') }}" class="mobile-nav-link">
                     <span class="mobile-nav-icon">🏠</span>
                     Home
                 </a>

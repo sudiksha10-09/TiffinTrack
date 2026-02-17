@@ -176,6 +176,16 @@
 }
 
 /* ================= BASE STYLES ================= */
+
+/* Force light color scheme - prevent system dark mode from affecting the site */
+:root {
+  color-scheme: light only;
+}
+
+html {
+  color-scheme: light;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -2139,8 +2149,8 @@ body {
   }
 }
 
-/* Dark Mode Support */
-@media (prefers-color-scheme: dark) {
+/* Dark Mode Support - Disabled to keep consistent light theme */
+/* @media (prefers-color-scheme: dark) {
   :root {
     --bg-primary: #111827;
     --bg-secondary: #1f2937;
@@ -2153,7 +2163,7 @@ body {
     --border: #374151;
     --border-light: #4b5563;
   }
-}
+} */
 /* ===================================
    MOBILE NAVIGATION STYLES
    =================================== */
@@ -2440,8 +2450,8 @@ body {
   }
 }
 
-/* Dark Mode Support for Navigation */
-@media (prefers-color-scheme: dark) {
+/* Dark Mode Support for Navigation - Disabled */
+/* @media (prefers-color-scheme: dark) {
   .mobile-menu {
     background: var(--bg-secondary);
     border-color: var(--border-dark);
@@ -2455,7 +2465,7 @@ body {
     background: var(--bg-secondary);
     border-color: var(--border-dark);
   }
-}
+} */
 /* ===================================
    LOGIN/REGISTER PAGE MOBILE STYLES
    =================================== */
@@ -3057,8 +3067,8 @@ body {
   }
 }
 
-/* Dark mode mobile adjustments */
-@media (prefers-color-scheme: dark) and (max-width: 767px) {
+/* Dark mode mobile adjustments - Disabled */
+/* @media (prefers-color-scheme: dark) and (max-width: 767px) {
   .mobile-nav {
     background: rgba(31, 41, 55, 0.95);
     border-color: rgba(255, 255, 255, 0.1);
@@ -3068,4 +3078,4 @@ body {
     background: var(--bg-tertiary);
     border-color: var(--primary);
   }
-}
+} */

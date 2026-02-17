@@ -17,7 +17,7 @@
     <div class="logo">🍱 TiffinTrack</div>
 
     <div>
-      <a href="/admin" class="btn-outline">Dashboard</a>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn-outline">Dashboard</a>
       <button onclick="handleLogout()" class="btn-secondary">Logout</button>
     </div>
   </div>
@@ -316,7 +316,7 @@ document.getElementById('addCustomerForm').addEventListener('submit', async func
 });
 
 function handleLogout() {
-  window.location.href = "/logout";
+  window.location.href = "{{ url_for('logout') }}";
 }
 </script>
 
