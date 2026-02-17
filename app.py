@@ -1564,6 +1564,54 @@ def save_pause():
     return redirect(url_for("pause_page"))
 
 
+@app.route("/pause/remove", methods=["POST"])
+def remove_pause():
+    """Remove a paused date"""
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        data = request.get_json()
+        pause_date_str = data.get("pause_date")
+
+        if not pause_date_str:
+            return jsonify({"error": "Date required"}), 400
+
+        pause_date = datetime.strptime(pause_date_str, "%Y-%m-%d").date()
+
+        # Find and delete the paused date
+        paused = PausedDate.query.filter_by(
+            customer_id=session["user_id"],
+            pause_date=pause_date
+        ).first()
+
+        if not paused:
+            return jsonify({"error": "Paused date not found"}), 404
+
+        # Check if it's too late to remove (after 8 AM on the pause date)
+        cutoff_time = time(8, 0)
+        current_time = datetime.now().time()
+
+        if pause_date == date.today() and current_time > cutoff_time:
+            return jsonify({"error": "Cannot remove pause after 8:00 AM cutoff time"}), 400
+
+        if pause_date < date.today():
+            return jsonify({"error": "Cannot remove pause for past dates"}), 400
+
+        db.session.delete(paused)
+        db.session.commit()
+
+        return jsonify({
+            "success": True,
+            "message": "Pause removed successfully"
+        })
+
+    except Exception as e:
+        print(f"Error removing pause: {e}")
+        return jsonify({"error": "Failed to remove pause"}), 500
+
+
+
 # ---------- Plans ----------
 @app.route("/plans")
 def choose_plans():
@@ -1685,13 +1733,68 @@ def save_plans():
 
 # ---------- Billing ----------
 @app.route("/billing")
+@db_retry(max_retries=3, delay=1)
 def billing_page():
-    """Redirect to customer dashboard which shows billing information"""
+    """Display customer billing page with all bills and payment history"""
     if "user_id" not in session:
         return redirect(url_for("login"))
     
-    # Redirect to customer dashboard which already shows billing info
-    return redirect(url_for("customer_dashboard"))
+    customer_id = session["user_id"]
+    
+    try:
+        # Get all bills
+        all_bills = Bill.query.filter_by(customer_id=customer_id).order_by(Bill.created_at.desc()).all()
+        unpaid_bills = [bill for bill in all_bills if not bill.is_paid]
+        paid_bills = [bill for bill in all_bills if bill.is_paid]
+        
+        # Calculate total due
+        total_due = sum(bill.amount for bill in unpaid_bills)
+        
+        # Get current month's estimated bill
+        current_month = date.today().month
+        current_year = date.today().year
+        
+        # Get customer's active plans
+        active_plans = db.session.query(CustomerPlan, Plan).select_from(CustomerPlan).join(
+            Plan, CustomerPlan.plan_id == Plan.id
+        ).filter(
+            CustomerPlan.customer_id == customer_id,
+            CustomerPlan.is_active == True,
+            CustomerPlan.end_date >= date.today()
+        ).all()
+        
+        # Calculate estimated bill for current month
+        estimated_bill = 0
+        current_month_start = date(current_year, current_month, 1)
+        current_month_end = date(current_year, current_month, monthrange(current_year, current_month)[1])
+        
+        for cp, plan in active_plans:
+            plan_start = max(cp.start_date, current_month_start)
+            plan_end = min(cp.end_date, current_month_end)
+            
+            if plan_start <= plan_end:
+                plan_days = (plan_end - plan_start).days + 1
+                
+                # Get paused days
+                plan_paused = PausedDate.query.filter(
+                    PausedDate.customer_id == customer_id,
+                    PausedDate.pause_date >= plan_start,
+                    PausedDate.pause_date <= plan_end
+                ).count()
+                
+                billable_days = plan_days - plan_paused
+                estimated_bill += billable_days * plan.daily_rate
+        
+        return render_template("billing.html",
+                             unpaid_bills=unpaid_bills,
+                             paid_bills=paid_bills,
+                             total_due=total_due,
+                             estimated_bill=estimated_bill)
+    
+    except Exception as e:
+        print(f"❌ Error in billing page: {e}")
+        flash("Error loading billing information. Please try again.", "error")
+        return redirect(url_for("customer_dashboard"))
 
 @app.route("/terms")
 def terms():

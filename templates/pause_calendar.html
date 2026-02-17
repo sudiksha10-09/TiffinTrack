@@ -205,12 +205,56 @@
     });
   }, 5000);
 
-  // Remove pause function (placeholder)
-  function removePause(dateStr) {
-    if (confirm('Are you sure you want to remove this paused date?')) {
-      // This would need a backend endpoint to handle removal
-      alert('Remove pause functionality would be implemented here');
+  // Remove pause function with API call
+  async function removePause(dateStr) {
+    if (!confirm('Are you sure you want to remove this paused date?')) {
+      return;
     }
+    
+    try {
+      const response = await fetch('/pause/remove', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ pause_date: dateStr })
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // Show success message
+        showFlashMessage('Pause removed successfully', 'success');
+        
+        // Reload page after short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else {
+        showFlashMessage(data.error || 'Failed to remove pause', 'error');
+      }
+    } catch (error) {
+      console.error('Error removing pause:', error);
+      showFlashMessage('Failed to remove pause. Please try again.', 'error');
+    }
+  }
+  
+  // Show flash message dynamically
+  function showFlashMessage(message, category) {
+    const flashContainer = document.querySelector('.flash-messages');
+    const flashDiv = document.createElement('div');
+    flashDiv.className = `flash-message flash-${category}`;
+    flashDiv.innerHTML = `
+      <i class="fas fa-${category === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+      ${message}
+    `;
+    flashContainer.appendChild(flashDiv);
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+      flashDiv.style.animation = 'slideOut 0.3s ease-out forwards';
+      setTimeout(() => flashDiv.remove(), 300);
+    }, 5000);
   }
 
   // Set minimum date to today

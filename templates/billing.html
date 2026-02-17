@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>My Bills - TiffinTrack</title>
+    
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('customer_dashboard') }}" class="logo">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
+            </a>
+            
+            <div class="nav-actions">
+                <a href="{{ url_for('customer_dashboard') }}" class="btn btn-ghost">
+                    <i class="fas fa-arrow-left"></i>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard">
+        
+        <!-- Page Header -->
+        <div class="dashboard-header" style="margin-bottom: var(--spacing-2xl);">
+            <div>
+                <h1 class="dashboard-title">
+                    <i class="fas fa-file-invoice-dollar" style="margin-right: 12px;"></i>
+                    My Bills & Payments
+                </h1>
+                <p class="dashboard-subtitle">View and manage your billing history</p>
+            </div>
+        </div>
+
+        <!-- Billing Summary Cards -->
+        <div class="kpi-grid" style="margin-bottom: var(--spacing-2xl);">
+            
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <i class="fas fa-exclamation-circle"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Unpaid Bills</h3>
+                    <p>{{ unpaid_bills|length }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Total Due</h3>
+                    <p>₹{{ total_due }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>Paid Bills</h3>
+                    <p>{{ paid_bills|length }}</p>
+                </div>
+            </div>
+
+            <div class="kpi-card">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="kpi-info">
+                    <h3>This Month</h3>
+                    <p>₹{{ estimated_bill }}</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Unpaid Bills Section -->
+        {% if unpaid_bills %}
+        <div class="card" style="margin-bottom: var(--spacing-2xl);">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-exclamation-triangle" style="color: var(--danger); margin-right: var(--spacing-sm);"></i>
+                    Unpaid Bills
+                </h3>
+                <span class="badge badge-danger">{{ unpaid_bills|length }} pending</span>
+            </div>
+            
+            <div class="card-body">
+                <div style="display: grid; gap: var(--spacing-lg);">
+                    {% for bill in unpaid_bills %}
+                    <div style="display: flex; align-items: center; justify-content: space-between; padding: var(--spacing-xl); background: var(--danger-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--danger); transition: all 0.3s ease;" onmouseover="this.style.transform='translateX(4px)'" onmouseout="this.style.transform='translateX(0)'">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-xl);">
+                            <div style="width: 60px; height: 60px; background: var(--danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow);">
+                                <i class="fas fa-file-invoice" style="color: white; font-size: var(--font-size-xl);"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 700; font-size: var(--font-size-xl); margin-bottom: var(--spacing-xs); color: var(--danger-dark);">
+                                    Bill for {{ bill.month }}/{{ bill.year }}
+                                </div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm); display: flex; align-items: center; gap: var(--spacing-lg);">
+                                    <span><i class="fas fa-calendar"></i> {{ bill.billable_days }} billable days</span>
+                                    <span><i class="fas fa-clock"></i> Generated {{ bill.created_at.strftime('%b %d, %Y') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: var(--spacing-xl);">
+                            <div style="text-align: right;">
+                                <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--danger-dark);">₹{{ bill.amount }}</div>
+                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Amount Due</div>
+                            </div>
+                            <a href="{{ url_for('payment_page', bill_id=bill.id) }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-credit-card"></i>
+                                Pay Now
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card" style="margin-bottom: var(--spacing-2xl); text-align: center; padding: var(--spacing-3xl);">
+            <i class="fas fa-check-circle" style="font-size: 4rem; color: var(--success); margin-bottom: var(--spacing-lg);"></i>
+            <h3 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-sm);">All Caught Up!</h3>
+            <p style="color: var(--text-secondary);">You have no pending bills at the moment.</p>
+        </div>
+        {% endif %}
+
+        <!-- Paid Bills Section -->
+        {% if paid_bills %}
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-history" style="color: var(--success); margin-right: var(--spacing-sm);"></i>
+                    Payment History
+                </h3>
+                <span class="badge badge-success">{{ paid_bills|length }} paid</span>
+            </div>
+            
+            <div class="card-body">
+                <div class="table-container" style="border: none; box-shadow: none;">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-calendar"></i> Billing Period</th>
+                                <th><i class="fas fa-calendar-check"></i> Days</th>
+                                <th><i class="fas fa-rupee-sign"></i> Amount</th>
+                                <th><i class="fas fa-clock"></i> Paid On</th>
+                                <th><i class="fas fa-credit-card"></i> Method</th>
+                                <th><i class="fas fa-check"></i> Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for bill in paid_bills %}
+                            <tr>
+                                <td>
+                                    <div style="font-weight: 600;">{{ bill.month }}/{{ bill.year }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background: var(--info-light); color: var(--info-dark);">
+                                        {{ bill.billable_days }} days
+                                    </span>
+                                </td>
+                                <td>
+                                    <span style="font-weight: 700; color: var(--success);">₹{{ bill.amount }}</span>
+                                </td>
+                                <td>
+                                    <span style="color: var(--text-secondary);">
+                                        {{ bill.updated_at.strftime('%b %d, %Y') if bill.updated_at else 'N/A' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge" style="background: var(--primary-light); color: var(--primary-dark);">
+                                        <i class="fas fa-credit-card"></i>
+                                        Card
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-check-circle"></i>
+                                        Paid
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card" style="text-align: center; padding: var(--spacing-3xl);">
+            <i class="fas fa-receipt" style="font-size: 3rem; color: var(--text-muted); margin-bottom: var(--spacing-lg);"></i>
+            <h3 style="font-size: var(--font-size-xl); font-weight: 600; margin-bottom: var(--spacing-sm); color: var(--text-secondary);">No Payment History</h3>
+            <p style="color: var(--text-muted);">Your payment history will appear here once you make your first payment.</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav d-md-none">
+        <a href="{{ url_for('customer_dashboard') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">🏠</span>
+            Home
+        </a>
+        <a href="{{ url_for('choose_plans') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">🍽️</span>
+            Plans
+        </a>
+        <a href="{{ url_for('pause_page') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">📅</span>
+            Calendar
+        </a>
+        <a href="{{ url_for('billing_page') }}" class="mobile-nav-item active">
+            <span class="mobile-nav-icon">💳</span>
+            Billing
+        </a>
+    </nav>
+
+</body>
+</html>
