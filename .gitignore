@@ -47,9 +47,12 @@ venv.bak/
 .DS_Store
 Thumbs.db
 
-# Uploads
-uploads/
-static/uploads/
+# Uploads (exclude user uploads but keep sample images)
+# uploads/
+# static/uploads/
+
+# Note: Commented out to allow sample dish images to be committed
+# In production, use S3 or similar for user uploads
 
 # Logs
 *.log
