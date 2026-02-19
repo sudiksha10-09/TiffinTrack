@@ -18,11 +18,11 @@
       <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
     </a>
     <div class="nav-actions">
-      <a href="{{ url_for('customer_dashboard') }}" class="btn-outline">
+      <a href="{{ url_for('customer_dashboard') }}" class="btn btn-outline">
         <i class="fas fa-arrow-left"></i>
         Dashboard
       </a>
-      <a href="{{ url_for('logout') }}" class="btn-secondary">
+      <a href="{{ url_for('logout') }}" class="btn btn-secondary">
         <i class="fas fa-sign-out-alt"></i>
         Logout
       </a>
@@ -44,25 +44,72 @@
   {% endwith %}
 </div>
 
-<div class="dashboard" style="max-width: 800px;">
+<div class="dashboard" style="max-width: 900px;">
 
-  <div class="page-header" style="text-align: center; margin-bottom: 40px;">
+  <div class="page-header" style="margin-bottom: 32px;">
     <div class="page-title">
-      <h1><i class="fas fa-calendar-times" style="margin-right: 12px; color: var(--primary);"></i>Pause Your Meals</h1>
-      <p>Select dates when you won't need meal delivery. Remember: cutoff time is 8:00 AM daily.</p>
+      <h1>
+        <i class="fas fa-calendar-times" style="margin-right: 12px; color: var(--primary);"></i>
+        Pause Your Meals
+      </h1>
+      <p style="max-width: 520px; color: var(--text-secondary);">
+        Quickly skip upcoming delivery days when you are travelling or unavailable. 
+        You stay in full control of your schedule and billing.
+      </p>
+    </div>
+    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+      <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary);">
+        Today
+      </span>
+      <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-light); font-size: 13px;">
+        <i class="fas fa-clock" style="color: var(--primary);"></i>
+        <span>Cutoff: <strong>8:00 AM</strong> for same‑day pauses</span>
+      </div>
+      <span style="font-size: 12px; color: var(--text-muted);">
+        Paused days scheduled: <strong>{{ paused_dates|length }}</strong>
+      </span>
     </div>
   </div>
 
-  <!-- CUTOFF WARNING -->
-  <div class="activity-card" style="margin-bottom: 32px; border-left: 4px solid var(--warning);">
-    <div style="display: flex; align-items: center; gap: 16px;">
-      <div style="width: 48px; height: 48px; background: var(--warning-light); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-        <i class="fas fa-clock" style="color: var(--warning); font-size: 20px;"></i>
+  <!-- CUTOFF + SUMMARY -->
+  <div class="activity-card" style="margin-bottom: 32px;">
+    <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 24px; align-items: stretch;">
+      <!-- Cutoff -->
+      <div style="border-right: 1px solid var(--border-light); padding-right: 16px;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="width: 48px; height: 48px; background: var(--warning-light); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-clock" style="color: var(--warning); font-size: 20px;"></i>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 4px; color: var(--warning);">Important: Daily Cutoff Time</h3>
+            <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
+              You can pause meals until <strong>8:00 AM</strong> on the delivery date. After this time, you’ll still be charged for that day’s meal.
+            </p>
+          </div>
+        </div>
       </div>
-      <div>
-        <h3 style="margin-bottom: 4px; color: var(--warning);">Important: Daily Cutoff Time</h3>
-        <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
-          You can pause meals until <strong>8:00 AM</strong> on the delivery date. After this time, you'll be charged for that day's meal.
+
+      <!-- Summary -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <div style="flex: 1; min-width: 160px; padding: 12px 14px; border-radius: 12px; background: var(--surface-elevated, var(--surface)); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between;">
+            <div>
+              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px;">
+                Paused days
+              </div>
+              <div style="font-size: 20px; font-weight: 700;">{{ paused_dates|length }}</div>
+            </div>
+            <i class="fas fa-calendar-minus" style="color: var(--primary); opacity: 0.9;"></i>
+          </div>
+          <div style="flex: 1; min-width: 160px; padding: 12px 14px; border-radius: 12px; background: var(--success-light); border: 1px solid var(--success); display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-money-bill-wave" style="color: var(--success);"></i>
+            <p style="margin: 0; font-size: 13px; color: var(--success-dark);">
+              Paused days are <strong>automatically excluded</strong> from your monthly bill.
+            </p>
+          </div>
+        </div>
+        <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">
+          Tip: Schedule all known holidays and travel dates in advance to avoid last‑minute changes.
         </p>
       </div>
     </div>
@@ -70,14 +117,24 @@
 
   <!-- PAUSE FORM -->
   <div class="card" style="margin-bottom: 32px;">
-    <div style="text-align: center; margin-bottom: 24px;">
-      <h3><i class="fas fa-plus-circle" style="margin-right: 8px; color: var(--primary);"></i>Pause a Meal</h3>
-      <p style="color: var(--text-secondary); margin: 8px 0 0 0;">Select a date to skip your meal delivery</p>
+    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px;">
+      <div>
+        <h3 style="margin: 0 0 4px 0;">
+          <i class="fas fa-plus-circle" style="margin-right: 8px; color: var(--primary);"></i>
+          Pause a Meal
+        </h3>
+        <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
+          Select a date to skip your meal delivery. You can always remove a pause later (before 8:00 AM).
+        </p>
+      </div>
+      <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">
+        Earliest date allowed is today
+      </span>
     </div>
 
     <form method="POST" action="/pause/save" id="pauseForm">
-      <div style="display: flex; gap: 16px; align-items: end;">
-        <div style="flex: 1;">
+      <div class="pause-form-grid">
+        <div>
           <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
             <i class="fas fa-calendar-alt" style="margin-right: 8px; color: var(--primary);"></i>
             Select Date
@@ -90,12 +147,20 @@
             min="{{ (date.today() + timedelta(days=0)).strftime('%Y-%m-%d') }}"
             id="pauseDateInput"
           >
+          <p style="margin: 6px 0 0 0; font-size: 12px; color: var(--text-secondary);">
+            You can only choose today or future dates.
+          </p>
         </div>
         
-        <button type="submit" class="btn-primary" id="pauseBtn">
-          <i class="fas fa-pause-circle"></i>
-          Pause Meal
-        </button>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
+          <button type="submit" class="btn btn-primary" id="pauseBtn" style="min-width: 180px;">
+            <i class="fas fa-pause-circle"></i>
+            Pause Meal
+          </button>
+          <span style="font-size: 12px; color: var(--text-muted);">
+            Your plan remains active on all other days.
+          </span>
+        </div>
       </div>
     </form>
   </div>
@@ -105,7 +170,7 @@
     <h3><i class="fas fa-list" style="margin-right: 8px; color: var(--secondary);"></i>Your Paused Dates</h3>
     
     {% if paused_dates %}
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-top: 20px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px;">
         {% for date_str in paused_dates %}
           {% set pause_date = date_str | strptime('%Y-%m-%d') %}
           <div class="paused-date-card">
@@ -179,6 +244,18 @@
           <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Flexible Changes</h4>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
             You can remove paused dates if your plans change, as long as it's before the cutoff time.
+          </p>
+        </div>
+      </div>
+      
+      <div style="display: flex; align-items: start; gap: 12px;">
+        <div style="width: 32px; height: 32px; background: var(--info-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <i class="fas fa-mobile-alt" style="color: var(--info); font-size: 14px;"></i>
+        </div>
+        <div>
+          <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Best viewed on latest browser</h4>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
+            For the smoothest experience, use the latest version of Chrome, Safari, or Edge on your phone or laptop.
           </p>
         </div>
       </div>
@@ -349,6 +426,19 @@
 
 .paused-date-card:hover .remove-pause-btn {
   opacity: 1;
+}
+
+.pause-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr);
+  gap: 20px;
+  align-items: flex-end;
+}
+
+@media (max-width: 768px) {
+  .pause-form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
 

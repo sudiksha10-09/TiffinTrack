@@ -31,10 +31,10 @@
             <!-- Desktop Navigation -->
             <div class="nav-actions d-none d-md-flex">
                 <div style="display: flex; align-items: center; gap: var(--spacing-lg); margin-right: var(--spacing-lg);">
-                    <span style="color: var(--text-secondary); font-size: var(--text-sm);">
+                    <a href="{{ url_for('profile') }}" style="display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--text-secondary); font-size: var(--text-sm); text-decoration: none;">
                         <i class="fas fa-user-circle" style="margin-right: var(--spacing-xs); color: var(--primary);"></i>
-                        {{ session.get('user_name', 'Customer') }}
-                    </span>
+                        <span>{{ session.get('user_name', 'Customer') }}</span>
+                    </a>
                 </div>
                 
                 <a href="{{ url_for('logout') }}" class="btn btn-secondary">
@@ -73,6 +73,10 @@
                 <a href="{{ url_for('billing_page') }}" class="mobile-nav-link">
                     <span class="mobile-nav-icon">💳</span>
                     Payment
+                </a>
+                <a href="{{ url_for('profile') }}" class="mobile-nav-link">
+                    <span class="mobile-nav-icon">👤</span>
+                    My Profile
                 </a>
                 <a href="{{ url_for('logout') }}" class="mobile-nav-link logout">
                     <span class="mobile-nav-icon">🚪</span>

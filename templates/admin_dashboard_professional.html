@@ -21,10 +21,10 @@
             
             <div class="nav-actions">
                 <div style="display: flex; align-items: center; gap: var(--spacing-lg); margin-right: var(--spacing-lg);">
-                    <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                    <a href="{{ url_for('profile') }}" style="display: inline-flex; align-items: center; gap: var(--spacing-xs); color: var(--text-secondary); font-size: var(--font-size-sm); text-decoration: none;">
                         <i class="fas fa-user-shield" style="margin-right: var(--spacing-xs); color: var(--primary);"></i>
-                        {{ session.get('user_name', 'Admin') }}
-                    </span>
+                        <span>{{ session.get('user_name', 'Admin') }}</span>
+                    </a>
                 </div>
                 
                 <a href="/customers" class="btn btn-ghost">

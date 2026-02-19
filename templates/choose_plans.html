@@ -9,6 +9,191 @@
   <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    .plan-card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+    }
+    
+    .plan-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--primary);
+    }
+    
+    .plan-card.selected {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+      transform: translateY(-4px);
+    }
+    
+    .plan-image {
+      height: 240px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    .plan-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+    }
+    
+    .plan-card:hover .plan-image img {
+      transform: scale(1.1);
+    }
+    
+    .plan-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      background: var(--primary-gradient);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 20px;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .selected-badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: var(--success);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .plan-card.selected .selected-badge {
+      display: flex;
+      animation: bounceIn 0.4s ease;
+    }
+    
+    @keyframes bounceIn {
+      0% { transform: scale(0); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    .plan-content {
+      padding: 28px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .plan-header {
+      margin-bottom: 20px;
+    }
+    
+    .plan-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text-primary);
+    }
+    
+    .plan-description {
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+    
+    .plan-items {
+      margin: 24px 0;
+      flex: 1;
+    }
+    
+    .plan-items-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .plan-items-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    
+    .plan-item-tag {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .plan-selection-indicator {
+      padding: 16px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: all 0.3s ease;
+    }
+    
+    .plan-card.selected .plan-selection-indicator {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .submit-section {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 24px;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+      z-index: 100;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .submit-section.visible {
+      transform: translateY(0);
+    }
+    
+    .selected-count {
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 18px;
+      color: var(--text-secondary);
+    }
+    
+    .selected-count strong {
+      color: var(--primary);
+      font-size: 24px;
+      font-weight: 700;
+    }
+  </style>
 </head>
 
 <body>
@@ -18,7 +203,7 @@
       <a href="{{ url_for('customer_dashboard') }}" class="logo">
         <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
       </a>
-      <div>
+      <div class="nav-actions">
         <a href="{{ url_for('customer_dashboard') }}" class="btn btn-ghost">
           <i class="fas fa-arrow-left"></i>
           Dashboard
@@ -31,89 +216,106 @@
     </div>
   </nav>
 
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-messages">
+        {% for category, message in messages %}
+          <div class="flash-message flash-{{ category }}">
+            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
   <!-- Main Content -->
-  <div class="dashboard">
+  <div class="dashboard" style="padding-bottom: 120px;">
     
     <!-- Page Header -->
-    <div class="dashboard-header" style="text-align: center; margin-bottom: var(--spacing-3xl);">
-      <h1 class="dashboard-title" style="font-size: var(--font-size-4xl);">
+    <div class="dashboard-header" style="text-align: center; margin-bottom: 48px;">
+      <h1 class="dashboard-title" style="font-size: 42px;">
         <i class="fas fa-utensils" style="margin-right: 12px; color: var(--primary);"></i>
         Choose Your Meal Plans
       </h1>
-      <p class="dashboard-subtitle" style="font-size: var(--font-size-lg); max-width: 600px; margin: 0 auto;">
-        Select from our delicious meal options. You can choose multiple plans and customize your delivery schedule.
+      <p class="dashboard-subtitle" style="font-size: 18px; max-width: 700px; margin: 12px auto 0;">
+        Select your favorite meal plans. You can choose multiple plans!
       </p>
+      
+      <!-- Progress Steps -->
+      <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 32px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">1</div>
+          <span style="font-weight: 600; color: var(--primary);">Select Plans</span>
+        </div>
+        <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 36px; height: 36px; background: var(--bg-secondary); color: var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">2</div>
+          <span style="font-weight: 600; color: var(--text-muted);">Set Duration</span>
+        </div>
+        <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 36px; height: 36px; background: var(--bg-secondary); color: var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">3</div>
+          <span style="font-weight: 600; color: var(--text-muted);">Payment</span>
+        </div>
+      </div>
     </div>
 
     <!-- Plans Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: var(--spacing-2xl); max-width: 1200px; margin: 0 auto var(--spacing-3xl);">
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(380px, 1fr)); gap: 32px; max-width: 1400px; margin: 0 auto;">
       
       {% for plan in plans %}
-      <div class="card" style="overflow: hidden; transition: all 0.3s ease; border: 2px solid transparent;" onmouseover="this.style.borderColor='var(--primary)'; this.style.transform='translateY(-8px)'" onmouseout="this.style.borderColor='transparent'; this.style.transform='translateY(0)'">
+      <div class="plan-card" onclick="togglePlan({{ plan.id }})" id="card-{{ plan.id }}" data-plan-id="{{ plan.id }}" data-plan-name="{{ plan.name }}" data-plan-rate="{{ plan.daily_rate }}">
         
         <!-- Plan Image -->
-        {% if plan.image_filename %}
-        <div style="height: 200px; overflow: hidden;">
-          <img src="{{ url_for('static', filename='uploads/dishes/' + plan.image_filename) }}" 
-               alt="{{ plan.name }}" 
-               style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease;"
-               onmouseover="this.style.transform='scale(1.1)'"
-               onmouseout="this.style.transform='scale(1)'">
+        <div class="plan-image">
+          {% if plan.image_filename %}
+            <img src="{{ url_for('static', filename='uploads/dishes/' + plan.image_filename) }}" 
+                 alt="{{ plan.name }}">
+          {% else %}
+            <div style="width: 100%; height: 100%; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center;">
+              <i class="fas fa-utensils" style="font-size: 64px; color: white; opacity: 0.7;"></i>
+            </div>
+          {% endif %}
+          <div class="plan-badge">₹{{ plan.daily_rate }}/day</div>
+          <div class="selected-badge">
+            <i class="fas fa-check-circle"></i>
+            Selected
+          </div>
         </div>
-        {% else %}
-        <div style="height: 200px; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center;">
-          <i class="fas fa-utensils" style="font-size: 4rem; color: white; opacity: 0.7;"></i>
-        </div>
-        {% endif %}
         
         <!-- Plan Content -->
-        <div style="padding: var(--spacing-xl);">
+        <div class="plan-content">
           
           <!-- Plan Header -->
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--spacing-lg);">
-            <div>
-              <h3 style="font-size: var(--font-size-2xl); font-weight: 700; margin-bottom: var(--spacing-xs); color: var(--text-primary);">
-                {{ plan.name }}
-              </h3>
-              <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">
-                {{ plan.description or 'Delicious and nutritious meal' }}
-              </p>
-            </div>
-            <div style="background: var(--primary-gradient); color: white; padding: var(--spacing-sm) var(--spacing-lg); border-radius: 50px; font-weight: 700; font-size: var(--font-size-lg); white-space: nowrap;">
-              ₹{{ plan.daily_rate }}/day
-            </div>
+          <div class="plan-header">
+            <h3 class="plan-title">{{ plan.name }}</h3>
+            <p class="plan-description">
+              {{ plan.description or 'Delicious and nutritious meal prepared fresh daily' }}
+            </p>
           </div>
           
           <!-- Plan Items -->
           {% if plan.items %}
           {% set items = plan.items | from_json %}
-          <div style="margin-bottom: var(--spacing-lg);">
-            <h4 style="font-size: var(--font-size-sm); font-weight: 600; color: var(--text-secondary); margin-bottom: var(--spacing-md); text-transform: uppercase; letter-spacing: 0.5px;">
+          <div class="plan-items">
+            <div class="plan-items-title">
               <i class="fas fa-check-circle" style="color: var(--success);"></i>
               What's Included
-            </h4>
-            <div style="display: flex; flex-wrap: wrap; gap: var(--spacing-sm);">
+            </div>
+            <div class="plan-items-list">
               {% for item in items %}
-              <span style="background: var(--bg-secondary); color: var(--text-primary); padding: var(--spacing-xs) var(--spacing-md); border-radius: 20px; font-size: var(--font-size-sm); font-weight: 500;">
-                {{ item }}
-              </span>
+              <span class="plan-item-tag">{{ item }}</span>
               {% endfor %}
             </div>
           </div>
           {% endif %}
           
-          <!-- Plan Selection -->
-          <div style="padding-top: var(--spacing-lg); border-top: 1px solid var(--border);">
-            <label style="display: flex; align-items: center; gap: var(--spacing-md); cursor: pointer; padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius); transition: all 0.2s ease;" onmouseover="this.style.background='var(--primary-light)'" onmouseout="this.style.background='var(--bg-secondary)'">
-              <input type="checkbox" 
-                     name="plan_{{ plan.id }}" 
-                     value="{{ plan.id }}"
-                     style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--primary);">
-              <span style="font-weight: 600; color: var(--text-primary);">
-                <i class="fas fa-plus-circle" style="color: var(--primary);"></i>
-                Select this plan
-              </span>
-            </label>
+          <!-- Selection Indicator -->
+          <div class="plan-selection-indicator">
+            <i class="fas fa-hand-pointer"></i>
+            Click to select
           </div>
           
         </div>
@@ -122,18 +324,23 @@
       
     </div>
 
-    <!-- Submit Button -->
-    <div style="max-width: 600px; margin: 0 auto; text-align: center;">
-      <button onclick="savePlans()" class="btn btn-primary btn-lg" style="width: 100%; padding: var(--spacing-xl); font-size: var(--font-size-xl); font-weight: 700;">
-        <i class="fas fa-check-circle"></i>
-        Save My Plan Selection
+  </div>
+
+  <!-- Submit Section (Fixed at bottom) -->
+  <div class="submit-section" id="submitSection">
+    <div style="max-width: 800px; margin: 0 auto;">
+      <div class="selected-count">
+        <strong id="selectedCount">0</strong> plan(s) selected
+      </div>
+      <button onclick="proceedToCustomization()" class="btn btn-primary btn-lg" style="width: 100%; padding: 18px; font-size: 18px; font-weight: 700;">
+        <i class="fas fa-arrow-right"></i>
+        Continue to Customize Duration
       </button>
-      <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin-top: var(--spacing-md);">
+      <p style="color: var(--text-secondary); font-size: 14px; margin-top: 12px; text-align: center;">
         <i class="fas fa-info-circle"></i>
-        You can change your plans anytime from your dashboard
+        Next: Choose how long you want each plan
       </p>
     </div>
-
   </div>
 
   <!-- Mobile Bottom Navigation -->
@@ -157,39 +364,74 @@
   </nav>
 
   <script>
-    async function savePlans() {
-      const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+    let selectedPlans = new Set();
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      updateUI();
       
-      if (checkboxes.length === 0) {
+      // Auto-hide flash messages
+      setTimeout(() => {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        flashMessages.forEach(msg => {
+          msg.style.transition = 'opacity 0.3s ease';
+          msg.style.opacity = '0';
+          setTimeout(() => msg.remove(), 300);
+        });
+      }, 5000);
+    });
+    
+    // Toggle plan selection
+    function togglePlan(planId) {
+      const card = document.getElementById('card-' + planId);
+      
+      if (selectedPlans.has(planId)) {
+        selectedPlans.delete(planId);
+        card.classList.remove('selected');
+      } else {
+        selectedPlans.add(planId);
+        card.classList.add('selected');
+      }
+      
+      updateUI();
+    }
+    
+    // Update UI based on selection
+    function updateUI() {
+      const count = selectedPlans.size;
+      document.getElementById('selectedCount').textContent = count;
+      
+      const submitSection = document.getElementById('submitSection');
+      if (count > 0) {
+        submitSection.classList.add('visible');
+      } else {
+        submitSection.classList.remove('visible');
+      }
+    }
+    
+    // Proceed to customization page
+    function proceedToCustomization() {
+      if (selectedPlans.size === 0) {
         alert('⚠️ Please select at least one plan');
         return;
       }
       
-      const planIds = Array.from(checkboxes).map(cb => cb.value);
-      
-      try {
-        const response = await fetch('/plans/save', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            plan_ids: planIds
-          })
+      // Get plan details
+      const planDetails = [];
+      selectedPlans.forEach(planId => {
+        const card = document.getElementById('card-' + planId);
+        planDetails.push({
+          id: planId,
+          name: card.dataset.planName,
+          rate: card.dataset.planRate
         });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          alert('✅ Plans saved successfully!');
-          window.location.href = '/dashboard';
-        } else {
-          alert('❌ Error: ' + result.message);
-        }
-      } catch (error) {
-        console.error('Error:', error);
-        alert('❌ Failed to save plans. Please try again.');
-      }
+      });
+      
+      // Store in session storage
+      sessionStorage.setItem('selectedPlans', JSON.stringify(planDetails));
+      
+      // Redirect to customization page
+      window.location.href = '{{ url_for("customize_plans") }}';
     }
   </script>
 

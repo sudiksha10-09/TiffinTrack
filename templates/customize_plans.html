@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="color-scheme" content="light">
+  <title>Customize Duration - TiffinTrack</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <style>
+    .plan-customize-card {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow);
+      margin-bottom: 24px;
+      border-left: 6px solid var(--primary);
+    }
+    
+    .plan-customize-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+    }
+    
+    .plan-name {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .plan-rate {
+      background: var(--primary-gradient);
+      color: white;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 18px;
+    }
+    
+    .duration-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .duration-option {
+      background: var(--bg-secondary);
+      border: 3px solid transparent;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .duration-option:hover {
+      background: var(--primary-light);
+      transform: translateY(-4px);
+    }
+    
+    .duration-option.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    
+    .duration-value {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .duration-label {
+      font-size: 14px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .custom-dates {
+      display: none;
+      margin-top: 24px;
+      padding: 24px;
+      background: var(--primary-light);
+      border-radius: 12px;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .custom-dates.active {
+      display: block;
+      animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .date-input-group {
+      margin-bottom: 16px;
+    }
+    
+    .date-input-group:last-child {
+      margin-bottom: 0;
+    }
+    
+    .date-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    
+    .date-input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.2s ease;
+    }
+    
+    .date-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+    
+    .cost-summary {
+      background: var(--success-light);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      border-left: 4px solid var(--success);
+    }
+    
+    .cost-label {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    
+    .cost-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--success);
+    }
+    
+    .total-summary {
+      background: white;
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: var(--shadow-lg);
+      margin-top: 40px;
+      border: 3px solid var(--primary);
+    }
+    
+    .total-summary-header {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      color: var(--text-primary);
+      text-align: center;
+    }
+    
+    .total-breakdown {
+      margin-bottom: 24px;
+    }
+    
+    .breakdown-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    .breakdown-item:last-child {
+      border-bottom: none;
+      padding-top: 20px;
+      margin-top: 12px;
+      border-top: 2px solid var(--border);
+    }
+    
+    .breakdown-label {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .breakdown-value {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .breakdown-item:last-child .breakdown-label {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+    
+    .breakdown-item:last-child .breakdown-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="{{ url_for('customer_dashboard') }}" class="logo">
+        <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
+      </a>
+      <div class="nav-actions">
+        <a href="{{ url_for('choose_plans') }}" class="btn btn-ghost">
+          <i class="fas fa-arrow-left"></i>
+          Back to Plans
+        </a>
+        <a href="{{ url_for('logout') }}" class="btn btn-secondary">
+          <i class="fas fa-sign-out-alt"></i>
+          Logout
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="dashboard">
+    
+    <!-- Page Header -->
+    <div class="dashboard-header" style="text-align: center; margin-bottom: 48px;">
+      <h1 class="dashboard-title" style="font-size: 42px;">
+        <i class="fas fa-calendar-alt" style="margin-right: 12px; color: var(--primary);"></i>
+        Customize Your Duration
+      </h1>
+      <p class="dashboard-subtitle" style="font-size: 18px; max-width: 700px; margin: 12px auto 0;">
+        Choose how long you want each meal plan
+      </p>
+      
+      <!-- Progress Steps -->
+      <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 32px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 36px; height: 36px; background: var(--success); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+            <i class="fas fa-check"></i>
+          </div>
+          <span style="font-weight: 600; color: var(--success);">Select Plans</span>
+        </div>
+        <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 36px; height: 36px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">2</div>
+          <span style="font-weight: 600; color: var(--primary);">Set Duration</span>
+        </div>
+        <i class="fas fa-chevron-right" style="color: var(--text-muted);"></i>
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 36px; height: 36px; background: var(--bg-secondary); color: var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700;">3</div>
+          <span style="font-weight: 600; color: var(--text-muted);">Payment</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Plans Customization -->
+    <div style="max-width: 900px; margin: 0 auto;" id="plansContainer">
+      <!-- Plans will be loaded here by JavaScript -->
+    </div>
+
+    <!-- Total Summary -->
+    <div class="total-summary" style="max-width: 900px; margin: 40px auto;">
+      <div class="total-summary-header">
+        <i class="fas fa-receipt"></i>
+        Order Summary
+      </div>
+      <div class="total-breakdown" id="totalBreakdown">
+        <!-- Breakdown will be loaded here -->
+      </div>
+      <button onclick="proceedToPayment()" class="btn btn-primary btn-lg" style="width: 100%; padding: 18px; font-size: 18px; font-weight: 700;">
+        <i class="fas fa-credit-card"></i>
+        Proceed to Payment
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    let selectedPlans = [];
+    let planConfigurations = {};
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load selected plans from session storage
+      const storedPlans = sessionStorage.getItem('selectedPlans');
+      
+      if (!storedPlans) {
+        alert('⚠️ No plans selected. Redirecting to plans page...');
+        window.location.href = '{{ url_for("choose_plans") }}';
+        return;
+      }
+      
+      selectedPlans = JSON.parse(storedPlans);
+      renderPlans();
+      updateTotalSummary();
+    });
+    
+    // Render plans
+    function renderPlans() {
+      const container = document.getElementById('plansContainer');
+      container.innerHTML = '';
+      
+      selectedPlans.forEach((plan, index) => {
+        const planCard = createPlanCard(plan, index);
+        container.appendChild(planCard);
+      });
+    }
+    
+    // Create plan card
+    function createPlanCard(plan, index) {
+      const card = document.createElement('div');
+      card.className = 'plan-customize-card';
+      card.innerHTML = `
+        <div class="plan-customize-header">
+          <div class="plan-name">
+            <i class="fas fa-utensils" style="color: var(--primary); margin-right: 8px;"></i>
+            ${plan.name}
+          </div>
+          <div class="plan-rate">₹${plan.rate}/day</div>
+        </div>
+        
+        <div class="duration-options">
+          <div class="duration-option" onclick="selectDuration(${plan.id}, 1)">
+            <div class="duration-value">1</div>
+            <div class="duration-label">Day</div>
+          </div>
+          <div class="duration-option" onclick="selectDuration(${plan.id}, 3)">
+            <div class="duration-value">3</div>
+            <div class="duration-label">Days</div>
+          </div>
+          <div class="duration-option" onclick="selectDuration(${plan.id}, 7)">
+            <div class="duration-value">7</div>
+            <div class="duration-label">Days</div>
+          </div>
+          <div class="duration-option" onclick="selectDuration(${plan.id}, 30)">
+            <div class="duration-value">30</div>
+            <div class="duration-label">Days</div>
+          </div>
+          <div class="duration-option" onclick="selectCustomDuration(${plan.id})">
+            <div class="duration-value"><i class="fas fa-calendar"></i></div>
+            <div class="duration-label">Custom</div>
+          </div>
+        </div>
+        
+        <div class="custom-dates" id="custom-${plan.id}">
+          <div class="date-input-group">
+            <label class="date-label" for="start-${plan.id}">
+              <i class="fas fa-calendar-alt"></i>
+              Start Date
+            </label>
+            <input type="date" 
+                   class="date-input" 
+                   id="start-${plan.id}"
+                   min="${new Date().toISOString().split('T')[0]}"
+                   onchange="updateCustomDates(${plan.id})">
+          </div>
+          
+          <div class="date-input-group">
+            <label class="date-label" for="end-${plan.id}">
+              <i class="fas fa-calendar-check"></i>
+              End Date
+            </label>
+            <input type="date" 
+                   class="date-input" 
+                   id="end-${plan.id}"
+                   min="${new Date().toISOString().split('T')[0]}"
+                   onchange="updateCustomDates(${plan.id})">
+          </div>
+        </div>
+        
+        <div class="cost-summary" id="cost-${plan.id}" style="display: none;">
+          <div class="cost-label">
+            <i class="fas fa-calculator"></i>
+            Estimated Cost
+          </div>
+          <div class="cost-value" id="cost-value-${plan.id}">₹0</div>
+        </div>
+      `;
+      
+      return card;
+    }
+    
+    // Select duration
+    function selectDuration(planId, days) {
+      // Remove custom dates
+      const customDiv = document.getElementById('custom-' + planId);
+      customDiv.classList.remove('active');
+      
+      // Clear custom date inputs
+      document.getElementById('start-' + planId).value = '';
+      document.getElementById('end-' + planId).value = '';
+      
+      // Update selection UI
+      const card = document.querySelector(`[onclick*="selectDuration(${planId}"]`).closest('.plan-customize-card');
+      const options = card.querySelectorAll('.duration-option');
+      options.forEach(opt => opt.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      
+      // Calculate dates
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setDate(endDate.getDate() + days - 1);
+      
+      // Store configuration
+      const plan = selectedPlans.find(p => p.id == planId);
+      planConfigurations[planId] = {
+        planId: planId,
+        planName: plan.name,
+        dailyRate: parseFloat(plan.rate),
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate.toISOString().split('T')[0],
+        days: days,
+        totalCost: days * parseFloat(plan.rate)
+      };
+      
+      // Show cost
+      showCost(planId);
+      updateTotalSummary();
+    }
+    
+    // Select custom duration
+    function selectCustomDuration(planId) {
+      const customDiv = document.getElementById('custom-' + planId);
+      customDiv.classList.add('active');
+      
+      // Update selection UI
+      const card = customDiv.closest('.plan-customize-card');
+      const options = card.querySelectorAll('.duration-option');
+      options.forEach(opt => opt.classList.remove('selected'));
+      event.currentTarget.classList.add('selected');
+      
+      // Set default dates
+      const startInput = document.getElementById('start-' + planId);
+      const endInput = document.getElementById('end-' + planId);
+      
+      if (!startInput.value) {
+        startInput.value = new Date().toISOString().split('T')[0];
+      }
+      if (!endInput.value) {
+        const nextMonth = new Date();
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+        endInput.value = nextMonth.toISOString().split('T')[0];
+      }
+      
+      updateCustomDates(planId);
+    }
+    
+    // Update custom dates
+    function updateCustomDates(planId) {
+      const startDate = document.getElementById('start-' + planId).value;
+      const endDate = document.getElementById('end-' + planId).value;
+      
+      if (!startDate || !endDate) return;
+      
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+      
+      if (days < 1) {
+        alert('⚠️ End date must be after start date');
+        return;
+      }
+      
+      // Store configuration
+      const plan = selectedPlans.find(p => p.id == planId);
+      planConfigurations[planId] = {
+        planId: planId,
+        planName: plan.name,
+        dailyRate: parseFloat(plan.rate),
+        startDate: startDate,
+        endDate: endDate,
+        days: days,
+        totalCost: days * parseFloat(plan.rate)
+      };
+      
+      // Show cost
+      showCost(planId);
+      updateTotalSummary();
+    }
+    
+    // Show cost
+    function showCost(planId) {
+      const costDiv = document.getElementById('cost-' + planId);
+      const costValue = document.getElementById('cost-value-' + planId);
+      const config = planConfigurations[planId];
+      
+      if (config) {
+        costValue.textContent = '₹' + config.totalCost;
+        costDiv.style.display = 'flex';
+      }
+    }
+    
+    // Update total summary
+    function updateTotalSummary() {
+      const breakdown = document.getElementById('totalBreakdown');
+      breakdown.innerHTML = '';
+      
+      let grandTotal = 0;
+      
+      Object.values(planConfigurations).forEach(config => {
+        const item = document.createElement('div');
+        item.className = 'breakdown-item';
+        item.innerHTML = `
+          <div class="breakdown-label">
+            ${config.planName} × ${config.days} day${config.days > 1 ? 's' : ''}
+          </div>
+          <div class="breakdown-value">₹${config.totalCost}</div>
+        `;
+        breakdown.appendChild(item);
+        grandTotal += config.totalCost;
+      });
+      
+      // Add total
+      const totalItem = document.createElement('div');
+      totalItem.className = 'breakdown-item';
+      totalItem.innerHTML = `
+        <div class="breakdown-label">Total Amount</div>
+        <div class="breakdown-value">₹${grandTotal}</div>
+      `;
+      breakdown.appendChild(totalItem);
+    }
+    
+    // Proceed to payment
+    function proceedToPayment() {
+      const configCount = Object.keys(planConfigurations).length;
+      
+      if (configCount === 0) {
+        alert('⚠️ Please select duration for at least one plan');
+        return;
+      }
+      
+      if (configCount < selectedPlans.length) {
+        const confirm = window.confirm(`⚠️ You have only configured ${configCount} out of ${selectedPlans.length} plans. Continue anyway?`);
+        if (!confirm) return;
+      }
+      
+      // Store configurations
+      sessionStorage.setItem('planConfigurations', JSON.stringify(planConfigurations));
+      
+      // Redirect to payment page
+      window.location.href = '{{ url_for("plan_checkout") }}';
+    }
+  </script>
+
+</body>
+</html>

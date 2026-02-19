@@ -2,290 +2,506 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Customers – TiffinTrack</title>
+  <meta name="color-scheme" content="light">
+  <title>Customers – TiffinTrack Admin</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
+  
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
   <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
-<body class="app">
+<body>
 
 <!-- NAVBAR -->
 <nav class="navbar">
   <div class="nav-container">
-    <div class="logo">🍱 TiffinTrack</div>
-
-    <div>
-      <a href="{{ url_for('admin_dashboard') }}" class="btn-outline">Dashboard</a>
-      <button onclick="handleLogout()" class="btn-secondary">Logout</button>
+    <a href="{{ url_for('admin_dashboard') }}" class="logo">
+      <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
+    </a>
+    
+    <div class="nav-actions">
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">
+        <i class="fas fa-arrow-left"></i>
+        Dashboard
+      </a>
+      <button onclick="handleLogout()" class="btn btn-secondary">
+        <i class="fas fa-sign-out-alt"></i>
+        Logout
+      </button>
     </div>
   </div>
 </nav>
 
-<!-- PAGE -->
-<div class="page">
-
-  <!-- HEADER -->
-  <div class="page-header">
-    <div class="page-title">
-      <h1>Customers</h1>
-      <p>Manage all customer subscriptions and payments.</p>
+<!-- MAIN CONTENT -->
+<div class="dashboard">
+  
+  <!-- PAGE HEADER -->
+  <div class="dashboard-header" style="margin-bottom: var(--spacing-2xl);">
+    <div>
+      <h1 class="dashboard-title">
+        <i class="fas fa-users" style="margin-right: 12px;"></i>
+        Customer Management
+      </h1>
+      <p class="dashboard-subtitle">Manage all customer subscriptions and payments</p>
     </div>
-
-    <div class="toolbar">
-      <input class="search-input" placeholder="Search customers..." onkeyup="filterCustomers()">
-      <button class="btn-primary" onclick="showAddCustomerModal()">+ Add Customer</button>
+    
+    <div class="dashboard-actions">
+      <button class="btn btn-primary" onclick="showAddCustomerModal()">
+        <i class="fas fa-user-plus"></i>
+        Add Customer
+      </button>
     </div>
   </div>
 
-  <!-- STATS -->
-  <div class="stats-grid">
+  <!-- SEARCH BAR -->
+  <div class="card" style="margin-bottom: var(--spacing-2xl); padding: var(--spacing-lg);">
+    <div style="position: relative;">
+      <i class="fas fa-search" style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+      <input 
+        type="text" 
+        class="form-input" 
+        placeholder="Search by name, email, phone, or area..." 
+        onkeyup="filterCustomers()"
+        id="searchInput"
+        style="padding-left: 48px; font-size: var(--text-base);">
+    </div>
+  </div>
 
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#2563eb;">
+  <!-- STATS GRID -->
+  <div class="kpi-grid" style="margin-bottom: var(--spacing-2xl);">
+    
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
         <i class="fas fa-users"></i>
       </div>
-      <div class="stat-info">
-        <h3>Total</h3>
+      <div class="kpi-info">
+        <h3>Total Customers</h3>
         <p>{{ customers|length }}</p>
       </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#16a34a;">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
         <i class="fas fa-check-circle"></i>
       </div>
-      <div class="stat-info">
+      <div class="kpi-info">
         <h3>Active</h3>
         <p>{{ customers | selectattr('status', 'equalto', 'Active') | list | length }}</p>
       </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#ca8a04;">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
         <i class="fas fa-pause-circle"></i>
       </div>
-      <div class="stat-info">
+      <div class="kpi-info">
         <h3>Paused</h3>
         <p>{{ customers | selectattr('status', 'equalto', 'Paused') | list | length }}</p>
       </div>
     </div>
 
-    <div class="stat-card">
-      <div class="stat-icon" style="background:#dc2626;">
-        <i class="fas fa-credit-card"></i>
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <i class="fas fa-exclamation-circle"></i>
       </div>
-      <div class="stat-info">
-        <h3>Pending</h3>
+      <div class="kpi-info">
+        <h3>Unpaid Bills</h3>
         <p>{{ customers | selectattr('payment', 'equalto', 'Pending') | list | length }}</p>
       </div>
     </div>
 
   </div>
 
-  <!-- TABLE -->
-  <div class="table-card">
+  <!-- FILTER BAR -->
+  <div class="card" style="margin-bottom: var(--spacing-2xl); padding: var(--spacing-md) var(--spacing-lg); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <span style="font-size: var(--text-sm); color: var(--text-secondary); font-weight: 500;">
+        Quick filters
+      </span>
+      <button type="button" class="btn btn-ghost" data-filter="all" onclick="setStatusFilter('all')" id="filter-all">
+        <i class="fas fa-layer-group"></i>
+        All
+      </button>
+      <button type="button" class="btn btn-ghost" data-filter="active" onclick="setStatusFilter('active')" id="filter-active">
+        <i class="fas fa-check-circle"></i>
+        Active
+      </button>
+      <button type="button" class="btn btn-ghost" data-filter="paused" onclick="setStatusFilter('paused')" id="filter-paused">
+        <i class="fas fa-pause-circle"></i>
+        Paused
+      </button>
+      <button type="button" class="btn btn-ghost" data-filter="pending" onclick="setStatusFilter('pending')" id="filter-pending">
+        <i class="fas fa-exclamation-circle"></i>
+        Pending Bills
+      </button>
+    </div>
+    <div id="customerSummary" style="font-size: var(--text-sm); color: var(--text-secondary); margin-top: 6px;">
+      Showing <strong>{{ customers|length }}</strong> customers
+    </div>
+  </div>
 
+  <!-- CUSTOMER TABLE -->
+  <div class="table-container">
     <div class="table-header">
-      Customer List
+      <h3 class="table-title">
+        <i class="fas fa-list"></i>
+        Customer List
+      </h3>
+      <span style="color: var(--text-secondary); font-size: var(--text-sm);">
+        {{ customers|length }} total customers
+      </span>
     </div>
 
-    <table class="dashboard-table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>Contact</th>
-          <th>Area</th>
-          <th>Plan</th>
-          <th>Status</th>
-          <th>Payment</th>
-        </tr>
-      </thead>
-      <tbody id="customer-table-body">
-        {% for customer in customers %}
-        <tr>
-          <td><strong>{{ customer.name }}</strong></td>
-          <td>
-            {{ customer.phone }}<br>
-            <small style="color:#6b7280;">{{ customer.email }}</small>
-          </td>
-          <td>{{ customer.area }}</td>
-          <td>{{ customer.plan }}</td>
-          <td>
-            {% if customer.status == 'Active' %}
-              <span class="badge-pill badge-active">{{ customer.status }}</span>
-            {% else %}
-              <span class="badge-pill badge-paused">{{ customer.status }}</span>
-            {% endif %}
-          </td>
-          <td>
-            {% if customer.payment == 'Paid' %}
-              <span class="badge-pill badge-paid">{{ customer.payment }}</span>
-            {% else %}
-              <span class="badge-pill badge-pending">{{ customer.payment }}</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
+    <div style="overflow-x: auto;">
+      <table class="table">
+        <thead>
+          <tr>
+            <th><i class="fas fa-user"></i> Name</th>
+            <th><i class="fas fa-phone"></i> Contact</th>
+            <th><i class="fas fa-map-marker-alt"></i> Area</th>
+            <th><i class="fas fa-utensils"></i> Plan</th>
+            <th><i class="fas fa-toggle-on"></i> Status</th>
+            <th><i class="fas fa-credit-card"></i> Payment</th>
+          </tr>
+        </thead>
+        <tbody id="customerTableBody">
+          {% for customer in customers %}
+          <tr 
+            data-status="{{ customer.status | lower }}" 
+            data-payment="{{ customer.payment | lower }}"
+          >
+            <td>
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
+                  {{ customer.name[0].upper() }}
+                </div>
+                <div>
+                  <div style="font-weight: 600; color: var(--text-primary);">{{ customer.name }}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-size: var(--text-sm);">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+                  <i class="fas fa-phone" style="color: var(--text-muted); font-size: 12px;"></i>
+                  <span>{{ customer.phone }}</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; color: var(--text-secondary);">
+                  <i class="fas fa-envelope" style="color: var(--text-muted); font-size: 12px;"></i>
+                  <span>{{ customer.email }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge" style="background: var(--info-light); color: var(--info-dark);">
+                <i class="fas fa-map-marker-alt"></i>
+                {{ customer.area }}
+              </span>
+            </td>
+            <td>
+              <span style="font-weight: 500; color: var(--text-primary);">{{ customer.plan }}</span>
+            </td>
+            <td>
+              {% if customer.status == 'Active' %}
+                <span class="badge badge-success">
+                  <i class="fas fa-check-circle"></i>
+                  Active
+                </span>
+              {% else %}
+                <span class="badge badge-warning">
+                  <i class="fas fa-pause-circle"></i>
+                  Paused
+                </span>
+              {% endif %}
+            </td>
+            <td>
+              {% if customer.payment == 'Paid' %}
+                <span class="badge badge-success">
+                  <i class="fas fa-check-circle"></i>
+                  Paid
+                </span>
+              {% else %}
+                <span class="badge badge-danger">
+                  <i class="fas fa-exclamation-circle"></i>
+                  Unpaid
+                </span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+          <tr id="noCustomersRow" style="display: none;">
+            <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-secondary);">
+              <i class="fas fa-search" style="margin-right: 8px;"></i>
+              No customers match your current search and filters.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
 </div>
 
 <!-- ADD CUSTOMER MODAL -->
-<div id="addCustomerModal" class="modal" style="display:none;">
-  <div class="modal-content">
+<div id="addCustomerModal" class="modal-overlay" style="display:none;" onclick="hideAddCustomerModal()">
+  <div class="modal-dialog" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <h3>Add New Customer</h3>
-      <button onclick="hideAddCustomerModal()" class="modal-close">&times;</button>
+      <h3 style="margin: 0; font-size: var(--text-2xl); font-weight: 700;">
+        <i class="fas fa-user-plus" style="color: var(--primary); margin-right: 8px;"></i>
+        Add New Customer
+      </h3>
+      <button onclick="hideAddCustomerModal()" class="btn btn-ghost" style="padding: 8px;">
+        <i class="fas fa-times"></i>
+      </button>
     </div>
     
-    <form id="addCustomerForm">
-      <div class="form-grid">
-        <div>
-          <label>Full Name</label>
-          <input type="text" name="fullname" class="input" required>
+    <form id="addCustomerForm" style="padding: var(--spacing-xl);">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); margin-bottom: var(--spacing-lg);">
+        
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-user"></i>
+            Full Name
+          </label>
+          <input type="text" name="fullname" class="form-input" required placeholder="Enter full name">
         </div>
         
-        <div>
-          <label>Email</label>
-          <input type="email" name="email" class="input" required>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-envelope"></i>
+            Email Address
+          </label>
+          <input type="email" name="email" class="form-input" required placeholder="email@example.com">
         </div>
         
-        <div>
-          <label>Phone</label>
-          <input type="tel" name="phone" class="input" required>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-phone"></i>
+            Phone Number
+          </label>
+          <input type="tel" name="phone" class="form-input" required placeholder="10-digit mobile number">
         </div>
         
-        <div>
-          <label>Delivery Area</label>
-          <select name="delivery_area" class="input" required>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-map-marker-alt"></i>
+            Delivery Area
+          </label>
+          <select name="delivery_area" class="form-input form-select" required>
             <option value="">Select Area</option>
-            <option value="Sector 9">Sector 9</option>
-            <option value="Sector 10">Sector 10</option>
-            <option value="Sector 11">Sector 11</option>
             <option value="Vashi">Vashi</option>
             <option value="Nerul">Nerul</option>
+            <option value="Belapur">Belapur</option>
+            <option value="Kharghar">Kharghar</option>
+            <option value="Panvel">Panvel</option>
+            <option value="Airoli">Airoli</option>
+            <option value="Ghansoli">Ghansoli</option>
+            <option value="Koparkhairane">Koparkhairane</option>
           </select>
         </div>
         
-        <div>
-          <label>Address Line 1</label>
-          <input type="text" name="addr1" class="input" required>
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label">
+            <i class="fas fa-home"></i>
+            Address Line 1
+          </label>
+          <input type="text" name="addr1" class="form-input" required placeholder="Flat/House No, Building Name">
         </div>
         
-        <div>
-          <label>Address Line 2</label>
-          <input type="text" name="addr2" class="input">
+        <div class="form-group" style="grid-column: 1 / -1;">
+          <label class="form-label">
+            Address Line 2
+          </label>
+          <input type="text" name="addr2" class="form-input" placeholder="Street, Landmark (Optional)">
         </div>
         
-        <div>
-          <label>City</label>
-          <input type="text" name="city" class="input" required>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-city"></i>
+            City
+          </label>
+          <input type="text" name="city" class="form-input" required value="Navi Mumbai">
         </div>
         
-        <div>
-          <label>State</label>
-          <input type="text" name="state" class="input" required>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-map"></i>
+            State
+          </label>
+          <input type="text" name="state" class="form-input" required value="Maharashtra">
         </div>
         
-        <div>
-          <label>Pincode</label>
-          <input type="text" name="pincode" class="input" required>
+        <div class="form-group">
+          <label class="form-label">
+            <i class="fas fa-mail-bulk"></i>
+            Pincode
+          </label>
+          <input type="text" name="pincode" class="form-input" required placeholder="6-digit pincode" pattern="[0-9]{6}">
         </div>
       </div>
       
-      <div class="modal-actions">
-        <button type="button" onclick="hideAddCustomerModal()" class="btn-outline">Cancel</button>
-        <button type="submit" class="btn-primary">Add Customer</button>
+      <div style="display: flex; gap: var(--spacing-md); justify-content: flex-end; padding-top: var(--spacing-lg); border-top: 1px solid var(--border);">
+        <button type="button" onclick="hideAddCustomerModal()" class="btn btn-ghost">
+          <i class="fas fa-times"></i>
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-check"></i>
+          Add Customer
+        </button>
       </div>
     </form>
   </div>
 </div>
 
 <style>
-.modal {
+/* Modal Styles */
+.modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeIn 0.2s ease-out;
 }
 
-.modal-content {
+.modal-dialog {
   background: white;
-  border-radius: 12px;
+  border-radius: var(--border-radius-xl);
   width: 90%;
-  max-width: 600px;
+  max-width: 700px;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: var(--shadow-2xl);
+  animation: slideUp 0.3s ease-out;
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: var(--spacing-xl);
+  border-bottom: 1px solid var(--border);
 }
 
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: #6b7280;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  padding: 20px;
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.modal-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: flex-end;
-  padding: 20px;
-  border-top: 1px solid #e5e7eb;
-}
-
+/* Responsive */
 @media (max-width: 768px) {
-  .form-grid {
-    grid-template-columns: 1fr;
+  .modal-dialog {
+    width: 95%;
+    max-height: 95vh;
+  }
+  
+  .modal-dialog form > div {
+    grid-template-columns: 1fr !important;
   }
 }
 </style>
 
 <script>
-function filterCustomers() {
-  const searchTerm = document.querySelector('.search-input').value.toLowerCase();
-  const rows = document.querySelectorAll('#customer-table-body tr');
-  
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(searchTerm) ? '' : 'none';
+let activeStatusFilter = 'all';
+
+function setStatusFilter(status) {
+  activeStatusFilter = status;
+
+  const filterButtons = document.querySelectorAll('[data-filter]');
+  filterButtons.forEach(btn => {
+    if (btn.getAttribute('data-filter') === status) {
+      btn.classList.add('btn-primary');
+      btn.classList.remove('btn-ghost');
+    } else {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-ghost');
+    }
   });
+
+  applyCustomerFilters();
+}
+
+function applyCustomerFilters() {
+  const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  const rows = document.querySelectorAll('#customerTableBody tr[data-status]');
+  const noRow = document.getElementById('noCustomersRow');
+  let visibleCount = 0;
+
+  rows.forEach(row => {
+    const rowText = row.textContent.toLowerCase();
+    const status = row.dataset.status || '';
+    const payment = row.dataset.payment || '';
+
+    const matchesSearch = rowText.includes(searchTerm);
+
+    let matchesStatus = true;
+    if (activeStatusFilter === 'active') {
+      matchesStatus = status === 'active';
+    } else if (activeStatusFilter === 'paused') {
+      matchesStatus = status === 'paused';
+    } else if (activeStatusFilter === 'pending') {
+      matchesStatus = payment === 'pending';
+    }
+
+    const shouldShow = matchesSearch && matchesStatus;
+    row.style.display = shouldShow ? '' : 'none';
+
+    if (shouldShow) {
+      visibleCount += 1;
+    }
+  });
+
+  if (noRow) {
+    noRow.style.display = visibleCount === 0 ? '' : 'none';
+  }
+
+  const summary = document.getElementById('customerSummary');
+  if (summary) {
+    summary.innerHTML = `Showing <strong>${visibleCount}</strong> customer${visibleCount === 1 ? '' : 's'}`;
+  }
 }
 
 function showAddCustomerModal() {
   document.getElementById('addCustomerModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
 }
 
 function hideAddCustomerModal() {
   document.getElementById('addCustomerModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
   document.getElementById('addCustomerForm').reset();
 }
+
+// Close modal on Escape key
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    hideAddCustomerModal();
+  }
+});
+
+// Initialise filters on load
+document.addEventListener('DOMContentLoaded', function () {
+  setStatusFilter('all');
+});
 
 document.getElementById('addCustomerForm').addEventListener('submit', async function(e) {
   e.preventDefault();
@@ -305,13 +521,14 @@ document.getElementById('addCustomerForm').addEventListener('submit', async func
     const result = await response.json();
     
     if (result.success) {
-      alert('Customer added successfully!');
+      alert('✅ Customer added successfully!');
       location.reload();
     } else {
-      alert('Error: ' + result.message);
+      alert('❌ Error: ' + result.message);
     }
   } catch (error) {
-    alert('Error adding customer');
+    alert('❌ Error adding customer. Please try again.');
+    console.error(error);
   }
 });
 

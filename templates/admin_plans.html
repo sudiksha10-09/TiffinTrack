@@ -18,11 +18,11 @@
       <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
     </a>
     <div class="nav-actions">
-      <a href="{{ url_for('admin_dashboard') }}" class="btn-outline">
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline">
         <i class="fas fa-arrow-left"></i>
         Dashboard
       </a>
-      <a href="{{ url_for('logout') }}" class="btn-secondary">
+      <a href="{{ url_for('logout') }}" class="btn btn-secondary">
         <i class="fas fa-sign-out-alt"></i>
         Logout
       </a>
@@ -51,8 +51,22 @@
       <p>Create, edit, and manage your tiffin service meal plans</p>
     </div>
     
-    <div class="toolbar">
-      <a href="{{ url_for('add_plan') }}" class="btn-primary">
+    <div class="toolbar" style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: flex-end;">
+      <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-right: auto;">
+        <button type="button" class="btn btn-ghost plan-filter-btn plan-filter-active" data-plan-filter="all" onclick="filterPlans('all')">
+          <i class="fas fa-layer-group"></i>
+          All
+        </button>
+        <button type="button" class="btn btn-ghost plan-filter-btn" data-plan-filter="active" onclick="filterPlans('active')">
+          <i class="fas fa-check-circle"></i>
+          Active
+        </button>
+        <button type="button" class="btn btn-ghost plan-filter-btn" data-plan-filter="inactive" onclick="filterPlans('inactive')">
+          <i class="fas fa-pause-circle"></i>
+          Inactive
+        </button>
+      </div>
+      <a href="{{ url_for('add_plan') }}" class="btn btn-primary">
         <i class="fas fa-plus"></i>
         Add New Plan
       </a>
@@ -61,9 +75,9 @@
 
   <!-- PLANS GRID -->
   {% if plans %}
-    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px;">
+    <div id="plansGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 24px;">
       {% for plan in plans %}
-      <div class="plan-card">
+      <div class="plan-card" data-status="{{ 'active' if plan.is_active else 'inactive' }}">
         <!-- Plan Image -->
         <div class="plan-image">
           {% if plan.image_filename %}
@@ -85,6 +99,24 @@
           </div>
           
           <p class="plan-description">{{ plan.description or 'No description available' }}</p>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; font-size: 12px; color: var(--text-secondary);">
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fas fa-clock" style="color: var(--text-muted);"></i>
+              Created {{ (plan.created_at or plan.id)|strftime('%d %b %Y') }}
+            </span>
+            {% if plan.is_active %}
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fas fa-bolt" style="color: var(--success);"></i>
+              Currently available to customers
+            </span>
+            {% else %}
+            <span style="display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fas fa-moon" style="color: var(--warning);"></i>
+              Hidden from new subscriptions
+            </span>
+            {% endif %}
+          </div>
           
           <!-- Plan Items -->
           {% if plan.items %}
@@ -114,13 +146,13 @@
           
           <!-- Plan Actions -->
           <div class="plan-actions">
-            <a href="{{ url_for('edit_plan', plan_id=plan.id) }}" class="btn-outline">
+            <a href="{{ url_for('edit_plan', plan_id=plan.id) }}" class="btn btn-outline">
               <i class="fas fa-edit"></i>
               Edit
             </a>
             
             <form method="POST" action="{{ url_for('toggle_plan_status', plan_id=plan.id) }}" style="display: inline;">
-              <button type="submit" class="btn-secondary">
+              <button type="submit" class="btn btn-secondary">
                 <i class="fas fa-{{ 'pause' if plan.is_active else 'play' }}"></i>
                 {{ 'Deactivate' if plan.is_active else 'Activate' }}
               </button>
@@ -129,7 +161,7 @@
             <form method="POST" action="{{ url_for('delete_plan', plan_id=plan.id) }}" 
                   style="display: inline;" 
                   onsubmit="return confirm('Are you sure you want to delete this plan? This action cannot be undone.')">
-              <button type="submit" class="btn-danger">
+              <button type="submit" class="btn btn-danger">
                 <i class="fas fa-trash"></i>
                 Delete
               </button>
@@ -146,7 +178,7 @@
       <p style="color: var(--text-secondary); margin-bottom: 24px;">
         Create your first meal plan to start offering tiffin services to customers.
       </p>
-      <a href="{{ url_for('add_plan') }}" class="btn-primary">
+      <a href="{{ url_for('add_plan') }}" class="btn btn-primary">
         <i class="fas fa-plus"></i>
         Create First Plan
       </a>
@@ -163,6 +195,34 @@
       setTimeout(() => msg.remove(), 300);
     });
   }, 5000);
+
+  let activePlanFilter = 'all';
+
+  function filterPlans(status) {
+    activePlanFilter = status;
+    const cards = document.querySelectorAll('.plan-card');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const planStatus = card.dataset.status || 'active';
+      const shouldShow = status === 'all' || planStatus === status;
+      card.style.display = shouldShow ? '' : 'none';
+      if (shouldShow) visibleCount += 1;
+    });
+
+    const filterButtons = document.querySelectorAll('.plan-filter-btn');
+    filterButtons.forEach(btn => {
+      if (btn.getAttribute('data-plan-filter') === status) {
+        btn.classList.add('plan-filter-active');
+      } else {
+        btn.classList.remove('plan-filter-active');
+      }
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    filterPlans('all');
+  });
 </script>
 
 <style>
@@ -185,6 +245,17 @@
 .plan-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
+}
+
+.plan-filter-btn {
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+.plan-filter-active {
+  background: var(--primary-light);
+  color: var(--primary);
 }
 
 .plan-details {

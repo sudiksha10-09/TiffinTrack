@@ -1,6 +1,10 @@
 import os
 import json
 import stripe
+import smtplib
+import ssl
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 from datetime import datetime, date, time, timedelta
 from calendar import monthrange
 from werkzeug.utils import secure_filename
@@ -106,13 +110,66 @@ else:
         }
     }
 
-# Stripe Configuration
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-app.config["STRIPE_PUBLISHABLE_KEY"] = os.getenv("STRIPE_PUBLISHABLE_KEY")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 
 # Stripe Configuration
-stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
-app.config["STRIPE_PUBLISHABLE_KEY"] = os.getenv("STRIPE_PUBLISHABLE_KEY")
+stripe.api_key = STRIPE_SECRET_KEY
+app.config["STRIPE_PUBLISHABLE_KEY"] = STRIPE_PUBLISHABLE_KEY
+
+# ------------------------
+# Email Configuration
+# ------------------------
+
+SMTP_HOST = os.getenv("SMTP_HOST")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USERNAME = os.getenv("SMTP_USERNAME")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
+MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@tiffintrack.com")
+
+
+def is_email_configured() -> bool:
+    """Return True if all required SMTP settings are present."""
+    return all([SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, MAIL_DEFAULT_SENDER])
+
+
+def send_email(to_email: str, subject: str, html_body: str, text_body: str | None = None) -> tuple[bool, str | None]:
+    """
+    Send an email using SMTP settings from environment variables.
+    Returns (success, error_message).
+    """
+    if not is_email_configured():
+        return False, "Email service is not configured. Please set SMTP_* environment variables."
+
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["Subject"] = subject
+        msg["From"] = MAIL_DEFAULT_SENDER
+        msg["To"] = to_email
+
+        if not text_body:
+            text_body = html_body
+
+        part_text = MIMEText(text_body, "plain")
+        part_html = MIMEText(html_body, "html")
+        msg.attach(part_text)
+        msg.attach(part_html)
+
+        if SMTP_USE_TLS:
+            with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+                server.starttls(context=ssl.create_default_context())
+                server.login(SMTP_USERNAME, SMTP_PASSWORD)
+                server.sendmail(MAIL_DEFAULT_SENDER, [to_email], msg.as_string())
+        else:
+            with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT, context=ssl.create_default_context()) as server:
+                server.login(SMTP_USERNAME, SMTP_PASSWORD)
+                server.sendmail(MAIL_DEFAULT_SENDER, [to_email], msg.as_string())
+
+        return True, None
+    except Exception as e:
+        print(f"❌ Error sending email: {e}")
+        return False, str(e)
 
 # File Upload Configuration
 UPLOAD_FOLDER = 'static/uploads/dishes'
@@ -185,16 +242,25 @@ def verify_database_connection():
     """Verify database connection and setup with retry logic"""
     try:
         with app.app_context():
-            # Create tables if using SQLite
-            if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"]:
-                print("🔄 Setting up SQLite database...")
-                db.create_all()
-                
-                # Seed initial data if no users exist
-                if User.query.count() == 0:
-                    print("🌱 Seeding initial data...")
-                    seed_initial_data()
-            
+            db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+
+            # Create tables automatically for SQLite and for empty PostgreSQL schemas
+            if "sqlite" in db_uri or "postgresql" in db_uri:
+                try:
+                    # Try a lightweight query against the users table to see if schema exists
+                    db.session.execute(db.text("SELECT 1 FROM users LIMIT 1"))
+                    db.session.commit()
+                    print("✅ Existing database schema detected")
+                except Exception as schema_error:
+                    # If the users table (or others) are missing, create all tables
+                    print(f"ℹ️ Database schema missing or incomplete, creating tables… ({schema_error})")
+                    db.create_all()
+
+                    # Seed initial data if no users exist
+                    if User.query.count() == 0:
+                        print("🌱 Seeding initial data...")
+                        seed_initial_data()
+
             # Test connection with a simple query
             connection = db.engine.connect()
             result = connection.execute(db.text("SELECT 1"))
@@ -203,7 +269,7 @@ def verify_database_connection():
             
             # Check if we have data
             user_count = User.query.count()
-            db_type = "SQLite" if "sqlite" in app.config["SQLALCHEMY_DATABASE_URI"] else "PostgreSQL"
+            db_type = "SQLite" if "sqlite" in db_uri else "PostgreSQL"
             print(f"✅ {db_type} database ready with {user_count} users")
             
         return True
@@ -565,6 +631,11 @@ def register():
         if User.query.filter_by(email=email).first():
             return render_template("register_professional.html", error="Email already registered")
 
+        # Restrict registration to supported Navi Mumbai areas only
+        area = request.form.get("area", "").strip()
+        if area not in NAVI_MUMBAI_AREAS:
+            return render_template("register_professional.html", error="Please select a valid delivery area in Navi Mumbai")
+
         user = User(
             fullname=fullname,
             email=email,
@@ -572,9 +643,9 @@ def register():
             password=generate_password_hash(password),
             addr1=addr1,
             addr2=addr2,
-            area=request.form.get("area", "Vashi"),  # Default to Vashi
-            city="Navi Mumbai",  # Force Navi Mumbai
-            state="Maharashtra",  # Force Maharashtra
+            area=area or "Vashi",
+            city="Navi Mumbai",
+            state="Maharashtra",
             pincode=pincode,
         )
 
@@ -584,6 +655,81 @@ def register():
         return redirect(url_for("login"))
 
     return render_template("register_professional.html")
+
+
+@app.route("/profile", methods=["GET", "POST"])
+def profile():
+    """View and update the logged in user's profile details."""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+
+    user = User.query.get_or_404(session["user_id"])
+    
+    # Check if user has active plans
+    has_active_plans = CustomerPlan.query.filter_by(
+        customer_id=user.id,
+        is_active=True
+    ).filter(CustomerPlan.end_date >= date.today()).count() > 0
+
+    if request.method == "POST":
+        fullname = request.form.get("fullname", "").strip()
+        email = request.form.get("email", "").lower().strip()
+        phone = request.form.get("phone", "").strip()
+        addr1 = request.form.get("addr1", "").strip()
+        addr2 = request.form.get("addr2", "").strip()
+        city = request.form.get("city", "").strip()
+        state = request.form.get("state", "").strip()
+        pincode = request.form.get("pincode", "").strip()
+        area = request.form.get("area", "").strip()
+
+        if not fullname or not email or not phone or not addr1 or not city or not state or not pincode or not area:
+            flash("Please fill in all required fields.", "error")
+            return render_template("profile.html", user=user, is_admin=user.is_admin, areas=NAVI_MUMBAI_AREAS, has_active_plans=has_active_plans)
+
+        if area not in NAVI_MUMBAI_AREAS:
+            flash("Please select a valid delivery area in Navi Mumbai.", "error")
+            return render_template("profile.html", user=user, is_admin=user.is_admin, areas=NAVI_MUMBAI_AREAS, has_active_plans=has_active_plans)
+
+        # Check if address fields are being changed and user has active plans
+        address_changed = (
+            addr1 != user.addr1 or 
+            addr2 != user.addr2 or 
+            area != user.area or 
+            city != user.city or 
+            state != user.state or 
+            pincode != user.pincode
+        )
+        
+        if address_changed and has_active_plans:
+            flash("Cannot change address while you have active meal plans. Please wait until your current plans end or contact support.", "error")
+            return render_template("profile.html", user=user, is_admin=user.is_admin, areas=NAVI_MUMBAI_AREAS, has_active_plans=has_active_plans)
+
+        # Ensure email uniqueness if changing
+        if email != user.email:
+            existing = User.query.filter_by(email=email).first()
+            if existing:
+                flash("That email address is already in use.", "error")
+                return render_template("profile.html", user=user, is_admin=user.is_admin, areas=NAVI_MUMBAI_AREAS, has_active_plans=has_active_plans)
+
+        user.fullname = fullname
+        user.email = email
+        user.phone = phone
+        user.addr1 = addr1
+        user.addr2 = addr2
+        user.city = city
+        user.state = state
+        user.pincode = pincode
+        user.area = area
+
+        db.session.commit()
+
+        # Keep session display name up to date
+        session["user_name"] = user.fullname
+
+        flash("Profile updated successfully.", "success")
+        return redirect(url_for("profile"))
+
+    return render_template("profile.html", user=user, is_admin=user.is_admin, areas=NAVI_MUMBAI_AREAS, has_active_plans=has_active_plans)
 
 
 # ---------- Logout ----------
@@ -618,7 +764,56 @@ def admin_dashboard():
         'pending_bills': pending_bills
     }
     
-    return render_template("admin_dashboard_professional.html", stats=stats, current_date=current_date)
+    return render_template(
+        "admin_dashboard_professional.html",
+        stats=stats,
+        current_date=current_date,
+        email_configured=is_email_configured(),
+    )
+
+
+@app.route("/admin/test-email")
+def admin_test_email():
+    """Send a test email to verify SMTP configuration."""
+    if not session.get("is_admin"):
+        return redirect(url_for("login"))
+
+    if not is_email_configured():
+        flash(
+            "Email service is not configured. Please set SMTP_HOST, SMTP_PORT, SMTP_USERNAME, "
+            "SMTP_PASSWORD and MAIL_DEFAULT_SENDER in the environment.",
+            "error",
+        )
+        return redirect(url_for("admin_dashboard"))
+
+    # Send test email to the logged in admin or fallback to default
+    admin_user = User.query.get(session.get("user_id"))
+    to_email = admin_user.email if admin_user else os.getenv("TEST_EMAIL") or MAIL_DEFAULT_SENDER
+
+    html_body = """
+        <p>Hi from <strong>TiffinTrack</strong> 👋</p>
+        <p>This is a <strong>test email</strong> to confirm that your email service is configured correctly.</p>
+        <p>If you received this, your SMTP settings are working.</p>
+    """
+    text_body = (
+        "Hi from TiffinTrack,\n\n"
+        "This is a test email to confirm that your email service is configured correctly.\n"
+        "If you received this, your SMTP settings are working."
+    )
+
+    success, error = send_email(
+        to_email=to_email,
+        subject="TiffinTrack – Test Email",
+        html_body=html_body,
+        text_body=text_body,
+    )
+
+    if success:
+        flash(f"Test email sent to {to_email}. Please check that inbox.", "success")
+    else:
+        flash(f"Failed to send test email: {error}", "error")
+
+    return redirect(url_for("admin_dashboard"))
 
 # ---------- Admin Plan Management ----------
 @app.route("/admin/plans")
@@ -1729,6 +1924,125 @@ def save_plans():
         flash(f"Successfully subscribed to {len(selected_plans)} plans. Total cost: ₹{total_cost}", "success")
     
     return redirect(url_for("customer_dashboard"))
+
+
+@app.route("/plans/customize")
+def customize_plans():
+    """Step 2: Customize plan durations"""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    
+    return render_template("customize_plans.html")
+
+
+@app.route("/plans/checkout")
+def plan_checkout():
+    """Step 3: Checkout and payment for plans"""
+    if "user_id" not in session:
+        return redirect(url_for("login"))
+    
+    stripe_publishable_key = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+    return render_template("plan_checkout.html", stripe_publishable_key=stripe_publishable_key)
+
+
+@app.route("/plans/process-payment", methods=["POST"])
+def process_plan_payment():
+    """Process payment for plan subscription"""
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        configurations = data.get("configurations")
+        
+        if not configurations:
+            return jsonify({"error": "No plan configurations provided"}), 400
+        
+        customer_id = session["user_id"]
+        total_amount = 0
+        
+        # Calculate total and validate
+        for config in configurations:
+            total_amount += config['totalCost']
+        
+        # Create Stripe Payment Intent
+        intent = stripe.PaymentIntent.create(
+            amount=int(total_amount * 100),  # Convert to paise
+            currency="inr",
+            metadata={
+                "customer_id": customer_id,
+                "type": "plan_subscription",
+                "plan_count": len(configurations)
+            },
+            description=f"TiffinTrack Plan Subscription - {len(configurations)} plan(s)"
+        )
+        
+        # Store configurations in session for later processing
+        session['pending_plan_configs'] = configurations
+        
+        return jsonify({
+            "client_secret": intent.client_secret,
+            "payment_intent_id": intent.id
+        })
+        
+    except Exception as e:
+        print(f"Error creating payment intent: {e}")
+        return jsonify({"error": "Failed to create payment intent"}), 500
+
+
+@app.route("/plans/payment-success", methods=["POST"])
+def plan_payment_success():
+    """Handle successful plan payment"""
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        payment_intent_id = data.get("payment_intent_id")
+        
+        if not payment_intent_id:
+            return jsonify({"error": "Payment Intent ID required"}), 400
+        
+        # Retrieve payment intent from Stripe
+        intent = stripe.PaymentIntent.retrieve(payment_intent_id)
+        
+        if intent.status == "succeeded":
+            customer_id = session["user_id"]
+            configurations = session.get('pending_plan_configs', [])
+            
+            if not configurations:
+                return jsonify({"error": "No pending configurations found"}), 404
+            
+            # Remove existing active plans
+            CustomerPlan.query.filter_by(customer_id=customer_id, is_active=True).delete()
+            
+            # Add new plans
+            for config in configurations:
+                customer_plan = CustomerPlan(
+                    customer_id=customer_id,
+                    plan_id=config['planId'],
+                    start_date=datetime.strptime(config['startDate'], "%Y-%m-%d").date(),
+                    end_date=datetime.strptime(config['endDate'], "%Y-%m-%d").date(),
+                    is_active=True
+                )
+                db.session.add(customer_plan)
+            
+            db.session.commit()
+            
+            # Clear pending configurations
+            session.pop('pending_plan_configs', None)
+            
+            return jsonify({
+                "success": True,
+                "message": "Plans activated successfully!",
+                "redirect_url": url_for("payment_success", payment_intent_id=payment_intent_id, _external=False)
+            })
+        else:
+            return jsonify({"error": "Payment not completed"}), 400
+            
+    except Exception as e:
+        print(f"Error processing plan payment: {e}")
+        return jsonify({"error": "Failed to process payment"}), 500
 
 
 # ---------- Billing ----------

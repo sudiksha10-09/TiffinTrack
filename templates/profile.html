@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light">
+    <title>My Profile - TiffinTrack</title>
+    
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/professional.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{{ url_for('customer_dashboard') if not is_admin else url_for('admin_dashboard') }}" class="logo">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="TiffinTrack Logo" class="logo-image">
+            </a>
+            
+            <div class="nav-actions">
+                <a href="{{ url_for('customer_dashboard') if not is_admin else url_for('admin_dashboard') }}" class="btn btn-ghost">
+                    <i class="fas fa-arrow-left"></i>
+                    Dashboard
+                </a>
+                <a href="{{ url_for('logout') }}" class="btn btn-secondary">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard">
+        
+        <!-- Page Header -->
+        <div class="dashboard-header" style="margin-bottom: var(--spacing-2xl);">
+            <div>
+                <h1 class="dashboard-title">
+                    <i class="fas fa-user-circle" style="margin-right: 12px;"></i>
+                    My Profile
+                </h1>
+                <p class="dashboard-subtitle">Manage your account information and preferences</p>
+            </div>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div style="max-width: 800px; margin: 0 auto var(--spacing-xl);">
+                    {% for category, message in messages %}
+                        <div class="flash-message flash-{{ category }}">
+                            <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-circle' }}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Active Plans Warning -->
+        {% if has_active_plans %}
+        <div style="max-width: 800px; margin: 0 auto var(--spacing-xl);">
+            <div style="display: flex; align-items: start; gap: var(--spacing-lg); padding: var(--spacing-xl); background: var(--warning-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--warning);">
+                <div style="width: 48px; height: 48px; background: var(--warning); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <i class="fas fa-exclamation-triangle" style="color: white; font-size: 20px;"></i>
+                </div>
+                <div>
+                    <h3 style="font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--spacing-xs); color: var(--warning-dark);">
+                        Address Changes Restricted
+                    </h3>
+                    <p style="color: var(--text-secondary); margin: 0; line-height: var(--leading-relaxed);">
+                        You have active meal plans. Address fields are locked to ensure uninterrupted delivery. 
+                        You can update your address after your current plans end or contact support for assistance.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Profile Form -->
+        <div class="card" style="max-width: 800px; margin: 0 auto;">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-id-card"></i>
+                    Account Information
+                </h2>
+            </div>
+            
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('profile') }}">
+                    
+                    <!-- Personal Information -->
+                    <div style="margin-bottom: var(--spacing-2xl);">
+                        <h3 style="font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--spacing-lg); color: var(--text-primary); display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <i class="fas fa-user" style="color: var(--primary);"></i>
+                            Personal Information
+                        </h3>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                            <div class="form-group">
+                                <label for="fullname" class="form-label">
+                                    <i class="fas fa-user" style="margin-right: var(--spacing-xs);"></i>
+                                    Full Name
+                                </label>
+                                <input type="text" 
+                                       id="fullname" 
+                                       name="fullname" 
+                                       class="form-input" 
+                                       value="{{ user.fullname }}"
+                                       required
+                                       autocomplete="name">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email" class="form-label">
+                                    <i class="fas fa-envelope" style="margin-right: var(--spacing-xs);"></i>
+                                    Email Address
+                                </label>
+                                <input type="email" 
+                                       id="email" 
+                                       name="email" 
+                                       class="form-input" 
+                                       value="{{ user.email }}"
+                                       required
+                                       autocomplete="email">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone" class="form-label">
+                                <i class="fas fa-phone" style="margin-right: var(--spacing-xs);"></i>
+                                Phone Number
+                            </label>
+                            <input type="tel" 
+                                   id="phone" 
+                                   name="phone" 
+                                   class="form-input" 
+                                   value="{{ user.phone }}"
+                                   required
+                                   autocomplete="tel">
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address -->
+                    <div style="margin-bottom: var(--spacing-2xl);">
+                        <h3 style="font-size: var(--font-size-lg); font-weight: 700; margin-bottom: var(--spacing-lg); color: var(--text-primary); display: flex; align-items: center; gap: var(--spacing-sm);">
+                            <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                            Delivery Address
+                            {% if has_active_plans %}
+                            <span style="background: var(--warning-light); color: var(--warning-dark); padding: 4px 12px; border-radius: 20px; font-size: var(--font-size-xs); font-weight: 600; margin-left: auto;">
+                                <i class="fas fa-lock"></i>
+                                Locked
+                            </span>
+                            {% endif %}
+                        </h3>
+                        
+                        <div class="form-group">
+                            <label for="addr1" class="form-label">
+                                <i class="fas fa-home" style="margin-right: var(--spacing-xs);"></i>
+                                Address Line 1
+                            </label>
+                            <input type="text" 
+                                   id="addr1" 
+                                   name="addr1" 
+                                   class="form-input" 
+                                   value="{{ user.addr1 }}"
+                                   required
+                                   autocomplete="address-line1"
+                                   {% if has_active_plans %}readonly style="background: var(--bg-secondary); cursor: not-allowed;"{% endif %}>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="addr2" class="form-label">
+                                <i class="fas fa-building" style="margin-right: var(--spacing-xs);"></i>
+                                Address Line 2 (Optional)
+                            </label>
+                            <input type="text" 
+                                   id="addr2" 
+                                   name="addr2" 
+                                   class="form-input" 
+                                   value="{{ user.addr2 or '' }}"
+                                   autocomplete="address-line2"
+                                   {% if has_active_plans %}readonly style="background: var(--bg-secondary); cursor: not-allowed;"{% endif %}>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                            <div class="form-group">
+                                <label for="area" class="form-label">
+                                    <i class="fas fa-map-marker-alt" style="margin-right: var(--spacing-xs);"></i>
+                                    Area (Navi Mumbai)
+                                </label>
+                                <select id="area" 
+                                        name="area" 
+                                        class="form-input form-select" 
+                                        required
+                                        {% if has_active_plans %}disabled style="background: var(--bg-secondary); cursor: not-allowed;"{% endif %}>
+                                    <option value="">Select your area</option>
+                                    {% for area_name in areas %}
+                                    <option value="{{ area_name }}" {% if user.area == area_name %}selected{% endif %}>{{ area_name }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if has_active_plans %}
+                                <input type="hidden" name="area" value="{{ user.area }}">
+                                {% endif %}
+                            </div>
+
+                            <div class="form-group">
+                                <label for="pincode" class="form-label">
+                                    <i class="fas fa-mail-bulk" style="margin-right: var(--spacing-xs);"></i>
+                                    Pincode
+                                </label>
+                                <input type="text" 
+                                       id="pincode" 
+                                       name="pincode" 
+                                       class="form-input" 
+                                       value="{{ user.pincode }}"
+                                       required
+                                       autocomplete="postal-code"
+                                       {% if has_active_plans %}readonly style="background: var(--bg-secondary); cursor: not-allowed;"{% endif %}>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg);">
+                            <div class="form-group">
+                                <label for="city" class="form-label">
+                                    <i class="fas fa-city" style="margin-right: var(--spacing-xs);"></i>
+                                    City
+                                </label>
+                                <input type="text" 
+                                       id="city" 
+                                       name="city" 
+                                       class="form-input" 
+                                       value="{{ user.city }}"
+                                       required
+                                       autocomplete="address-level2"
+                                       {% if has_active_plans %}readonly style="background: var(--bg-secondary); cursor: not-allowed;"{% endif %}>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="state" class="form-label">
+                                    <i class="fas fa-map" style="margin-right: var(--spacing-xs);"></i>
+                                    State
+                                </label>
+                                <input type="text" 
+                                       id="state" 
+                                       name="state" 
+                                       class="form-input" 
+                                       value="{{ user.state }}"
+                                       required
+                                       autocomplete="address-level1"
+                                       {% if has_active_plans %}readonly style="background: var(--bg-secondary); cursor: not-allowed;"{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div style="display: flex; gap: var(--spacing-md);">
+                        <button type="submit" class="btn btn-primary btn-lg" style="flex: 1;">
+                            <i class="fas fa-save"></i>
+                            Save Changes
+                        </button>
+                        <a href="{{ url_for('customer_dashboard') if not is_admin else url_for('admin_dashboard') }}" class="btn btn-outline btn-lg">
+                            <i class="fas fa-times"></i>
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Account Actions -->
+        <div style="max-width: 800px; margin: var(--spacing-2xl) auto 0;">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Account Security
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--border-radius);">
+                        <div>
+                            <h4 style="font-weight: 600; margin-bottom: var(--spacing-xs);">Change Password</h4>
+                            <p style="color: var(--text-secondary); font-size: var(--font-size-sm); margin: 0;">Update your password to keep your account secure</p>
+                        </div>
+                        <button onclick="alert('Password change feature coming soon!')" class="btn btn-outline">
+                            <i class="fas fa-key"></i>
+                            Change Password
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav d-md-none">
+        <a href="{{ url_for('customer_dashboard') if not is_admin else url_for('admin_dashboard') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">🏠</span>
+            Home
+        </a>
+        <a href="{{ url_for('choose_plans') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">🍽️</span>
+            Plans
+        </a>
+        <a href="{{ url_for('pause_page') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">📅</span>
+            Calendar
+        </a>
+        <a href="{{ url_for('billing_page') }}" class="mobile-nav-item">
+            <span class="mobile-nav-icon">💳</span>
+            Billing
+        </a>
+    </nav>
+
+    <script>
+        // Auto-hide flash messages
+        setTimeout(() => {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(msg => {
+                msg.style.transition = 'opacity 0.3s ease';
+                msg.style.opacity = '0';
+                setTimeout(() => msg.remove(), 300);
+            });
+        }, 5000);
+
+        // Auto-format phone number
+        document.getElementById('phone').addEventListener('input', function() {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 10) value = value.slice(0, 10);
+            this.value = value;
+        });
+
+        // Auto-format pincode
+        const pincodeInput = document.getElementById('pincode');
+        if (!pincodeInput.readOnly) {
+            pincodeInput.addEventListener('input', function() {
+                let value = this.value.replace(/\D/g, '');
+                if (value.length > 6) value = value.slice(0, 6);
+                this.value = value;
+            });
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const phone = document.getElementById('phone').value;
+            const pincode = document.getElementById('pincode').value;
+            
+            if (phone.length !== 10) {
+                e.preventDefault();
+                alert('⚠️ Phone number must be exactly 10 digits!');
+                return;
+            }
+            
+            if (pincode.length !== 6) {
+                e.preventDefault();
+                alert('⚠️ Pincode must be exactly 6 digits!');
+                return;
+            }
+        });
+    </script>
+
+    <style>
+        @media (max-width: 768px) {
+            .dashboard > div > div {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</body>
+</html>
