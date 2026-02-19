@@ -186,7 +186,7 @@ migrate = Migrate(app, db)
 
 # Database retry decorator for handling connection drops
 from functools import wraps
-import time
+import time as time_module
 from sqlalchemy.exc import OperationalError, DisconnectionError
 
 def db_retry(max_retries=3, delay=1):
@@ -214,7 +214,7 @@ def db_retry(max_retries=3, delay=1):
                             # Exponential backoff
                             sleep_time = delay * (2 ** attempt)
                             print(f"⏳ Retrying in {sleep_time} seconds...")
-                            time.sleep(sleep_time)
+                            time_module.sleep(sleep_time)
                             
                             # Try to refresh the connection
                             try:
