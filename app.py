@@ -732,6 +732,47 @@ def profile():
     return render_template("profile.html", user=user, is_admin=user.is_admin, areas=NAVI_MUMBAI_AREAS, has_active_plans=has_active_plans)
 
 
+@app.route("/change-password", methods=["POST"])
+def change_password():
+    """Change user password"""
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        data = request.get_json()
+        current_password = data.get("current_password", "").strip()
+        new_password = data.get("new_password", "").strip()
+        confirm_password = data.get("confirm_password", "").strip()
+        
+        if not current_password or not new_password or not confirm_password:
+            return jsonify({"error": "All fields are required"}), 400
+        
+        if new_password != confirm_password:
+            return jsonify({"error": "New passwords do not match"}), 400
+        
+        if len(new_password) < 6:
+            return jsonify({"error": "Password must be at least 6 characters long"}), 400
+        
+        user = User.query.get(session["user_id"])
+        
+        # Verify current password
+        if not check_password_hash(user.password, current_password):
+            return jsonify({"error": "Current password is incorrect"}), 400
+        
+        # Update password
+        user.password = generate_password_hash(new_password)
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Password changed successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error changing password: {e}")
+        return jsonify({"error": "Failed to change password"}), 500
+
+
 # ---------- Logout ----------
 @app.route("/logout")
 def logout():
