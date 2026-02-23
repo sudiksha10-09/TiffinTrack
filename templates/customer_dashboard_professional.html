@@ -360,35 +360,105 @@
                 </div>
                 
                 <div class="card-body">
-                    {% if active_plans %}
-                        <div style="display: flex; flex-direction: column; gap: var(--spacing-lg);">
-                            {% for cp, plan in active_plans %}
-                            <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--border-radius-lg); border-left: 4px solid var(--primary);">
-                                <div style="width: 60px; height: 60px; background: var(--primary-gradient); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center;">
-                                    <i class="fas fa-utensils" style="color: white; font-size: var(--font-size-lg);"></i>
-                                </div>
-                                <div style="flex: 1;">
-                                    <div style="font-weight: 700; font-size: var(--font-size-lg); margin-bottom: var(--spacing-xs);">{{ plan.name }}</div>
-                                    <div style="color: var(--text-secondary); margin-bottom: var(--spacing-sm);">
-                                        <i class="fas fa-calendar" style="margin-right: var(--spacing-xs);"></i>
-                                        {{ cp.start_date.strftime('%b %d') }} to {{ cp.end_date.strftime('%b %d, %Y') }}
+                    {% if running_plans or upcoming_plans %}
+                        <!-- Running Plans -->
+                        {% if running_plans %}
+                        <div style="margin-bottom: var(--spacing-xl);">
+                            <h4 style="font-size: var(--font-size-md); font-weight: 700; margin-bottom: var(--spacing-md); color: var(--success);">
+                                <i class="fas fa-play-circle"></i> Currently Running ({{ running_plans|length }})
+                            </h4>
+                            <div style="display: flex; flex-direction: column; gap: var(--spacing-lg);">
+                                {% for cp, plan in running_plans %}
+                                <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--success);">
+                                    <div style="width: 60px; height: 60px; background: var(--success-gradient); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-utensils" style="color: white; font-size: var(--font-size-lg);"></i>
                                     </div>
-                                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                                        <span class="badge badge-success">Active</span>
-                                        <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
-                                            <i class="fas fa-rupee-sign" style="margin-right: var(--spacing-xs);"></i>
-                                            ₹{{ plan.daily_rate }}/day
-                                        </span>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 700; font-size: var(--font-size-lg); margin-bottom: var(--spacing-xs);">{{ plan.name }}</div>
+                                        <div style="color: var(--text-secondary); margin-bottom: var(--spacing-sm);">
+                                            <i class="fas fa-calendar" style="margin-right: var(--spacing-xs);"></i>
+                                            {{ cp.start_date.strftime('%b %d') }} to {{ cp.end_date.strftime('%b %d, %Y') }}
+                                            <span style="margin-left: var(--spacing-md);">
+                                                <i class="fas fa-clock" style="margin-right: var(--spacing-xs);"></i>
+                                                {{ (cp.end_date - cp.start_date).days + 1 }} days
+                                            </span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                                            <span class="badge badge-success">
+                                                <i class="fas fa-circle" style="font-size: 6px; margin-right: var(--spacing-xs);"></i>
+                                                Active Now
+                                            </span>
+                                            <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                                                <i class="fas fa-rupee-sign" style="margin-right: var(--spacing-xs);"></i>
+                                                ₹{{ plan.daily_rate }}/day
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right; display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                                        <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--success);">
+                                            ₹{{ ((cp.end_date - cp.start_date).days + 1) * plan.daily_rate }}
+                                        </div>
+                                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">total cost</div>
                                     </div>
                                 </div>
-                                <div style="text-align: right;">
-                                    <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--primary);">
-                                        ₹{{ plan.daily_rate }}
-                                    </div>
-                                    <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">per day</div>
-                                </div>
+                                {% endfor %}
                             </div>
-                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Upcoming Plans -->
+                        {% if upcoming_plans %}
+                        <div>
+                            <h4 style="font-size: var(--font-size-md); font-weight: 700; margin-bottom: var(--spacing-md); color: var(--primary);">
+                                <i class="fas fa-calendar-plus"></i> Upcoming Plans ({{ upcoming_plans|length }})
+                            </h4>
+                            <div style="display: flex; flex-direction: column; gap: var(--spacing-lg);">
+                                {% for cp, plan in upcoming_plans %}
+                                <div style="display: flex; align-items: center; gap: var(--spacing-lg); padding: var(--spacing-lg); background: var(--bg-secondary); border-radius: var(--border-radius-lg); border-left: 4px solid var(--primary);">
+                                    <div style="width: 60px; height: 60px; background: var(--primary-gradient); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-utensils" style="color: white; font-size: var(--font-size-lg);"></i>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <div style="font-weight: 700; font-size: var(--font-size-lg); margin-bottom: var(--spacing-xs);">{{ plan.name }}</div>
+                                        <div style="color: var(--text-secondary); margin-bottom: var(--spacing-sm);">
+                                            <i class="fas fa-calendar" style="margin-right: var(--spacing-xs);"></i>
+                                            {{ cp.start_date.strftime('%b %d') }} to {{ cp.end_date.strftime('%b %d, %Y') }}
+                                            <span style="margin-left: var(--spacing-md);">
+                                                <i class="fas fa-clock" style="margin-right: var(--spacing-xs);"></i>
+                                                {{ (cp.end_date - cp.start_date).days + 1 }} days
+                                            </span>
+                                        </div>
+                                        <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                                            <span class="badge badge-info">
+                                                Starts in {{ (cp.start_date - date.today()).days }} days
+                                            </span>
+                                            <span style="color: var(--text-secondary); font-size: var(--font-size-sm);">
+                                                <i class="fas fa-rupee-sign" style="margin-right: var(--spacing-xs);"></i>
+                                                ₹{{ plan.daily_rate }}/day
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right; display: flex; flex-direction: column; gap: var(--spacing-sm);">
+                                        <div style="font-size: var(--font-size-2xl); font-weight: 800; color: var(--primary);">
+                                            ₹{{ ((cp.end_date - cp.start_date).days + 1) * plan.daily_rate }}
+                                        </div>
+                                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">total cost</div>
+                                        <button onclick="cancelPlan({{ cp.id }})" class="btn btn-sm btn-outline" style="margin-top: var(--spacing-xs);">
+                                            <i class="fas fa-times"></i>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div style="margin-top: var(--spacing-lg); text-align: center;">
+                            <a href="{{ url_for('choose_plans') }}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i>
+                                Add More Plans
+                            </a>
                         </div>
                     {% else %}
                         <div style="text-align: center; padding: var(--spacing-2xl); color: var(--text-secondary);">
@@ -835,6 +905,34 @@
         
         // Touch-friendly interactions
         document.addEventListener('touchstart', function() {}, {passive: true});
+        
+        // Cancel plan function
+        async function cancelPlan(planId) {
+            if (!confirm('Are you sure you want to cancel this plan? This action cannot be undone.')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/plans/cancel/${planId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(data.message);
+                    window.location.reload();
+                } else {
+                    alert(data.error || 'Failed to cancel plan');
+                }
+            } catch (error) {
+                console.error('Error canceling plan:', error);
+                alert('Failed to cancel plan. Please try again.');
+            }
+        }
     </script>
 </body>
 </html>

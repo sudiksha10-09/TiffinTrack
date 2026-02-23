@@ -1659,12 +1659,24 @@ def customer_dashboard():
         ).order_by(Payment.updated_at.desc()).first()
     
     try:
-        # Get customer's active plans with connection retry
+        # Get customer's active plans (not expired)
         active_plans = db.session.query(CustomerPlan, Plan).select_from(CustomerPlan).join(Plan, CustomerPlan.plan_id == Plan.id).filter(
             CustomerPlan.customer_id == customer_id,
             CustomerPlan.is_active == True,
             CustomerPlan.end_date >= date.today()
-        ).all()
+        ).order_by(CustomerPlan.end_date.asc()).all()
+        
+        # Get upcoming plans (not started yet)
+        upcoming_plans = [
+            (cp, plan) for cp, plan in active_plans 
+            if cp.start_date > date.today()
+        ]
+        
+        # Get currently running plans
+        running_plans = [
+            (cp, plan) for cp, plan in active_plans 
+            if cp.start_date <= date.today() <= cp.end_date
+        ]
         
         # Get current month's paused days
         current_month = date.today().month
@@ -1724,6 +1736,8 @@ def customer_dashboard():
         
         dashboard_data = {
             'active_plans': active_plans,
+            'running_plans': running_plans,
+            'upcoming_plans': upcoming_plans,
             'estimated_bill': estimated_bill,
             'paused_this_month': paused_this_month,
             'recent_pauses': recent_pauses,
@@ -1734,7 +1748,8 @@ def customer_dashboard():
             'paid_bills': paid_bills,
             'recent_payments': recent_payments,
             'payment_success': payment_success,
-            'recent_payment': recent_payment
+            'recent_payment': recent_payment,
+            'date': date  # Pass date class for template calculations
         }
         
         return render_template("customer_dashboard_professional.html", **dashboard_data)
@@ -1856,6 +1871,43 @@ def choose_plans():
 
     plans = Plan.query.filter_by(is_active=True).all()
     return render_template("choose_plans.html", plans=plans, date=date)
+
+
+@app.route("/plans/cancel/<int:plan_id>", methods=["POST"])
+def cancel_plan(plan_id):
+    """Cancel an individual customer plan"""
+    if "user_id" not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        customer_id = session["user_id"]
+        
+        # Find the customer plan
+        customer_plan = CustomerPlan.query.filter_by(
+            id=plan_id,
+            customer_id=customer_id
+        ).first()
+        
+        if not customer_plan:
+            return jsonify({"error": "Plan not found"}), 404
+        
+        # Check if plan has already started
+        if customer_plan.start_date <= date.today():
+            return jsonify({"error": "Cannot cancel a plan that has already started"}), 400
+        
+        # Delete the plan
+        db.session.delete(customer_plan)
+        db.session.commit()
+        
+        return jsonify({
+            "success": True,
+            "message": "Plan cancelled successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error cancelling plan: {e}")
+        db.session.rollback()
+        return jsonify({"error": "Failed to cancel plan"}), 500
 
 
 @app.route("/plans/save", methods=["POST"])
@@ -2054,10 +2106,7 @@ def plan_payment_success():
             if not configurations:
                 return jsonify({"error": "No pending configurations found"}), 404
             
-            # Remove existing active plans
-            CustomerPlan.query.filter_by(customer_id=customer_id, is_active=True).delete()
-            
-            # Add new plans
+            # Add new plans (keep existing active plans running)
             for config in configurations:
                 customer_plan = CustomerPlan(
                     customer_id=customer_id,

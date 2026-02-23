@@ -65,7 +65,7 @@
     </nav>
 
     <!-- Login Container -->
-    <div class="login-container">
+    <div class="login-container" style="margin-top: 120px;">
         
         <!-- Left Side - Branding (Desktop Only) -->
         <div class="login-branding d-none d-lg-block">
@@ -194,26 +194,6 @@
 
     </div>
 
-    <!-- Demo Credentials -->
-    <div style="position: fixed; bottom: var(--spacing-lg); right: var(--spacing-lg); background: rgba(255, 255, 255, 0.95); padding: var(--spacing-lg); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-lg); max-width: 300px; backdrop-filter: blur(10px);">
-        <h4 style="font-size: var(--font-size-sm); font-weight: 700; margin-bottom: var(--spacing-md); color: var(--text-primary);">
-            <i class="fas fa-key" style="color: var(--primary); margin-right: var(--spacing-xs);"></i>
-            Demo Credentials
-        </h4>
-        <div style="font-size: var(--font-size-xs); color: var(--text-secondary); line-height: var(--leading-relaxed);">
-            <div style="margin-bottom: var(--spacing-sm);">
-                <strong>Admin:</strong><br>
-                admin@tiffintrack.com<br>
-                admin123
-            </div>
-            <div>
-                <strong>Customer:</strong><br>
-                rahul.sharma@email.com<br>
-                password123
-            </div>
-        </div>
-    </div>
-
     <script>
         // Mobile Menu Toggle
         document.addEventListener('DOMContentLoaded', function() {
@@ -257,26 +237,6 @@
                 passwordInput.type = 'password';
                 passwordToggle.className = 'fas fa-eye';
             }
-        }
-
-        // Auto-fill demo credentials
-        document.addEventListener('DOMContentLoaded', function() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const demo = urlParams.get('demo');
-            
-            if (demo === 'admin') {
-                document.getElementById('email').value = 'admin@tiffintrack.com';
-                document.getElementById('password').value = 'admin123';
-            } else if (demo === 'customer') {
-                document.getElementById('email').value = 'rahul.sharma@email.com';
-                document.getElementById('password').value = 'password123';
-            }
-        });
-
-        // Add floating animation to demo credentials
-        const demoBox = document.querySelector('[style*="position: fixed; bottom:"]');
-        if (demoBox) {
-            demoBox.style.animation = 'float 3s ease-in-out infinite';
         }
         
         // Touch-friendly interactions
