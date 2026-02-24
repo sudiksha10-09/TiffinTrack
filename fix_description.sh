@@ -7,15 +7,22 @@ echo "🔧 TiffinTrack - Fix Plan Description Column"
 echo "=============================================="
 echo ""
 
-# Check if .env file exists
-if [ ! -f .env ]; then
-    echo "❌ Error: .env file not found!"
+# Check if we're in the right directory
+if [ ! -f app.py ]; then
+    echo "❌ Error: app.py not found!"
     echo "Please run this script from the TiffinTrack directory."
     exit 1
 fi
 
-# Extract database URL
-DATABASE_URL=$(grep DATABASE_URL .env | cut -d '=' -f2- | tr -d '"' | tr -d "'")
+# Check if .env file exists
+if [ ! -f .env ]; then
+    echo "❌ Error: .env file not found!"
+    echo "Please make sure .env exists in the TiffinTrack directory."
+    exit 1
+fi
+
+# Load environment variables
+export $(grep -v '^#' .env | xargs)
 
 if [ -z "$DATABASE_URL" ]; then
     echo "❌ Error: DATABASE_URL not found in .env file!"
@@ -25,35 +32,19 @@ fi
 echo "✅ Found database connection"
 echo ""
 
-# Run the SQL command
-echo "📝 Updating description column to TEXT type..."
+# Use Python to fix the database
+echo "📝 Running database fix using Python..."
 echo ""
 
-psql "$DATABASE_URL" -c "ALTER TABLE plans ALTER COLUMN description TYPE TEXT;" 2>&1
+python3 fix_db_description.py
 
 if [ $? -eq 0 ]; then
     echo ""
-    echo "✅ Database updated successfully!"
-    echo ""
-    
-    # Verify the change
-    echo "🔍 Verifying the change..."
-    psql "$DATABASE_URL" -c "SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'plans' AND column_name = 'description';"
-    
-    echo ""
-    echo "✅ Fix completed successfully!"
-    echo ""
-    echo "Next steps:"
-    echo "1. Restart the application: sudo systemctl restart tiffintrack"
-    echo "2. Try adding your plan again"
+    echo "🎉 All done! Now restart the application:"
+    echo "   sudo systemctl restart tiffintrack"
     echo ""
 else
     echo ""
-    echo "❌ Error updating database!"
-    echo ""
-    echo "Manual fix:"
-    echo "1. Connect to database: psql \"$DATABASE_URL\""
-    echo "2. Run: ALTER TABLE plans ALTER COLUMN description TYPE TEXT;"
-    echo "3. Exit: \\q"
+    echo "❌ Fix failed. Check the error messages above."
     echo ""
 fi
