@@ -343,7 +343,7 @@ class Plan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     daily_rate = db.Column(db.Integer, nullable=False)
-    description = db.Column(db.String(255))
+    description = db.Column(db.Text)  # Changed from String(255) to Text for longer descriptions
     items = db.Column(db.Text)  # JSON string of menu items
     image_filename = db.Column(db.String(255))  # Image file name
     is_active = db.Column(db.Boolean, default=True)

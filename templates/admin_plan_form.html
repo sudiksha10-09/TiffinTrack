@@ -122,12 +122,21 @@
         <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
           <i class="fas fa-align-left" style="margin-right: 8px; color: var(--primary);"></i>
           Description
+          <span id="charCount" style="float: right; font-size: 12px; color: var(--text-muted); font-weight: normal;">
+            0 characters
+          </span>
         </label>
         <textarea name="description" 
+                  id="descriptionField"
                   class="input" 
-                  rows="3" 
-                  placeholder="Brief description of the meal plan"
-                  style="resize: vertical;">{{ plan.description if plan else '' }}</textarea>
+                  rows="5" 
+                  placeholder="Write a detailed description of your meal plan. Include what makes it special, ingredients, taste profile, or any other details customers should know."
+                  style="resize: vertical;"
+                  oninput="updateCharCount()">{{ plan.description if plan else '' }}</textarea>
+        <div style="margin-top: 8px; font-size: 12px; color: var(--text-secondary);">
+          <i class="fas fa-info-circle" style="color: var(--primary);"></i>
+          Tip: A good description helps customers understand what they're getting. Be descriptive and appetizing!
+        </div>
       </div>
 
       <!-- Menu Items -->
@@ -180,6 +189,28 @@
 </div>
 
 <script>
+  // Character counter for description
+  function updateCharCount() {
+    const textarea = document.getElementById('descriptionField');
+    const charCount = document.getElementById('charCount');
+    const length = textarea.value.length;
+    charCount.textContent = `${length} character${length !== 1 ? 's' : ''}`;
+    
+    // Color coding
+    if (length > 500) {
+      charCount.style.color = 'var(--success)';
+    } else if (length > 200) {
+      charCount.style.color = 'var(--primary)';
+    } else {
+      charCount.style.color = 'var(--text-muted)';
+    }
+  }
+  
+  // Initialize character count on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    updateCharCount();
+  });
+
   function previewImage(input) {
     if (input.files && input.files[0]) {
       const reader = new FileReader();
