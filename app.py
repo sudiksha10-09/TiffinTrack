@@ -1385,6 +1385,186 @@ def mark_bill_paid(bill_id):
     return redirect(url_for("bill_management"))
 
 
+@app.route("/bills/send-reminders", methods=["POST"])
+def send_bill_reminders():
+    """Send payment reminders to customers with unpaid bills"""
+    if not session.get("is_admin"):
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    try:
+        # Get all unpaid bills
+        unpaid_bills = db.session.query(Bill, User).join(User).filter(
+            Bill.is_paid == False
+        ).all()
+        
+        if not unpaid_bills:
+            return jsonify({
+                "success": True,
+                "message": "No unpaid bills found",
+                "sent": 0
+            })
+        
+        sent_count = 0
+        failed_count = 0
+        
+        for bill, user in unpaid_bills:
+            # Prepare email content
+            subject = f"Payment Reminder - TiffinTrack Bill for {bill.month}/{bill.year}"
+            
+            html_body = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    <h2 style="color: #ff6b35;">Payment Reminder</h2>
+                    <p>Dear {user.name},</p>
+                    <p>This is a friendly reminder that you have an unpaid bill for your TiffinTrack meal service.</p>
+                    
+                    <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                        <h3 style="margin-top: 0;">Bill Details:</h3>
+                        <p><strong>Bill Period:</strong> {bill.month}/{bill.year}</p>
+                        <p><strong>Amount Due:</strong> ₹{bill.amount}</p>
+                        <p><strong>Days:</strong> {bill.days} days</p>
+                    </div>
+                    
+                    <p>Please log in to your account to make the payment:</p>
+                    <p style="text-align: center; margin: 30px 0;">
+                        <a href="{request.url_root}login" 
+                           style="background: #ff6b35; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                            Pay Now
+                        </a>
+                    </p>
+                    
+                    <p>If you have already made the payment, please disregard this reminder.</p>
+                    <p>Thank you for choosing TiffinTrack!</p>
+                    
+                    <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+                    <p style="font-size: 12px; color: #666;">
+                        TiffinTrack - Fresh, Healthy Meals Delivered Daily<br>
+                        This is an automated reminder. Please do not reply to this email.
+                    </p>
+                </div>
+            </body>
+            </html>
+            """
+            
+            text_body = f"""
+            Payment Reminder - TiffinTrack
+            
+            Dear {user.name},
+            
+            This is a friendly reminder that you have an unpaid bill for your TiffinTrack meal service.
+            
+            Bill Details:
+            - Period: {bill.month}/{bill.year}
+            - Amount Due: ₹{bill.amount}
+            - Days: {bill.days} days
+            
+            Please log in to your account to make the payment: {request.url_root}login
+            
+            If you have already made the payment, please disregard this reminder.
+            
+            Thank you for choosing TiffinTrack!
+            """
+            
+            # Send email
+            success, error = send_email(user.email, subject, html_body, text_body)
+            
+            if success:
+                sent_count += 1
+            else:
+                failed_count += 1
+                print(f"Failed to send reminder to {user.email}: {error}")
+        
+        return jsonify({
+            "success": True,
+            "message": f"Sent {sent_count} reminder(s) successfully",
+            "sent": sent_count,
+            "failed": failed_count
+        })
+        
+    except Exception as e:
+        print(f"Error sending reminders: {e}")
+        return jsonify({"error": "Failed to send reminders"}), 500
+
+
+@app.route("/bills/export")
+def export_bills():
+    """Export billing data to CSV"""
+    if not session.get("is_admin"):
+        return redirect(url_for("login"))
+    
+    try:
+        import csv
+        from io import StringIO
+        
+        # Get filter parameters
+        month = request.args.get('month', type=int)
+        year = request.args.get('year', type=int)
+        status = request.args.get('status')  # 'paid', 'unpaid', or 'all'
+        
+        # Build query
+        query = db.session.query(Bill, User).join(User)
+        
+        if month:
+            query = query.filter(Bill.month == month)
+        if year:
+            query = query.filter(Bill.year == year)
+        if status == 'paid':
+            query = query.filter(Bill.is_paid == True)
+        elif status == 'unpaid':
+            query = query.filter(Bill.is_paid == False)
+        
+        bills = query.order_by(Bill.created_at.desc()).all()
+        
+        # Create CSV
+        output = StringIO()
+        writer = csv.writer(output)
+        
+        # Write header
+        writer.writerow([
+            'Bill ID',
+            'Customer Name',
+            'Customer Email',
+            'Month',
+            'Year',
+            'Days',
+            'Amount (₹)',
+            'Status',
+            'Created Date',
+            'Payment Date'
+        ])
+        
+        # Write data
+        for bill, user in bills:
+            writer.writerow([
+                bill.id,
+                user.name,
+                user.email,
+                bill.month,
+                bill.year,
+                bill.days,
+                bill.amount,
+                'Paid' if bill.is_paid else 'Unpaid',
+                bill.created_at.strftime('%Y-%m-%d %H:%M:%S') if bill.created_at else '',
+                bill.updated_at.strftime('%Y-%m-%d %H:%M:%S') if bill.is_paid and bill.updated_at else ''
+            ])
+        
+        # Prepare response
+        output.seek(0)
+        filename = f"tiffintrack_bills_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        
+        return Response(
+            output.getvalue(),
+            mimetype='text/csv',
+            headers={'Content-Disposition': f'attachment; filename={filename}'}
+        )
+        
+    except Exception as e:
+        print(f"Error exporting bills: {e}")
+        flash("Failed to export bills", "error")
+        return redirect(url_for("bill_management"))
+
+
 # ---------- Stripe Payment Integration ----------
 @app.route("/pay-bill/<int:bill_id>")
 def pay_bill(bill_id):
