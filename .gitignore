@@ -43,6 +43,11 @@ venv.bak/
 *.swp
 *.swo
 
+# Testing
+.pytest_cache/
+.benchmarks/
+test_utils.py
+
 # OS
 .DS_Store
 Thumbs.db
