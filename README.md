@@ -1,4 +1,120 @@
-# TiffinTrack - Modern Tiffin Service Management System
+# TiffinTrack 🍱
+
+A modern, full-featured tiffin (meal delivery) service management system built with Flask.
+
+## Features
+
+- 🍽️ **Multi-Plan System** - Customers can subscribe to multiple meal plans simultaneously
+- 💳 **Stripe Payments** - Secure online payment processing
+- 📧 **Email Notifications** - Automated payment reminders and receipts
+- 📊 **Analytics Dashboard** - Comprehensive business insights
+- 📅 **Pause Calendar** - Flexible meal pause management
+- 🎨 **Modern UI** - Professional, mobile-responsive design
+- 👥 **Multi-Role System** - Separate admin and customer interfaces
+
+## Quick Start
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/TiffinTrack.git
+cd TiffinTrack
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env with your settings
+
+# Run application
+python app.py
+```
+
+Visit http://localhost:5000
+
+## Documentation
+
+- **[Setup Guide](docs/SETUP.md)** - Complete installation and configuration
+- **[Features Guide](docs/FEATURES.md)** - Detailed feature documentation
+
+## Tech Stack
+
+- **Backend:** Flask, SQLAlchemy, PostgreSQL
+- **Frontend:** HTML, CSS, JavaScript
+- **Payments:** Stripe
+- **Email:** SMTP (Gmail, SendGrid, etc.)
+- **Deployment:** Gunicorn, Nginx
+
+## Default Credentials
+
+**Admin:**
+- Email: admin@tiffintrack.com
+- Password: admin123
+
+**Customer:**
+- Email: rahul.sharma@email.com
+- Password: password123
+
+⚠️ **Change these in production!**
+
+## Project Structure
+
+```
+TiffinTrack/
+├── app.py                 # Main application
+├── requirements.txt       # Python dependencies
+├── .env.example          # Environment template
+├── docs/                 # Documentation
+│   ├── SETUP.md         # Setup guide
+│   ├── FEATURES.md      # Features documentation
+│   ├── test_email.py    # Email testing tool
+│   └── fix_db_description.py  # Database fix script
+├── templates/           # HTML templates
+├── static/             # CSS, JS, images
+├── migrations/         # Database migrations
+└── instance/          # SQLite database (dev)
+```
+
+## Key Features
+
+### For Customers
+- Browse and subscribe to meal plans
+- Manage multiple active subscriptions
+- Pause meals on specific dates
+- View billing and payment history
+- Secure online payments
+- Profile management
+
+### For Admins
+- Manage meal plans and pricing
+- Generate monthly bills automatically
+- Send payment reminders via email
+- Export billing data to CSV
+- View analytics and reports
+- Manage customers and subscriptions
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Support
+
+For issues and questions:
+- Check [Setup Guide](docs/SETUP.md)
+- Check [Features Guide](docs/FEATURES.md)
+- Open an issue on GitHub
+
+---
+
+**Built with ❤️ for the tiffin service industry** - Modern Tiffin Service Management System
 
 A comprehensive web-based management system for tiffin services in Navi Mumbai, built with Flask and Neon PostgreSQL database.
 
