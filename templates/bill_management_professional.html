@@ -624,13 +624,28 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    alert(`✅ ${data.message}\n\nSent: ${data.sent}\nFailed: ${data.failed || 0}`);
+                    let message = `✅ ${data.message}\n\nSent: ${data.sent}`;
+                    if (data.failed > 0) {
+                        message += `\nFailed: ${data.failed}`;
+                        if (data.errors && data.errors.length > 0) {
+                            message += '\n\nErrors:\n' + data.errors.join('\n');
+                        }
+                    }
+                    alert(message);
+                    location.reload();  // Reload to update any stats
                 } else {
-                    alert('❌ Failed to send reminders: ' + (data.error || 'Unknown error'));
+                    let errorMsg = '❌ Failed to send reminders\n\n';
+                    if (data.error) {
+                        errorMsg += data.error;
+                    }
+                    if (data.errors && data.errors.length > 0) {
+                        errorMsg += '\n\nDetails:\n' + data.errors.join('\n');
+                    }
+                    alert(errorMsg);
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ Failed to send reminders. Please try again.');
+                alert('❌ Failed to send reminders. Please check your internet connection and try again.');
             } finally {
                 btn.innerHTML = originalText;
                 btn.disabled = false;

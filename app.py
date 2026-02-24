@@ -1392,6 +1392,13 @@ def send_bill_reminders():
         return jsonify({"error": "Unauthorized"}), 401
     
     try:
+        # Check if email is configured
+        if not is_email_configured():
+            return jsonify({
+                "success": False,
+                "error": "Email service is not configured. Please configure SMTP settings in .env file to send reminders."
+            }), 400
+        
         # Get all unpaid bills
         unpaid_bills = db.session.query(Bill, User).join(User).filter(
             Bill.is_paid == False
@@ -1400,12 +1407,14 @@ def send_bill_reminders():
         if not unpaid_bills:
             return jsonify({
                 "success": True,
-                "message": "No unpaid bills found",
-                "sent": 0
+                "message": "No unpaid bills found. All customers have paid their bills!",
+                "sent": 0,
+                "failed": 0
             })
         
         sent_count = 0
         failed_count = 0
+        errors = []
         
         for bill, user in unpaid_bills:
             # Prepare email content
@@ -1473,18 +1482,31 @@ def send_bill_reminders():
                 sent_count += 1
             else:
                 failed_count += 1
+                errors.append(f"{user.name} ({user.email}): {error}")
                 print(f"Failed to send reminder to {user.email}: {error}")
         
+        # Prepare response message
+        if sent_count > 0 and failed_count == 0:
+            message = f"Successfully sent {sent_count} reminder(s)!"
+        elif sent_count > 0 and failed_count > 0:
+            message = f"Sent {sent_count} reminder(s), but {failed_count} failed"
+        else:
+            message = f"Failed to send all {failed_count} reminder(s)"
+        
         return jsonify({
-            "success": True,
-            "message": f"Sent {sent_count} reminder(s) successfully",
+            "success": sent_count > 0,
+            "message": message,
             "sent": sent_count,
-            "failed": failed_count
+            "failed": failed_count,
+            "errors": errors[:5] if errors else []  # Return first 5 errors
         })
         
     except Exception as e:
         print(f"Error sending reminders: {e}")
-        return jsonify({"error": "Failed to send reminders"}), 500
+        return jsonify({
+            "success": False,
+            "error": f"Failed to send reminders: {str(e)}"
+        }), 500
 
 
 @app.route("/bills/export")
