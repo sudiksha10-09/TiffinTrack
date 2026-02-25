@@ -555,7 +555,7 @@ def seed_initial_data():
 
 @app.route("/")
 def home():
-    return render_template("index_professional.html")
+    return render_template("index.html")
 
 
 @app.route("/health")
@@ -605,9 +605,9 @@ def login():
                 return redirect(url_for("customer_dashboard"))
 
         flash("Invalid email or password", "error")
-        return render_template("login_professional.html")
+        return render_template("login.html")
 
-    return render_template("login_professional.html")
+    return render_template("login.html")
 
 
 # ---------- Register ----------
@@ -626,15 +626,15 @@ def register():
         pincode = request.form.get("pincode", "").strip()
 
         if password != confirm_password:
-            return render_template("register_professional.html", error="Passwords do not match")
+            return render_template("register.html", error="Passwords do not match")
 
         if User.query.filter_by(email=email).first():
-            return render_template("register_professional.html", error="Email already registered")
+            return render_template("register.html", error="Email already registered")
 
         # Restrict registration to supported Navi Mumbai areas only
         area = request.form.get("area", "").strip()
         if area not in NAVI_MUMBAI_AREAS:
-            return render_template("register_professional.html", error="Please select a valid delivery area in Navi Mumbai")
+            return render_template("register.html", error="Please select a valid delivery area in Navi Mumbai")
 
         user = User(
             fullname=fullname,
@@ -654,7 +654,7 @@ def register():
         flash("Account created successfully!", "success")
         return redirect(url_for("login"))
 
-    return render_template("register_professional.html")
+    return render_template("register.html")
 
 
 @app.route("/profile", methods=["GET", "POST"])
@@ -806,7 +806,7 @@ def admin_dashboard():
     }
     
     return render_template(
-        "admin_dashboard_professional.html",
+        "admin_dashboard.html",
         stats=stats,
         current_date=current_date,
         email_configured=is_email_configured(),
@@ -1147,7 +1147,7 @@ def kitchen_report():
         {'time': '10:00 AM', 'task': 'Quality check & dispatch', 'duration': '30 min'}
     ]
     
-    return render_template("kitchen_report_professional.html", 
+    return render_template("kitchen_report.html", 
                          production_data=production_data, 
                          total_meals=total_meals,
                          active_customers=active_customers,
@@ -1217,7 +1217,7 @@ def delivery_routes():
     # Sort routes by area name for consistent ordering
     sorted_routes = dict(sorted(routes.items()))
     
-    return render_template("delivery_routes_professional.html", 
+    return render_template("delivery_routes.html", 
                          routes=sorted_routes, 
                          total_deliveries=total_deliveries,
                          estimated_duration=round(estimated_duration, 1),
@@ -1279,7 +1279,7 @@ def bill_management():
         'collection_rate': round((paid_bills / total_bills * 100) if total_bills > 0 else 0, 1)
     }
     
-    return render_template("bill_management_professional.html", 
+    return render_template("bill_management.html", 
                          bills=bills,
                          bill_stats=bill_stats,
                          monthly_revenue=monthly_revenue,
@@ -1844,7 +1844,7 @@ def analytics_dashboard():
         'insights': insights
     }
     
-    return render_template("analytics_professional.html", 
+    return render_template("analytics.html", 
                          analytics=analytics_data,
                          date_range=date_range)
 
@@ -1962,7 +1962,7 @@ def customer_dashboard():
             'date': date  # Pass date class for template calculations
         }
         
-        return render_template("customer_dashboard_professional.html", **dashboard_data)
+        return render_template("customer_dashboard.html", **dashboard_data)
         
     except Exception as e:
         print(f"❌ Error in customer dashboard: {e}")
@@ -2316,7 +2316,15 @@ def plan_payment_success():
             if not configurations:
                 return jsonify({"error": "No pending configurations found"}), 404
             
+            # Get customer details
+            customer = User.query.get(customer_id)
+            if not customer:
+                return jsonify({"error": "Customer not found"}), 404
+            
             # Add new plans (keep existing active plans running)
+            new_plans = []
+            total_amount_paid = 0
+            
             for config in configurations:
                 customer_plan = CustomerPlan(
                     customer_id=customer_id,
@@ -2326,15 +2334,302 @@ def plan_payment_success():
                     is_active=True
                 )
                 db.session.add(customer_plan)
+                
+                # Get plan details for receipt
+                plan = Plan.query.get(config['planId'])
+                total_cost = config.get('totalCost', 0)
+                total_amount_paid += total_cost
+                
+                new_plans.append({
+                    'plan_id': config['planId'],
+                    'plan_name': plan.name if plan else 'Unknown Plan',
+                    'start_date': datetime.strptime(config['startDate'], "%Y-%m-%d").date(),
+                    'end_date': datetime.strptime(config['endDate'], "%Y-%m-%d").date(),
+                    'amount': total_cost,
+                    'days': (datetime.strptime(config['endDate'], "%Y-%m-%d").date() - 
+                            datetime.strptime(config['startDate'], "%Y-%m-%d").date()).days + 1
+                })
+            
+            db.session.flush()  # Flush to get IDs
+            
+            # Create bills for each plan period
+            created_bills = []
+            for plan_info in new_plans:
+                start_date = plan_info['start_date']
+                end_date = plan_info['end_date']
+                plan_id = plan_info['plan_id']
+                
+                # Get plan details
+                plan = Plan.query.get(plan_id)
+                if not plan:
+                    continue
+                
+                # Calculate total days
+                total_days = (end_date - start_date).days + 1
+                
+                # Get paused days (if any)
+                paused_days = PausedDate.query.filter(
+                    PausedDate.customer_id == customer_id,
+                    PausedDate.pause_date >= start_date,
+                    PausedDate.pause_date <= end_date
+                ).count()
+                
+                billable_days = total_days - paused_days
+                amount = billable_days * plan.daily_rate
+                
+                # Determine which month(s) this plan covers
+                current_date = start_date
+                while current_date <= end_date:
+                    month = current_date.month
+                    year = current_date.year
+                    
+                    # Check if bill already exists for this month
+                    existing_bill = Bill.query.filter_by(
+                        customer_id=customer_id,
+                        month=month,
+                        year=year
+                    ).first()
+                    
+                    # Calculate days in this month
+                    month_start = date(year, month, 1)
+                    month_end = date(year, month, monthrange(year, month)[1])
+                    
+                    period_start = max(start_date, month_start)
+                    period_end = min(end_date, month_end)
+                    
+                    if period_start <= period_end:
+                        month_days = (period_end - period_start).days + 1
+                        
+                        # Get paused days for this month
+                        month_paused = PausedDate.query.filter(
+                            PausedDate.customer_id == customer_id,
+                            PausedDate.pause_date >= period_start,
+                            PausedDate.pause_date <= period_end
+                        ).count()
+                        
+                        month_billable = month_days - month_paused
+                        month_amount = month_billable * plan.daily_rate
+                        
+                        if existing_bill:
+                            # Update existing bill
+                            existing_bill.total_days += month_days
+                            existing_bill.paused_days += month_paused
+                            existing_bill.billable_days += month_billable
+                            existing_bill.amount += month_amount
+                            existing_bill.is_paid = True  # Mark as paid since payment was successful
+                            created_bills.append({
+                                'month': month,
+                                'year': year,
+                                'amount': existing_bill.amount
+                            })
+                        else:
+                            # Create new bill
+                            bill = Bill(
+                                customer_id=customer_id,
+                                month=month,
+                                year=year,
+                                total_days=month_days,
+                                paused_days=month_paused,
+                                billable_days=month_billable,
+                                amount=month_amount,
+                                is_paid=True  # Mark as paid since payment was successful
+                            )
+                            db.session.add(bill)
+                            created_bills.append({
+                                'month': month,
+                                'year': year,
+                                'amount': month_amount
+                            })
+                    
+                    # Move to next month
+                    if month == 12:
+                        current_date = date(year + 1, 1, 1)
+                    else:
+                        current_date = date(year, month + 1, 1)
             
             db.session.commit()
+            
+            # Send receipt email
+            if is_email_configured():
+                try:
+                    # Prepare receipt email
+                    subject = f"Payment Receipt - TiffinTrack Order Confirmation"
+                    
+                    # Build plan details HTML
+                    plans_html = ""
+                    for idx, plan_info in enumerate(new_plans, 1):
+                        plans_html += f"""
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding: 12px; text-align: left;">{idx}</td>
+                            <td style="padding: 12px; text-align: left;">
+                                <strong>{plan_info['plan_name']}</strong><br>
+                                <span style="color: #666; font-size: 13px;">
+                                    {plan_info['start_date'].strftime('%b %d, %Y')} - {plan_info['end_date'].strftime('%b %d, %Y')}
+                                </span>
+                            </td>
+                            <td style="padding: 12px; text-align: center;">{plan_info['days']} days</td>
+                            <td style="padding: 12px; text-align: right; font-weight: 600;">₹{plan_info['amount']}</td>
+                        </tr>
+                        """
+                    
+                    html_body = f"""
+                    <html>
+                    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; background: #f5f5f5; padding: 20px;">
+                        <div style="max-width: 600px; margin: 0 auto; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                            <!-- Header -->
+                            <div style="background: linear-gradient(135deg, #ff6b35 0%, #ff8c61 100%); padding: 30px; text-align: center; color: white;">
+                                <h1 style="margin: 0; font-size: 28px;">Payment Successful! 🎉</h1>
+                                <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for your order</p>
+                            </div>
+                            
+                            <!-- Content -->
+                            <div style="padding: 30px;">
+                                <p style="font-size: 16px; margin-bottom: 20px;">Dear {customer.fullname},</p>
+                                
+                                <p style="margin-bottom: 25px;">
+                                    Your payment has been successfully processed! Your meal plan(s) are now active and ready to go.
+                                </p>
+                                
+                                <!-- Receipt Details -->
+                                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                                    <h3 style="margin: 0 0 15px 0; color: #ff6b35; font-size: 18px;">Receipt Details</h3>
+                                    <table style="width: 100%; border-collapse: collapse;">
+                                        <tr style="border-bottom: 1px solid #ddd;">
+                                            <td style="padding: 8px 0; color: #666;">Transaction ID:</td>
+                                            <td style="padding: 8px 0; text-align: right; font-weight: 600;">{payment_intent_id[:20]}...</td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #ddd;">
+                                            <td style="padding: 8px 0; color: #666;">Date:</td>
+                                            <td style="padding: 8px 0; text-align: right; font-weight: 600;">{datetime.now().strftime('%b %d, %Y %I:%M %p')}</td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #ddd;">
+                                            <td style="padding: 8px 0; color: #666;">Payment Method:</td>
+                                            <td style="padding: 8px 0; text-align: right; font-weight: 600;">Card Payment</td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding: 8px 0; color: #666;">Status:</td>
+                                            <td style="padding: 8px 0; text-align: right;">
+                                                <span style="background: #10b981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">PAID</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                
+                                <!-- Order Summary -->
+                                <h3 style="margin: 0 0 15px 0; color: #333; font-size: 18px;">Order Summary</h3>
+                                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+                                    <thead>
+                                        <tr style="background: #f8f9fa;">
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #666;">#</th>
+                                            <th style="padding: 12px; text-align: left; font-weight: 600; color: #666;">Plan Details</th>
+                                            <th style="padding: 12px; text-align: center; font-weight: 600; color: #666;">Duration</th>
+                                            <th style="padding: 12px; text-align: right; font-weight: 600; color: #666;">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {plans_html}
+                                        <tr style="background: #f8f9fa;">
+                                            <td colspan="3" style="padding: 15px; text-align: right; font-weight: 700; font-size: 16px;">Total Paid:</td>
+                                            <td style="padding: 15px; text-align: right; font-weight: 700; font-size: 18px; color: #ff6b35;">₹{total_amount_paid}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                
+                                <!-- Next Steps -->
+                                <div style="background: #e8f5e9; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981; margin-bottom: 25px;">
+                                    <h4 style="margin: 0 0 10px 0; color: #047857;">What's Next?</h4>
+                                    <ul style="margin: 0; padding-left: 20px; color: #065f46;">
+                                        <li style="margin-bottom: 8px;">Your meal deliveries will start as per your selected dates</li>
+                                        <li style="margin-bottom: 8px;">You can pause meals anytime from your dashboard</li>
+                                        <li style="margin-bottom: 8px;">View your bills and payment history in the billing section</li>
+                                    </ul>
+                                </div>
+                                
+                                <!-- CTA Button -->
+                                <div style="text-align: center; margin: 30px 0;">
+                                    <a href="{request.url_root}dashboard" 
+                                       style="display: inline-block; background: #ff6b35; color: white; padding: 14px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                                        View Dashboard
+                                    </a>
+                                </div>
+                                
+                                <p style="color: #666; font-size: 14px; margin-top: 25px;">
+                                    If you have any questions or concerns, please don't hesitate to contact us.
+                                </p>
+                                
+                                <p style="margin-top: 20px;">
+                                    Best regards,<br>
+                                    <strong>TiffinTrack Team</strong>
+                                </p>
+                            </div>
+                            
+                            <!-- Footer -->
+                            <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+                                <p style="margin: 0; font-size: 12px; color: #666;">
+                                    TiffinTrack - Fresh, Healthy Meals Delivered Daily<br>
+                                    This is an automated receipt. Please do not reply to this email.
+                                </p>
+                            </div>
+                        </div>
+                    </body>
+                    </html>
+                    """
+                    
+                    text_body = f"""
+                    Payment Receipt - TiffinTrack
+                    
+                    Dear {customer.fullname},
+                    
+                    Your payment has been successfully processed!
+                    
+                    Receipt Details:
+                    - Transaction ID: {payment_intent_id}
+                    - Date: {datetime.now().strftime('%b %d, %Y %I:%M %p')}
+                    - Payment Method: Card Payment
+                    - Status: PAID
+                    
+                    Order Summary:
+                    """
+                    
+                    for idx, plan_info in enumerate(new_plans, 1):
+                        text_body += f"""
+                    {idx}. {plan_info['plan_name']}
+                       Period: {plan_info['start_date'].strftime('%b %d, %Y')} - {plan_info['end_date'].strftime('%b %d, %Y')}
+                       Duration: {plan_info['days']} days
+                       Amount: ₹{plan_info['amount']}
+                    """
+                    
+                    text_body += f"""
+                    
+                    Total Paid: ₹{total_amount_paid}
+                    
+                    What's Next?
+                    - Your meal deliveries will start as per your selected dates
+                    - You can pause meals anytime from your dashboard
+                    - View your bills and payment history in the billing section
+                    
+                    View your dashboard: {request.url_root}dashboard
+                    
+                    Thank you for choosing TiffinTrack!
+                    
+                    Best regards,
+                    TiffinTrack Team
+                    """
+                    
+                    # Send email
+                    send_email(customer.email, subject, html_body, text_body)
+                    print(f"✅ Receipt email sent to {customer.email}")
+                    
+                except Exception as email_error:
+                    print(f"⚠️ Failed to send receipt email: {email_error}")
+                    # Don't fail the whole transaction if email fails
             
             # Clear pending configurations
             session.pop('pending_plan_configs', None)
             
             return jsonify({
                 "success": True,
-                "message": "Plans activated successfully!",
+                "message": "Plans activated and bills created successfully!",
                 "redirect_url": url_for("payment_success", payment_intent_id=payment_intent_id, _external=False)
             })
         else:
@@ -2342,6 +2637,9 @@ def plan_payment_success():
             
     except Exception as e:
         print(f"Error processing plan payment: {e}")
+        import traceback
+        traceback.print_exc()
+        db.session.rollback()
         return jsonify({"error": "Failed to process payment"}), 500
 
 
