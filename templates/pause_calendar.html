@@ -44,222 +44,244 @@
   {% endwith %}
 </div>
 
-<div class="dashboard" style="max-width: 900px;">
+<div class="dashboard">
 
-  <div class="page-header" style="margin-bottom: 32px;">
-    <div class="page-title">
-      <h1>
+  <!-- Page Header -->
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">
         <i class="fas fa-calendar-times" style="margin-right: 12px; color: var(--primary);"></i>
         Pause Your Meals
       </h1>
-      <p style="max-width: 520px; color: var(--text-secondary);">
-        Quickly skip upcoming delivery days when you are travelling or unavailable. 
-        You stay in full control of your schedule and billing.
+      <p class="dashboard-subtitle">
+        Skip delivery days when you're traveling or unavailable. Paused days are automatically excluded from billing.
       </p>
     </div>
-    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
-      <span style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary);">
-        Today
-      </span>
-      <div style="display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border-light); font-size: 13px;">
-        <i class="fas fa-clock" style="color: var(--primary);"></i>
-        <span>Cutoff: <strong>8:00 AM</strong> for same‑day pauses</span>
-      </div>
-      <span style="font-size: 12px; color: var(--text-muted);">
-        Paused days scheduled: <strong>{{ paused_dates|length }}</strong>
-      </span>
-    </div>
-  </div>
-
-  <!-- CUTOFF + SUMMARY -->
-  <div class="activity-card" style="margin-bottom: 32px;">
-    <div style="display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 24px; align-items: stretch;">
-      <!-- Cutoff -->
-      <div style="border-right: 1px solid var(--border-light); padding-right: 16px;">
-        <div style="display: flex; align-items: center; gap: 16px;">
-          <div style="width: 48px; height: 48px; background: var(--warning-light); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-            <i class="fas fa-clock" style="color: var(--warning); font-size: 20px;"></i>
-          </div>
-          <div>
-            <h3 style="margin-bottom: 4px; color: var(--warning);">Important: Daily Cutoff Time</h3>
-            <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
-              You can pause meals until <strong>8:00 AM</strong> on the delivery date. After this time, you’ll still be charged for that day’s meal.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Summary -->
-      <div style="display: flex; flex-direction: column; gap: 12px;">
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 160px; padding: 12px 14px; border-radius: 12px; background: var(--surface-elevated, var(--surface)); border: 1px solid var(--border-light); display: flex; align-items: center; justify-content: space-between;">
-            <div>
-              <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px;">
-                Paused days
-              </div>
-              <div style="font-size: 20px; font-weight: 700;">{{ paused_dates|length }}</div>
-            </div>
-            <i class="fas fa-calendar-minus" style="color: var(--primary); opacity: 0.9;"></i>
-          </div>
-          <div style="flex: 1; min-width: 160px; padding: 12px 14px; border-radius: 12px; background: var(--success-light); border: 1px solid var(--success); display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-money-bill-wave" style="color: var(--success);"></i>
-            <p style="margin: 0; font-size: 13px; color: var(--success-dark);">
-              Paused days are <strong>automatically excluded</strong> from your monthly bill.
-            </p>
-          </div>
-        </div>
-        <p style="font-size: 12px; color: var(--text-secondary); margin: 0;">
-          Tip: Schedule all known holidays and travel dates in advance to avoid last‑minute changes.
-        </p>
+    <div class="dashboard-actions">
+      <div class="stat-badge">
+        <i class="fas fa-calendar-minus"></i>
+        <span>{{ paused_dates|length }} Paused Days</span>
       </div>
     </div>
   </div>
 
-  <!-- PAUSE FORM -->
-  <div class="card" style="margin-bottom: 32px;">
-    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px;">
-      <div>
-        <h3 style="margin: 0 0 4px 0;">
-          <i class="fas fa-plus-circle" style="margin-right: 8px; color: var(--primary);"></i>
-          Pause a Meal
-        </h3>
-        <p style="color: var(--text-secondary); margin: 0; font-size: 14px;">
-          Select a date to skip your meal delivery. You can always remove a pause later (before 8:00 AM).
-        </p>
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+        <i class="fas fa-clock"></i>
       </div>
-      <span style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">
-        Earliest date allowed is today
-      </span>
+      <div class="kpi-info">
+        <h3>Cutoff Time</h3>
+        <p>8:00 AM Daily</p>
+      </div>
     </div>
 
-    <form method="POST" action="/pause/save" id="pauseForm">
-      <div class="pause-form-grid">
-        <div>
-          <label style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary);">
-            <i class="fas fa-calendar-alt" style="margin-right: 8px; color: var(--primary);"></i>
-            Select Date
-          </label>
-          <input 
-            type="date" 
-            name="pause_date" 
-            class="input" 
-            required
-            min="{{ (date.today() + timedelta(days=0)).strftime('%Y-%m-%d') }}"
-            id="pauseDateInput"
-          >
-          <p style="margin: 6px 0 0 0; font-size: 12px; color: var(--text-secondary);">
-            You can only choose today or future dates.
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+        <i class="fas fa-calendar-minus"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Paused Days</h3>
+        <p>{{ paused_dates|length }}</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+        <i class="fas fa-money-bill-wave"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Auto Billing</h3>
+        <p>Excluded</p>
+      </div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+        <i class="fas fa-undo"></i>
+      </div>
+      <div class="kpi-info">
+        <h3>Flexible</h3>
+        <p>Removable</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Important Notice -->
+  <div class="card" style="border-left: 4px solid var(--warning); background: var(--warning-light);">
+    <div class="card-body">
+      <div style="display: flex; align-items: start; gap: var(--spacing-lg);">
+        <div style="width: 48px; height: 48px; background: var(--warning); border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <i class="fas fa-exclamation-triangle" style="color: white; font-size: 20px;"></i>
+        </div>
+        <div style="flex: 1;">
+          <h3 style="margin-bottom: var(--spacing-sm); color: var(--warning-dark); font-weight: 700;">
+            Important: Daily Cutoff Time
+          </h3>
+          <p style="color: var(--text-secondary); margin: 0; line-height: 1.6;">
+            You can pause meals until <strong style="color: var(--warning-dark);">8:00 AM</strong> on the delivery date. 
+            After this time, you'll still be charged for that day's meal. Plan ahead to avoid charges!
           </p>
         </div>
-        
-        <div style="display: flex; flex-direction: column; align-items: flex-start; gap: 8px;">
-          <button type="submit" class="btn btn-primary" id="pauseBtn" style="min-width: 180px;">
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause Form -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-plus-circle" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+        Pause a Meal
+      </h3>
+      <p class="card-subtitle">Select a date to skip your meal delivery</p>
+    </div>
+
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('save_pause') }}" id="pauseForm">
+        <div style="display: grid; grid-template-columns: 1fr auto; gap: var(--spacing-lg); align-items: end;">
+          <div>
+            <label class="form-label">
+              <i class="fas fa-calendar-alt" style="margin-right: var(--spacing-xs); color: var(--primary);"></i>
+              Select Date
+            </label>
+            <input 
+              type="date" 
+              name="pause_date" 
+              class="form-input" 
+              required
+              min="{{ (date.today() + timedelta(days=0)).strftime('%Y-%m-%d') }}"
+              id="pauseDateInput"
+              style="font-size: var(--font-size-base);"
+            >
+            <p style="margin: var(--spacing-xs) 0 0 0; font-size: var(--font-size-sm); color: var(--text-secondary);">
+              You can only choose today or future dates
+            </p>
+          </div>
+          
+          <button type="submit" class="btn btn-primary" id="pauseBtn" style="min-width: 180px; height: 48px;">
             <i class="fas fa-pause-circle"></i>
             Pause Meal
           </button>
-          <span style="font-size: 12px; color: var(--text-muted);">
-            Your plan remains active on all other days.
-          </span>
         </div>
-      </div>
-    </form>
+      </form>
+    </div>
   </div>
 
-  <!-- PAUSED DATES -->
-  <div class="activity-card">
-    <h3><i class="fas fa-list" style="margin-right: 8px; color: var(--secondary);"></i>Your Paused Dates</h3>
+  <!-- Paused Dates -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-list" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
+        Your Paused Dates
+      </h3>
+      <p class="card-subtitle">
+        {% if paused_dates %}
+          {{ paused_dates|length }} day{{ 's' if paused_dates|length != 1 else '' }} scheduled
+        {% else %}
+          No paused dates yet
+        {% endif %}
+      </p>
+    </div>
     
-    {% if paused_dates %}
-      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; margin-top: 20px;">
-        {% for date_str in paused_dates %}
-          {% set pause_date = date_str | strptime('%Y-%m-%d') %}
-          <div class="paused-date-card">
-            <div class="paused-date-icon">
-              <i class="fas fa-calendar-times"></i>
+    <div class="card-body">
+      {% if paused_dates %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--spacing-lg);">
+          {% for date_str in paused_dates %}
+            {% set pause_date = date_str | strptime('%Y-%m-%d') %}
+            <div class="paused-date-card">
+              <div class="paused-date-header">
+                <div class="paused-date-icon">
+                  <i class="fas fa-calendar-times"></i>
+                </div>
+                <button onclick="removePause('{{ date_str }}')" class="remove-pause-btn" title="Remove pause">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+              <div class="paused-date-body">
+                <div class="paused-date-day">{{ pause_date.strftime('%d') }}</div>
+                <div class="paused-date-month">{{ pause_date.strftime('%B %Y') }}</div>
+                <div class="paused-date-weekday">
+                  <i class="fas fa-calendar"></i>
+                  {{ pause_date.strftime('%A') }}
+                </div>
+              </div>
             </div>
-            <div class="paused-date-info">
-              <div class="paused-date-day">{{ pause_date.strftime('%d') }}</div>
-              <div class="paused-date-month">{{ pause_date.strftime('%b %Y') }}</div>
-              <div class="paused-date-weekday">{{ pause_date.strftime('%A') }}</div>
+          {% endfor %}
+        </div>
+        
+        <div style="margin-top: var(--spacing-xl); padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg); border-left: 4px solid var(--success);">
+          <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+            <i class="fas fa-info-circle" style="color: var(--success); font-size: 1.5rem;"></i>
+            <div>
+              <h4 style="font-weight: 700; margin-bottom: var(--spacing-xs); color: var(--success-dark);">
+                Billing Impact
+              </h4>
+              <p style="font-size: var(--font-size-sm); color: var(--text-secondary); margin: 0;">
+                You have <strong>{{ paused_dates|length }} paused day{{ 's' if paused_dates|length != 1 else '' }}</strong>. 
+                These will be automatically excluded from your monthly bill.
+              </p>
             </div>
-            <button onclick="removePause('{{ date_str }}')" class="remove-pause-btn" title="Remove pause">
-              <i class="fas fa-times"></i>
-            </button>
           </div>
-        {% endfor %}
-      </div>
-      
-      <div style="margin-top: 24px; padding: 16px; background: var(--success-light); border-radius: 12px; border-left: 4px solid var(--success);">
-        <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--success);">
-          <i class="fas fa-info-circle"></i> Billing Impact
-        </h4>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
-          You have <strong>{{ paused_dates|length }} paused day{{ 's' if paused_dates|length != 1 else '' }}</strong> this month. 
-          These will be automatically excluded from your monthly bill.
-        </p>
-      </div>
-    {% else %}
-      <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
-        <i class="fas fa-calendar-check" style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;"></i>
-        <h4 style="margin-bottom: 8px;">No Paused Dates</h4>
-        <p style="font-size: 14px; margin: 0;">You haven't paused any meals yet. Use the form above to pause meals when you're away.</p>
-      </div>
-    {% endif %}
+        </div>
+      {% else %}
+        <div style="text-align: center; padding: var(--spacing-4xl); color: var(--text-secondary);">
+          <i class="fas fa-calendar-check" style="font-size: 4rem; margin-bottom: var(--spacing-lg); opacity: 0.3;"></i>
+          <h4 style="margin-bottom: var(--spacing-sm); color: var(--text-primary);">No Paused Dates</h4>
+          <p style="font-size: var(--font-size-sm); margin: 0;">
+            You haven't paused any meals yet. Use the form above to pause meals when you're away.
+          </p>
+        </div>
+      {% endif %}
+    </div>
   </div>
 
-  <!-- HELPFUL TIPS -->
-  <div class="activity-card" style="margin-top: 32px;">
-    <h3><i class="fas fa-lightbulb" style="margin-right: 8px; color: var(--accent);"></i>Tips for Pausing Meals</h3>
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-top: 16px;">
-      
-      <div style="display: flex; align-items: start; gap: 12px;">
-        <div style="width: 32px; height: 32px; background: var(--primary-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <i class="fas fa-clock" style="color: var(--primary); font-size: 14px;"></i>
+  <!-- Tips -->
+  <div class="card">
+    <div class="card-header">
+      <h3 class="card-title">
+        <i class="fas fa-lightbulb" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
+        Tips for Pausing Meals
+      </h3>
+    </div>
+    
+    <div class="card-body">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--spacing-lg);">
+        
+        <div class="tip-card">
+          <div class="tip-icon" style="background: var(--primary-light);">
+            <i class="fas fa-clock" style="color: var(--primary);"></i>
+          </div>
+          <h4>Plan Ahead</h4>
+          <p>Pause meals in advance for vacations or business trips to avoid unnecessary charges.</p>
         </div>
-        <div>
-          <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Plan Ahead</h4>
-          <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
-            Pause meals in advance for vacations or business trips to avoid unnecessary charges.
-          </p>
+        
+        <div class="tip-card">
+          <div class="tip-icon" style="background: var(--success-light);">
+            <i class="fas fa-money-bill-wave" style="color: var(--success);"></i>
+          </div>
+          <h4>Save Money</h4>
+          <p>Paused days are automatically deducted from your monthly bill - no manual adjustments needed.</p>
         </div>
+        
+        <div class="tip-card">
+          <div class="tip-icon" style="background: var(--warning-light);">
+            <i class="fas fa-undo" style="color: var(--warning);"></i>
+          </div>
+          <h4>Flexible Changes</h4>
+          <p>You can remove paused dates if your plans change, as long as it's before the cutoff time.</p>
+        </div>
+        
+        <div class="tip-card">
+          <div class="tip-icon" style="background: var(--info-light);">
+            <i class="fas fa-mobile-alt" style="color: var(--info);"></i>
+          </div>
+          <h4>Mobile Friendly</h4>
+          <p>Manage your pauses on the go from any device with our responsive design.</p>
+        </div>
+        
       </div>
-      
-      <div style="display: flex; align-items: start; gap: 12px;">
-        <div style="width: 32px; height: 32px; background: var(--success-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <i class="fas fa-money-bill-wave" style="color: var(--success); font-size: 14px;"></i>
-        </div>
-        <div>
-          <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Save Money</h4>
-          <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
-            Paused days are automatically deducted from your monthly bill - no manual adjustments needed.
-          </p>
-        </div>
-      </div>
-      
-      <div style="display: flex; align-items: start; gap: 12px;">
-        <div style="width: 32px; height: 32px; background: var(--warning-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <i class="fas fa-undo" style="color: var(--warning); font-size: 14px;"></i>
-        </div>
-        <div>
-          <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Flexible Changes</h4>
-          <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
-            You can remove paused dates if your plans change, as long as it's before the cutoff time.
-          </p>
-        </div>
-      </div>
-      
-      <div style="display: flex; align-items: start; gap: 12px;">
-        <div style="width: 32px; height: 32px; background: var(--info-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <i class="fas fa-mobile-alt" style="color: var(--info); font-size: 14px;"></i>
-        </div>
-        <div>
-          <h4 style="font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">Best viewed on latest browser</h4>
-          <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
-            For the smoothest experience, use the latest version of Chrome, Safari, or Edge on your phone or laptop.
-          </p>
-        </div>
-      </div>
-      
     </div>
   </div>
 
@@ -289,7 +311,7 @@
     }
     
     try {
-      const response = await fetch('/pause/remove', {
+      const response = await fetch('{{ url_for("remove_pause") }}', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -300,13 +322,8 @@
       const data = await response.json();
       
       if (response.ok && data.success) {
-        // Show success message
         showFlashMessage('Pause removed successfully', 'success');
-        
-        // Reload page after short delay
-        setTimeout(() => {
-          window.location.reload();
-        }, 1000);
+        setTimeout(() => window.location.reload(), 1000);
       } else {
         showFlashMessage(data.error || 'Failed to remove pause', 'error');
       }
@@ -327,7 +344,6 @@
     `;
     flashContainer.appendChild(flashDiv);
     
-    // Auto-hide after 5 seconds
     setTimeout(() => {
       flashDiv.style.animation = 'slideOut 0.3s ease-out forwards';
       setTimeout(() => flashDiv.remove(), 300);
@@ -346,29 +362,60 @@
   }
 }
 
+.stat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--border-radius-full);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.stat-badge i {
+  color: var(--primary);
+}
+
 .paused-date-card {
   background: var(--surface);
-  border: 2px solid var(--warning-light);
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  border: 2px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
   transition: all 0.3s ease;
   position: relative;
+  overflow: hidden;
+}
+
+.paused-date-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--warning), var(--danger));
 }
 
 .paused-date-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
   border-color: var(--warning);
+}
+
+.paused-date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
 }
 
 .paused-date-icon {
   width: 40px;
   height: 40px;
   background: var(--warning-light);
-  border-radius: 12px;
+  border-radius: var(--border-radius);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -376,43 +423,18 @@
   font-size: 18px;
 }
 
-.paused-date-info {
-  flex: 1;
-}
-
-.paused-date-day {
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1;
-}
-
-.paused-date-month {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  font-weight: 500;
-  margin-bottom: 2px;
-}
-
-.paused-date-weekday {
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 .remove-pause-btn {
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   background: var(--danger-light);
   border: none;
-  border-radius: 8px;
+  border-radius: var(--border-radius);
   color: var(--danger);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 14px;
   transition: all 0.3s ease;
   opacity: 0.7;
 }
@@ -428,17 +450,86 @@
   opacity: 1;
 }
 
-.pause-form-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1.5fr);
-  gap: 20px;
-  align-items: flex-end;
+.paused-date-body {
+  text-align: center;
 }
 
-@media (max-width: 768px) {
-  .pause-form-grid {
-    grid-template-columns: 1fr;
-  }
+.paused-date-day {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  margin-bottom: var(--spacing-xs);
+}
+
+.paused-date-month {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: var(--spacing-xs);
+}
+
+.paused-date-weekday {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+}
+
+.tip-card {
+  padding: var(--spacing-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  transition: all 0.3s ease;
+}
+
+.tip-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.tip-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  margin-bottom: var(--spacing-md);
+}
+
+.tip-card h4 {
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-primary);
+}
+
+.tip-card p {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.loading {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 </style>
 

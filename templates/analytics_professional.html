@@ -29,10 +29,6 @@
                     <i class="fas fa-sync-alt"></i>
                     Refresh
                 </button>
-                <button onclick="exportReport()" class="btn btn-primary">
-                    <i class="fas fa-download"></i>
-                    Export Report
-                </button>
                 <a href="{{ url_for('logout') }}" class="btn btn-secondary">
                     <i class="fas fa-sign-out-alt"></i>
                     Logout
@@ -45,43 +41,39 @@
     <div class="dashboard">
         <div class="dashboard-header">
             <div>
-                <h1 class="dashboard-title">Business Analytics</h1>
+                <h1 class="dashboard-title">
+                    <i class="fas fa-chart-line" style="margin-right: 12px; color: var(--primary);"></i>
+                    Business Analytics
+                </h1>
                 <p class="dashboard-subtitle">
                     Comprehensive insights into your tiffin service performance and growth metrics
                 </p>
             </div>
             
             <div class="dashboard-actions">
-                <select id="periodSelect" class="form-input" style="width: auto; margin-right: var(--spacing-md);">
-                    <option value="7">Last 7 Days</option>
-                    <option value="30" selected>Last 30 Days</option>
-                    <option value="90">Last 3 Months</option>
-                    <option value="365">Last Year</option>
-                </select>
-                
-                <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius); color: var(--info-dark);">
-                    <i class="fas fa-calendar"></i>
-                    <span style="font-weight: 600; font-size: var(--font-size-sm);" id="dateRange">{{ date_range }}</span>
+                <div style="display: flex; align-items: center; gap: var(--spacing-sm); padding: var(--spacing-md) var(--spacing-lg); background: var(--surface); border: 2px solid var(--border); border-radius: var(--border-radius-full); font-weight: 600;">
+                    <i class="fas fa-calendar" style="color: var(--primary);"></i>
+                    <span style="font-size: var(--font-size-sm);" id="dateRange">{{ date_range }}</span>
                 </div>
             </div>
         </div>
 
         <!-- Key Performance Indicators -->
         <div class="kpi-grid">
-            <div class="kpi-card">
+            <div class="kpi-card kpi-card-hover">
                 <div class="kpi-icon" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
                     <i class="fas fa-rupee-sign"></i>
                 </div>
                 <div class="kpi-info">
                     <h3>Total Revenue</h3>
-                    <p>₹{{ analytics.total_revenue }}</p>
+                    <p>₹{{ "{:,.0f}".format(analytics.total_revenue) }}</p>
                 </div>
-                <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); font-size: var(--font-size-sm); color: var(--success);">
-                    <i class="fas fa-arrow-up"></i> +{{ analytics.revenue_growth }}%
+                <div class="kpi-badge kpi-badge-success">
+                    <i class="fas fa-arrow-up"></i> {{ analytics.revenue_growth }}%
                 </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card kpi-card-hover">
                 <div class="kpi-icon" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
                     <i class="fas fa-users"></i>
                 </div>
@@ -89,34 +81,34 @@
                     <h3>Active Customers</h3>
                     <p>{{ analytics.active_customers }}</p>
                 </div>
-                <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); font-size: var(--font-size-sm); color: var(--success);">
-                    <i class="fas fa-arrow-up"></i> +{{ analytics.customer_growth }}%
+                <div class="kpi-badge kpi-badge-success">
+                    <i class="fas fa-arrow-up"></i> {{ analytics.customer_growth }}%
                 </div>
             </div>
 
-            <div class="kpi-card">
+            <div class="kpi-card kpi-card-hover">
                 <div class="kpi-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
                     <i class="fas fa-utensils"></i>
                 </div>
                 <div class="kpi-info">
                     <h3>Meals Delivered</h3>
-                    <p>{{ analytics.total_meals }}</p>
+                    <p>{{ "{:,}".format(analytics.total_meals) }}</p>
                 </div>
-                <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); font-size: var(--font-size-sm); color: var(--success);">
-                    <i class="fas fa-arrow-up"></i> +{{ analytics.meals_growth }}%
+                <div class="kpi-badge kpi-badge-success">
+                    <i class="fas fa-arrow-up"></i> {{ analytics.meals_growth }}%
                 </div>
             </div>
 
-            <div class="kpi-card">
-                <div class="kpi-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
-                    <i class="fas fa-percentage"></i>
+            <div class="kpi-card kpi-card-hover">
+                <div class="kpi-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+                    <i class="fas fa-heart"></i>
                 </div>
                 <div class="kpi-info">
-                    <h3>Customer Retention</h3>
+                    <h3>Retention Rate</h3>
                     <p>{{ analytics.retention_rate }}%</p>
                 </div>
-                <div style="position: absolute; top: var(--spacing-md); right: var(--spacing-md); font-size: var(--font-size-sm); color: var(--success);">
-                    <i class="fas fa-arrow-up"></i> +{{ analytics.retention_growth }}%
+                <div class="kpi-badge kpi-badge-success">
+                    <i class="fas fa-arrow-up"></i> {{ analytics.retention_growth }}%
                 </div>
             </div>
         </div>
@@ -125,22 +117,32 @@
         <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--spacing-2xl); margin-bottom: var(--spacing-2xl);">
             
             <!-- Revenue Trend Chart -->
-            <div class="card">
+            <div class="card card-hover">
                 <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-chart-line" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
-                        Revenue Trend
-                    </h3>
-                    <p class="card-subtitle">Daily revenue over the selected period</p>
+                    <div>
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-line" style="color: var(--primary); margin-right: var(--spacing-sm);"></i>
+                            Revenue Trend
+                        </h3>
+                        <p class="card-subtitle">Monthly revenue over the last 6 months</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                        <div style="display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <div style="width: 12px; height: 12px; background: var(--primary); border-radius: 50%;"></div>
+                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">Revenue</span>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="card-body">
-                    <canvas id="revenueChart" width="400" height="200"></canvas>
+                    <div style="height: 300px;">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
                 </div>
             </div>
 
             <!-- Plan Distribution -->
-            <div class="card">
+            <div class="card card-hover">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-chart-pie" style="color: var(--secondary); margin-right: var(--spacing-sm);"></i>
@@ -150,16 +152,18 @@
                 </div>
                 
                 <div class="card-body">
-                    <canvas id="planChart" width="300" height="300"></canvas>
+                    <div style="height: 200px; margin-bottom: var(--spacing-lg);">
+                        <canvas id="planChart"></canvas>
+                    </div>
                     
-                    <div style="margin-top: var(--spacing-lg);">
+                    <div style="display: grid; gap: var(--spacing-sm);">
                         {% for plan in analytics.plan_distribution %}
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-sm); background: var(--bg-secondary); border-radius: var(--border-radius);">
                             <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
                                 <div style="width: 12px; height: 12px; background: {{ plan.color }}; border-radius: 50%;"></div>
-                                <span style="font-size: var(--font-size-sm);">{{ plan.name }}</span>
+                                <span style="font-size: var(--font-size-sm); font-weight: 500;">{{ plan.name }}</span>
                             </div>
-                            <span style="font-weight: 600;">{{ plan.percentage }}%</span>
+                            <span style="font-weight: 700; color: var(--primary);">{{ plan.percentage }}%</span>
                         </div>
                         {% endfor %}
                     </div>
@@ -172,7 +176,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-2xl); margin-bottom: var(--spacing-2xl);">
             
             <!-- Customer Growth -->
-            <div class="card">
+            <div class="card card-hover">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-user-plus" style="color: var(--success); margin-right: var(--spacing-sm);"></i>
@@ -182,12 +186,14 @@
                 </div>
                 
                 <div class="card-body">
-                    <canvas id="customerGrowthChart" width="400" height="200"></canvas>
+                    <div style="height: 250px;">
+                        <canvas id="customerGrowthChart"></canvas>
+                    </div>
                 </div>
             </div>
 
             <!-- Area Performance -->
-            <div class="card">
+            <div class="card card-hover">
                 <div class="card-header">
                     <h3 class="card-title">
                         <i class="fas fa-map-marker-alt" style="color: var(--warning); margin-right: var(--spacing-sm);"></i>
@@ -199,16 +205,21 @@
                 <div class="card-body">
                     <div style="display: grid; gap: var(--spacing-md);">
                         {% for area in analytics.area_performance %}
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: var(--spacing-md); background: var(--bg-secondary); border-radius: var(--border-radius);">
-                            <div>
-                                <div style="font-weight: 600;">{{ area.name }}</div>
-                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ area.customers }} customers</div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div style="font-weight: 700; color: var(--primary);">₹{{ area.revenue }}</div>
-                                <div style="width: 100px; height: 4px; background: var(--border); border-radius: 2px; margin-top: var(--spacing-xs);">
-                                    <div style="width: {{ area.percentage }}%; height: 100%; background: var(--primary); border-radius: 2px;"></div>
+                        <div class="area-card">
+                            <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-sm);">
+                                <div style="width: 40px; height: 40px; background: var(--primary-light); border-radius: var(--border-radius); display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-map-pin" style="color: var(--primary);"></i>
                                 </div>
+                                <div style="flex: 1;">
+                                    <div style="font-weight: 700; margin-bottom: 2px;">{{ area.name }}</div>
+                                    <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ area.customers }} customers</div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-weight: 700; font-size: var(--font-size-lg); color: var(--primary);">₹{{ "{:,}".format(area.revenue) }}</div>
+                                </div>
+                            </div>
+                            <div style="width: 100%; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden;">
+                                <div style="width: {{ area.percentage }}%; height: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border-radius: 3px; transition: width 0.5s ease;"></div>
                             </div>
                         </div>
                         {% endfor %}
@@ -219,7 +230,7 @@
         </div>
 
         <!-- Operational Metrics -->
-        <div class="card">
+        <div class="card card-hover">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-cogs" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
@@ -231,52 +242,58 @@
             <div class="card-body">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-lg);">
                     
-                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--success-light); border-radius: var(--border-radius-lg);">
-                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--success-dark); margin-bottom: var(--spacing-sm);">
-                            {{ analytics.delivery_success_rate }}%
+                    <div class="metric-card" style="background: linear-gradient(135deg, #10b981 0%, #047857 100%);">
+                        <div class="metric-icon">
+                            <i class="fas fa-truck"></i>
                         </div>
-                        <div style="font-weight: 600; color: var(--success-dark);">Delivery Success</div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">On-time deliveries</div>
+                        <div class="metric-value">{{ analytics.delivery_success_rate }}%</div>
+                        <div class="metric-label">Delivery Success</div>
+                        <div class="metric-sublabel">On-time deliveries</div>
                     </div>
                     
-                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--info-light); border-radius: var(--border-radius-lg);">
-                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--info-dark); margin-bottom: var(--spacing-sm);">
-                            {{ analytics.avg_order_value }}
+                    <div class="metric-card" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);">
+                        <div class="metric-icon">
+                            <i class="fas fa-rupee-sign"></i>
                         </div>
-                        <div style="font-weight: 600; color: var(--info-dark);">Avg Order Value</div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Per customer</div>
+                        <div class="metric-value">₹{{ analytics.avg_order_value }}</div>
+                        <div class="metric-label">Avg Order Value</div>
+                        <div class="metric-sublabel">Per customer</div>
                     </div>
                     
-                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--warning-light); border-radius: var(--border-radius-lg);">
-                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--warning-dark); margin-bottom: var(--spacing-sm);">
-                            {{ analytics.pause_rate }}%
+                    <div class="metric-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                        <div class="metric-icon">
+                            <i class="fas fa-pause-circle"></i>
                         </div>
-                        <div style="font-weight: 600; color: var(--warning-dark);">Pause Rate</div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Monthly average</div>
+                        <div class="metric-value">{{ analytics.pause_rate }}%</div>
+                        <div class="metric-label">Pause Rate</div>
+                        <div class="metric-sublabel">Monthly average</div>
                     </div>
                     
-                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--primary-light); border-radius: var(--border-radius-lg);">
-                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--primary-dark); margin-bottom: var(--spacing-sm);">
-                            {{ analytics.customer_satisfaction }}
+                    <div class="metric-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);">
+                        <div class="metric-icon">
+                            <i class="fas fa-star"></i>
                         </div>
-                        <div style="font-weight: 600; color: var(--primary-dark);">Customer Rating</div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Out of 5.0</div>
+                        <div class="metric-value">{{ analytics.customer_satisfaction }}</div>
+                        <div class="metric-label">Customer Rating</div>
+                        <div class="metric-sublabel">Out of 5.0</div>
                     </div>
                     
-                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--secondary-light); border-radius: var(--border-radius-lg);">
-                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--secondary-dark); margin-bottom: var(--spacing-sm);">
-                            {{ analytics.food_waste }}%
+                    <div class="metric-card" style="background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);">
+                        <div class="metric-icon">
+                            <i class="fas fa-leaf"></i>
                         </div>
-                        <div style="font-weight: 600; color: var(--secondary-dark);">Food Waste</div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Reduction achieved</div>
+                        <div class="metric-value">{{ analytics.food_waste }}%</div>
+                        <div class="metric-label">Food Waste</div>
+                        <div class="metric-sublabel">Reduction achieved</div>
                     </div>
                     
-                    <div style="text-align: center; padding: var(--spacing-lg); background: var(--danger-light); border-radius: var(--border-radius-lg);">
-                        <div style="font-size: var(--font-size-3xl); font-weight: 800; color: var(--danger-dark); margin-bottom: var(--spacing-sm);">
-                            {{ analytics.collection_efficiency }}%
+                    <div class="metric-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                        <div class="metric-icon">
+                            <i class="fas fa-wallet"></i>
                         </div>
-                        <div style="font-weight: 600; color: var(--danger-dark);">Collection Rate</div>
-                        <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">Payment efficiency</div>
+                        <div class="metric-value">{{ analytics.collection_efficiency }}%</div>
+                        <div class="metric-label">Collection Rate</div>
+                        <div class="metric-sublabel">Payment efficiency</div>
                     </div>
                     
                 </div>
@@ -284,7 +301,7 @@
         </div>
 
         <!-- Insights and Recommendations -->
-        <div class="card">
+        <div class="card card-hover" style="margin-top: var(--spacing-2xl);">
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-lightbulb" style="color: var(--accent); margin-right: var(--spacing-sm);"></i>
@@ -297,22 +314,28 @@
                 <div style="display: grid; gap: var(--spacing-lg);">
                     
                     {% for insight in analytics.insights %}
-                    <div style="padding: var(--spacing-lg); background: {{ insight.bg_color }}; border-radius: var(--border-radius-lg); border-left: 4px solid {{ insight.border_color }};">
-                        <div style="display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-md);">
-                            <div style="width: 40px; height: 40px; background: {{ insight.icon_color }}; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                                <i class="{{ insight.icon }}" style="color: white; font-size: var(--font-size-lg);"></i>
+                    <div class="insight-card">
+                        <div style="display: flex; align-items: start; gap: var(--spacing-lg);">
+                            <div class="insight-icon" style="background: {{ insight.icon_color }};">
+                                <i class="{{ insight.icon }}"></i>
                             </div>
-                            <div>
-                                <h4 style="font-weight: 700; color: {{ insight.text_color }}; margin-bottom: var(--spacing-xs);">{{ insight.title }}</h4>
-                                <div style="color: var(--text-secondary); font-size: var(--font-size-sm);">{{ insight.category }}</div>
+                            <div style="flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: var(--spacing-sm);">
+                                    <div>
+                                        <h4 style="font-weight: 700; color: var(--text-primary); margin-bottom: var(--spacing-xs);">{{ insight.title }}</h4>
+                                        <span class="insight-category">{{ insight.category }}</span>
+                                    </div>
+                                    <div class="insight-impact" style="background: {{ insight.bg_color }}; color: {{ insight.impact_color }};">
+                                        <i class="fas fa-arrow-up"></i> {{ insight.impact }}
+                                    </div>
+                                </div>
+                                <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md); line-height: 1.6;">{{ insight.description }}</p>
+                                <div style="display: flex; align-items: center; gap: var(--spacing-md);">
+                                    <span style="font-size: var(--font-size-sm); color: var(--text-muted);">
+                                        <i class="fas fa-clock"></i> {{ insight.timeframe }}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
-                        <p style="color: var(--text-secondary); margin-bottom: var(--spacing-md);">{{ insight.description }}</p>
-                        <div style="display: flex; align-items: center; gap: var(--spacing-md);">
-                            <span style="font-size: var(--font-size-sm); color: {{ insight.impact_color }}; font-weight: 600;">
-                                <i class="fas fa-arrow-up"></i> {{ insight.impact }}
-                            </span>
-                            <span style="font-size: var(--font-size-sm); color: var(--text-secondary);">{{ insight.timeframe }}</span>
                         </div>
                     </div>
                     {% endfor %}
@@ -331,12 +354,18 @@
             data: {
                 labels: {{ analytics.revenue_labels | tojson }},
                 datasets: [{
-                    label: 'Daily Revenue',
+                    label: 'Revenue',
                     data: {{ analytics.revenue_data | tojson }},
                     borderColor: 'rgb(255, 107, 53)',
                     backgroundColor: 'rgba(255, 107, 53, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: 'rgb(255, 107, 53)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2
                 }]
             },
             options: {
@@ -345,15 +374,39 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                return 'Revenue: ₹' + context.parsed.y.toLocaleString();
+                            }
+                        }
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        },
                         ticks: {
                             callback: function(value) {
-                                return '₹' + value;
+                                return '₹' + value.toLocaleString();
                             }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
                         }
                     }
                 }
@@ -373,7 +426,9 @@
                         'rgb(78, 205, 196)',
                         'rgb(255, 213, 79)',
                         'rgb(59, 130, 246)'
-                    ]
+                    ],
+                    borderWidth: 0,
+                    hoverOffset: 10
                 }]
             },
             options: {
@@ -382,8 +437,22 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value + ' (' + percentage + '%)';
+                            }
+                        }
                     }
-                }
+                },
+                cutout: '70%'
             }
         });
 
@@ -398,7 +467,9 @@
                     data: {{ analytics.customer_data | tojson }},
                     backgroundColor: 'rgba(16, 185, 129, 0.8)',
                     borderColor: 'rgb(16, 185, 129)',
-                    borderWidth: 1
+                    borderWidth: 0,
+                    borderRadius: 8,
+                    hoverBackgroundColor: 'rgb(16, 185, 129)'
                 }]
             },
             options: {
@@ -407,11 +478,23 @@
                 plugins: {
                     legend: {
                         display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
@@ -426,44 +509,150 @@
             
             setTimeout(() => {
                 location.reload();
-            }, 2000);
+            }, 1500);
         }
-
-        function exportReport() {
-            const btn = event.target;
-            const originalText = btn.innerHTML;
-            
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Exporting...';
-            btn.disabled = true;
-            
-            setTimeout(() => {
-                btn.innerHTML = '<i class="fas fa-check"></i> Downloaded';
-                btn.style.background = 'var(--success)';
-                
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                    btn.disabled = false;
-                    btn.style.background = '';
-                }, 2000);
-            }, 3000);
-        }
-
-        // Period selector
-        document.getElementById('periodSelect').addEventListener('change', function() {
-            const period = this.value;
-            const dateRange = document.getElementById('dateRange');
-            
-            const endDate = new Date();
-            const startDate = new Date();
-            startDate.setDate(endDate.getDate() - parseInt(period));
-            
-            dateRange.textContent = `${startDate.toLocaleDateString()} - ${endDate.toLocaleDateString()}`;
-            
-            // Simulate data refresh
-            setTimeout(() => {
-                location.reload();
-            }, 500);
-        });
     </script>
+
+    <style>
+        .kpi-card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .kpi-card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .kpi-badge {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            font-size: var(--font-size-sm);
+            font-weight: 600;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--border-radius-full);
+        }
+
+        .kpi-badge-success {
+            background: var(--success-light);
+            color: var(--success-dark);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .area-card {
+            padding: var(--spacing-lg);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius-lg);
+            transition: all 0.3s ease;
+        }
+
+        .area-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .metric-card {
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius-lg);
+            color: white;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-icon {
+            font-size: 2rem;
+            margin-bottom: var(--spacing-md);
+            opacity: 0.9;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .metric-label {
+            font-weight: 600;
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .metric-sublabel {
+            font-size: var(--font-size-sm);
+            opacity: 0.9;
+        }
+
+        .insight-card {
+            padding: var(--spacing-xl);
+            background: var(--surface);
+            border: 2px solid var(--border);
+            border-radius: var(--border-radius-lg);
+            transition: all 0.3s ease;
+        }
+
+        .insight-card:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-md);
+        }
+
+        .insight-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: var(--border-radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .insight-category {
+            display: inline-block;
+            padding: var(--spacing-xs) var(--spacing-sm);
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .insight-impact {
+            padding: var(--spacing-sm) var(--spacing-md);
+            border-radius: var(--border-radius-full);
+            font-size: var(--font-size-sm);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+    </style>
 </body>
 </html>

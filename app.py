@@ -1425,14 +1425,14 @@ def send_bill_reminders():
             <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
                 <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
                     <h2 style="color: #ff6b35;">Payment Reminder</h2>
-                    <p>Dear {user.name},</p>
+                    <p>Dear {user.fullname},</p>
                     <p>This is a friendly reminder that you have an unpaid bill for your TiffinTrack meal service.</p>
                     
                     <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
                         <h3 style="margin-top: 0;">Bill Details:</h3>
                         <p><strong>Bill Period:</strong> {bill.month}/{bill.year}</p>
                         <p><strong>Amount Due:</strong> ₹{bill.amount}</p>
-                        <p><strong>Days:</strong> {bill.days} days</p>
+                        <p><strong>Days:</strong> {bill.billable_days} days</p>
                     </div>
                     
                     <p>Please log in to your account to make the payment:</p>
@@ -1459,14 +1459,14 @@ def send_bill_reminders():
             text_body = f"""
             Payment Reminder - TiffinTrack
             
-            Dear {user.name},
+            Dear {user.fullname},
             
             This is a friendly reminder that you have an unpaid bill for your TiffinTrack meal service.
             
             Bill Details:
             - Period: {bill.month}/{bill.year}
             - Amount Due: ₹{bill.amount}
-            - Days: {bill.days} days
+            - Days: {bill.billable_days} days
             
             Please log in to your account to make the payment: {request.url_root}login
             
@@ -1482,7 +1482,7 @@ def send_bill_reminders():
                 sent_count += 1
             else:
                 failed_count += 1
-                errors.append(f"{user.name} ({user.email}): {error}")
+                errors.append(f"{user.fullname} ({user.email}): {error}")
                 print(f"Failed to send reminder to {user.email}: {error}")
         
         # Prepare response message
@@ -1547,9 +1547,13 @@ def export_bills():
             'Bill ID',
             'Customer Name',
             'Customer Email',
+            'Customer Phone',
+            'Customer Area',
             'Month',
             'Year',
-            'Days',
+            'Total Days',
+            'Paused Days',
+            'Billable Days',
             'Amount (₹)',
             'Status',
             'Created Date',
@@ -1560,11 +1564,15 @@ def export_bills():
         for bill, user in bills:
             writer.writerow([
                 bill.id,
-                user.name,
+                user.fullname,
                 user.email,
+                user.phone,
+                user.area,
                 bill.month,
                 bill.year,
-                bill.days,
+                bill.total_days,
+                bill.paused_days,
+                bill.billable_days,
                 bill.amount,
                 'Paid' if bill.is_paid else 'Unpaid',
                 bill.created_at.strftime('%Y-%m-%d %H:%M:%S') if bill.created_at else '',
