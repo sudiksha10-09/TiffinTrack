@@ -121,12 +121,12 @@ app.config["STRIPE_PUBLISHABLE_KEY"] = STRIPE_PUBLISHABLE_KEY
 # Email Configuration
 # ------------------------
 
-SMTP_HOST = os.getenv("SMTP_HOST")
+SMTP_HOST = os.getenv("SMTP_SERVER")  # Changed from SMTP_HOST to match .env.example
 SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
 SMTP_USERNAME = os.getenv("SMTP_USERNAME")
 SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
 SMTP_USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
-MAIL_DEFAULT_SENDER = os.getenv("MAIL_DEFAULT_SENDER", "no-reply@tiffintrack.com")
+MAIL_DEFAULT_SENDER = os.getenv("SENDER_EMAIL", "no-reply@tiffintrack.com")  # Changed from MAIL_DEFAULT_SENDER to SENDER_EMAIL
 
 
 def is_email_configured() -> bool:
